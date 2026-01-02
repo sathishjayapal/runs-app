@@ -1,0 +1,17 @@
+{
+  "question": "Should I do a hard interval workout today?",
+  "healthMetrics": {
+    "heartRate": 105,
+    "sleepHours": 5.0,
+    "stressLevel": 8,
+    "hasInjury": true,
+    "feelingFatigued": true,
+    "recoveryDays": 0
+  },
+  "trainingContext": {
+    "currentPhase": "build",
+    "weeksUntilRace": 8,
+    "currentWeeklyMileage": 45.0,
+    "trainingForBoston": true
+  }
+}

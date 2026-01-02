@@ -1,0 +1,17 @@
+{
+  "question": "Can I do my scheduled tempo run today?",
+  "healthMetrics": {
+    "heartRate": 70,
+    "sleepHours": 5.5,
+    "stressLevel": 4,
+    "hasInjury": false,
+    "feelingFatigued": false,
+    "recoveryDays": 1
+  },
+  "trainingContext": {
+    "currentPhase": "base",
+    "weeksUntilRace": 16,
+    "currentWeeklyMileage": 35.0,
+    "trainingForBoston": true
+  }
+}
