@@ -1,0 +1,18 @@
+{
+  "question": "Should I do a 20-mile long run this weekend?",
+  "healthMetrics": {
+    "heartRate": 65,
+    "sleepHours": 8.0,
+    "stressLevel": 3,
+    "hasInjury": false,
+    "feelingFatigued": false,
+    "recoveryDays": 2
+  },
+  "trainingContext": {
+    "currentPhase": "peak",
+    "weeksUntilRace": 4,
+    "currentWeeklyMileage": 50.0,
+    "lastWorkoutType": "tempo run",
+    "trainingForBoston": true
+  }
+}

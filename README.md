@@ -56,47 +56,56 @@ The application will start on `http://localhost:8080`
 curl http://localhost:8080/api/coach/health
 ```
 
-### Get Coaching Advice (No Red Flags)
+### Get Coaching Advice
+
+Example requests are provided in the `examples/` directory:
+
+#### Healthy Athlete (No Red Flags)
 ```bash
 curl -X POST http://localhost:8080/api/coach/advice \
   -H "Content-Type: application/json" \
-  -d '{
-    "question": "Should I do a 20-mile long run this weekend?",
-    "healthMetrics": {
-      "heartRate": 65,
-      "sleepHours": 8.0,
-      "stressLevel": 3,
-      "hasInjury": false,
-      "feelingFatigued": false,
-      "recoveryDays": 2
-    },
-    "trainingContext": {
-      "currentPhase": "peak",
-      "weeksUntilRace": 4,
-      "currentWeeklyMileage": 50.0,
-      "lastWorkoutType": "tempo run",
-      "trainingForBoston": true
-    }
-  }'
+  -d @examples/good-health-request.json
 ```
 
-### Get Coaching Advice (With Red Flags)
+Expected response: `allowWorkout: true` with training advice
+
+#### Athlete with Multiple Red Flags
+```bash
+curl -X POST http://localhost:8080/api/coach/advice \
+  -H "Content-Type: application/json" \
+  -d @examples/red-flags-request.json
+```
+
+Expected response: `allowWorkout: false` with recovery-focused advice
+
+#### Athlete with Single Red Flag (Insufficient Sleep)
+```bash
+curl -X POST http://localhost:8080/api/coach/advice \
+  -H "Content-Type: application/json" \
+  -d @examples/single-red-flag-request.json
+```
+
+Expected response: `allowWorkout: false` with sleep-focused recovery advice
+
+### Custom Requests
+
+You can also create custom requests with inline JSON:
 ```bash
 curl -X POST http://localhost:8080/api/coach/advice \
   -H "Content-Type: application/json" \
   -d '{
-    "question": "Should I do a hard interval workout today?",
+    "question": "What should my workout be today?",
     "healthMetrics": {
-      "heartRate": 105,
-      "sleepHours": 5.0,
-      "stressLevel": 8,
-      "hasInjury": true,
-      "feelingFatigued": true,
-      "recoveryDays": 0
+      "heartRate": 72,
+      "sleepHours": 7.5,
+      "stressLevel": 5,
+      "hasInjury": false,
+      "feelingFatigued": false,
+      "recoveryDays": 1
     },
     "trainingContext": {
       "currentPhase": "build",
-      "weeksUntilRace": 8,
+      "weeksUntilRace": 10,
       "currentWeeklyMileage": 45.0,
       "trainingForBoston": true
     }
