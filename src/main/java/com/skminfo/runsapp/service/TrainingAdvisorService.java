@@ -15,6 +15,15 @@ import java.util.Optional;
 @Service
 public class TrainingAdvisorService {
     
+    private static final double MODERATE_LONG_RUN_REDUCTION_FACTOR = 0.625;
+    private static final double MODERATE_INTENSITY_REDUCTION_FACTOR = 0.8;
+    private static final double POOR_DISTANCE_REDUCTION_FACTOR = 0.5;
+    private static final double MAX_RECOVERY_DISTANCE_MILES = 3.0;
+    private static final int EXCELLENT_SCORE_THRESHOLD = 7;
+    private static final int MODERATE_SCORE_THRESHOLD = 5;
+    private static final int HIGH_PAIN_THRESHOLD = 7;
+    private static final int HIGH_STRESS_THRESHOLD = 8;
+    
     @Autowired
     private BodyStateRepository bodyStateRepository;
     
@@ -40,13 +49,13 @@ public class TrainingAdvisorService {
         session.setBodyState(bodyState);
         session.setCompleted(false);
         
-        if (overallScore >= 7) {
+        if (overallScore >= EXCELLENT_SCORE_THRESHOLD) {
             session.setRecommendedType(plannedType);
             session.setRecommendedDistance(plannedDistance);
             session.setRecommendation(String.format(
                 "Body state is excellent (Score: %d/10). Proceed with planned %s of %.1f miles.", 
                 overallScore, plannedType, plannedDistance));
-        } else if (overallScore >= 5) {
+        } else if (overallScore >= MODERATE_SCORE_THRESHOLD) {
             adjustSessionForModerateState(session, bodyState, overallScore);
         } else {
             adjustSessionForPoorState(session, bodyState, overallScore);
@@ -60,7 +69,7 @@ public class TrainingAdvisorService {
         Double plannedDistance = session.getPlannedDistance();
         
         if (plannedType == SessionType.LONG_RUN) {
-            double reducedDistance = plannedDistance * 0.625;
+            double reducedDistance = plannedDistance * MODERATE_LONG_RUN_REDUCTION_FACTOR;
             session.setRecommendedType(SessionType.EASY_RUN);
             session.setRecommendedDistance(reducedDistance);
             session.setRecommendation(String.format(
@@ -70,7 +79,7 @@ public class TrainingAdvisorService {
                 plannedType, plannedDistance, SessionType.EASY_RUN, reducedDistance));
         } else if (plannedType == SessionType.INTERVAL_RUN || plannedType == SessionType.TEMPO_RUN) {
             session.setRecommendedType(SessionType.EASY_RUN);
-            session.setRecommendedDistance(plannedDistance * 0.8);
+            session.setRecommendedDistance(plannedDistance * MODERATE_INTENSITY_REDUCTION_FACTOR);
             session.setRecommendation(String.format(
                 "Moderate body state (Score: %d/10). Converting intensity session to easy run.",
                 score));
@@ -84,7 +93,7 @@ public class TrainingAdvisorService {
     }
     
     private void adjustSessionForPoorState(TrainingSession session, BodyState bodyState, int score) {
-        if (bodyState.getPainLevel() >= 7 || bodyState.getStressLevel() >= 8) {
+        if (bodyState.getPainLevel() >= HIGH_PAIN_THRESHOLD || bodyState.getStressLevel() >= HIGH_STRESS_THRESHOLD) {
             session.setRecommendedType(SessionType.CROSS_TRAINING);
             session.setRecommendedDistance(0.0);
             session.setRecommendation(String.format(
@@ -93,11 +102,11 @@ public class TrainingAdvisorService {
                 score, bodyState.getPainLevel(), bodyState.getStressLevel()));
         } else {
             session.setRecommendedType(SessionType.RECOVERY_RUN);
-            session.setRecommendedDistance(Math.min(session.getPlannedDistance() * 0.5, 3.0));
+            session.setRecommendedDistance(Math.min(session.getPlannedDistance() * POOR_DISTANCE_REDUCTION_FACTOR, MAX_RECOVERY_DISTANCE_MILES));
             session.setRecommendation(String.format(
                 "Poor body state (Score: %d/10). Sleep quality is low (%d). " +
-                "Recommending short recovery run (max 3 miles) or rest day.",
-                score, bodyState.getSleepQuality()));
+                "Recommending short recovery run (max %.1f miles) or rest day.",
+                score, bodyState.getSleepQuality(), MAX_RECOVERY_DISTANCE_MILES));
         }
     }
     
