@@ -1,0 +1,9 @@
+DELETE FROM garmin_run;
+
+DELETE FROM shedlock;
+
+DELETE FROM file_name_tracker;
+
+DELETE FROM strava_run;
+
+DELETE FROM "user";
