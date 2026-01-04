@@ -1,11 +1,12 @@
 package me.sathish.runsapp.runs_app.file_name_tracker;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 
 public interface FileNameTrackerService {
 
-    List<FileNameTrackerDTO> findAll();
+    Page<FileNameTrackerDTO> findAll(String filter, Pageable pageable);
 
     FileNameTrackerDTO get(Long id);
 

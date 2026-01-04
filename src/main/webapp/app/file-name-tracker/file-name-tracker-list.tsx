@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router';
-import { handleServerError } from 'app/common/utils';
+import { Link, useNavigate, useSearchParams } from 'react-router';
+import { handleServerError, getListParams } from 'app/common/utils';
 import { FileNameTrackerDTO } from 'app/file-name-tracker/file-name-tracker-model';
+import { PagedModel, Pagination } from 'app/common/list-helper/pagination';
 import axios from 'axios';
+import SearchFilter from 'app/common/list-helper/search-filter';
+import Sorting from 'app/common/list-helper/sorting';
 import useDocumentTitle from 'app/common/use-document-title';
 
 
@@ -11,12 +14,19 @@ export default function FileNameTrackerList() {
   const { t } = useTranslation();
   useDocumentTitle(t('fileNameTracker.list.headline'));
 
-  const [fileNameTrackers, setFileNameTrackers] = useState<FileNameTrackerDTO[]>([]);
+  const [fileNameTrackers, setFileNameTrackers] = useState<PagedModel<FileNameTrackerDTO>|undefined>(undefined);
   const navigate = useNavigate();
+  const [searchParams, ] = useSearchParams();
+  const listParams = getListParams();
+  const sortOptions = {
+    'id,ASC': t('fileNameTracker.list.sort.id,ASC'), 
+    'fileName,ASC': t('fileNameTracker.list.sort.fileName,ASC'), 
+    'createdAt,ASC': t('fileNameTracker.list.sort.createdAt,ASC')
+  };
 
   const getAllFileNameTrackers = async () => {
     try {
-      const response = await axios.get('/api/fileNameTrackers');
+      const response = await axios.get('/api/fileNameTrackers?' + listParams);
       setFileNameTrackers(response.data);
     } catch (error: any) {
       handleServerError(error, navigate);
@@ -42,7 +52,7 @@ export default function FileNameTrackerList() {
 
   useEffect(() => {
     getAllFileNameTrackers();
-  }, []);
+  }, [searchParams]);
 
   return (<>
     <div className="flex flex-wrap mb-6">
@@ -51,9 +61,15 @@ export default function FileNameTrackerList() {
         <Link to="/fileNameTrackers/add" className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2">{t('fileNameTracker.list.createNew')}</Link>
       </div>
     </div>
-    {!fileNameTrackers || fileNameTrackers.length === 0 ? (
+    {((fileNameTrackers && fileNameTrackers.page.totalElements !== 0) || searchParams.get('filter')) && (
+    <div className="flex flex-wrap justify-between">
+      <SearchFilter placeholder={t('fileNameTracker.list.filter')} />
+      <Sorting sortOptions={sortOptions} />
+    </div>
+    )}
+    {!fileNameTrackers || fileNameTrackers.page.totalElements === 0 ? (
     <div>{t('fileNameTracker.list.empty')}</div>
-    ) : (
+    ) : (<>
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
@@ -67,7 +83,7 @@ export default function FileNameTrackerList() {
           </tr>
         </thead>
         <tbody className="border-t-2 border-black">
-          {fileNameTrackers.map((fileNameTracker) => (
+          {fileNameTrackers.content.map((fileNameTracker) => (
           <tr key={fileNameTracker.id} className="odd:bg-gray-100">
             <td className="p-2">{fileNameTracker.id}</td>
             <td className="p-2">{fileNameTracker.createdAt}</td>
@@ -86,6 +102,7 @@ export default function FileNameTrackerList() {
         </tbody>
       </table>
     </div>
-    )}
+    <Pagination page={fileNameTrackers.page} />
+    </>)}
   </>);
 }

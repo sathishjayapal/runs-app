@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router';
-import { handleServerError } from 'app/common/utils';
+import { Link, useNavigate, useSearchParams } from 'react-router';
+import { handleServerError, getListParams } from 'app/common/utils';
 import { StravaRunDTO } from 'app/strava-run/strava-run-model';
+import { PagedModel, Pagination } from 'app/common/list-helper/pagination';
 import axios from 'axios';
+import SearchFilter from 'app/common/list-helper/search-filter';
+import Sorting from 'app/common/list-helper/sorting';
 import useDocumentTitle from 'app/common/use-document-title';
 
 
@@ -11,12 +14,19 @@ export default function StravaRunList() {
   const { t } = useTranslation();
   useDocumentTitle(t('stravaRun.list.headline'));
 
-  const [stravaRuns, setStravaRuns] = useState<StravaRunDTO[]>([]);
+  const [stravaRuns, setStravaRuns] = useState<PagedModel<StravaRunDTO>|undefined>(undefined);
   const navigate = useNavigate();
+  const [searchParams, ] = useSearchParams();
+  const listParams = getListParams();
+  const sortOptions = {
+    'runNumber,ASC': t('stravaRun.list.sort.runNumber,ASC'), 
+    'customerId,ASC': t('stravaRun.list.sort.customerId,ASC'), 
+    'runName,ASC': t('stravaRun.list.sort.runName,ASC')
+  };
 
   const getAllStravaRuns = async () => {
     try {
-      const response = await axios.get('/api/stravaRuns');
+      const response = await axios.get('/api/stravaRuns?' + listParams);
       setStravaRuns(response.data);
     } catch (error: any) {
       handleServerError(error, navigate);
@@ -42,7 +52,7 @@ export default function StravaRunList() {
 
   useEffect(() => {
     getAllStravaRuns();
-  }, []);
+  }, [searchParams]);
 
   return (<>
     <div className="flex flex-wrap mb-6">
@@ -51,9 +61,15 @@ export default function StravaRunList() {
         <Link to="/stravaRuns/add" className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2">{t('stravaRun.list.createNew')}</Link>
       </div>
     </div>
-    {!stravaRuns || stravaRuns.length === 0 ? (
+    {((stravaRuns && stravaRuns.page.totalElements !== 0) || searchParams.get('filter')) && (
+    <div className="flex flex-wrap justify-between">
+      <SearchFilter placeholder={t('stravaRun.list.filter')} />
+      <Sorting sortOptions={sortOptions} />
+    </div>
+    )}
+    {!stravaRuns || stravaRuns.page.totalElements === 0 ? (
     <div>{t('stravaRun.list.empty')}</div>
-    ) : (
+    ) : (<>
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
@@ -70,7 +86,7 @@ export default function StravaRunList() {
           </tr>
         </thead>
         <tbody className="border-t-2 border-black">
-          {stravaRuns.map((stravaRun) => (
+          {stravaRuns.content.map((stravaRun) => (
           <tr key={stravaRun.runNumber} className="odd:bg-gray-100">
             <td className="p-2">{stravaRun.runNumber}</td>
             <td className="p-2">{stravaRun.customerId}</td>
@@ -92,6 +108,7 @@ export default function StravaRunList() {
         </tbody>
       </table>
     </div>
-    )}
+    <Pagination page={stravaRuns.page} />
+    </>)}
   </>);
 }
