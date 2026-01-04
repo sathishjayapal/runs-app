@@ -1,4 +1,4 @@
-import { NavigateFunction } from 'react-router';
+import { NavigateFunction, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { UseFormSetError } from 'react-hook-form';
 import { TFunction } from 'i18next';
@@ -48,6 +48,21 @@ export function handleServerError(error: any, navigate: NavigateFunction, setErr
       setError(key, { type: type, message: message })
     }
   }
+}
+
+/**
+ * Get the current parameters relevant for a list request.
+ */
+export function getListParams() {
+  const [searchParams, ] = useSearchParams();
+  const listParamNames = ['page', 'size', 'sort', 'filter'];
+  const listParams = new URLSearchParams();
+  for (let listParamName of listParamNames) {
+    if (searchParams.get(listParamName)) {
+      listParams.append(listParamName, searchParams.get(listParamName)!);
+    }
+  }
+  return listParams;
 }
 
 function emptyToNull(val:any, inputVal:any) {

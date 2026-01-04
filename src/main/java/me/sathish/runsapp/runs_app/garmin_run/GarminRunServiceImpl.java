@@ -1,13 +1,14 @@
 package me.sathish.runsapp.runs_app.garmin_run;
 
-import java.util.List;
 import me.sathish.runsapp.runs_app.events.BeforeDeleteUser;
 import me.sathish.runsapp.runs_app.user.User;
 import me.sathish.runsapp.runs_app.user.UserRepository;
 import me.sathish.runsapp.runs_app.util.NotFoundException;
 import me.sathish.runsapp.runs_app.util.ReferencedException;
 import org.springframework.context.event.EventListener;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 
@@ -24,11 +25,24 @@ public class GarminRunServiceImpl implements GarminRunService {
     }
 
     @Override
-    public List<GarminRunDTO> findAll() {
-        final List<GarminRun> garminRuns = garminRunRepository.findAll(Sort.by("id"));
-        return garminRuns.stream()
+    public Page<GarminRunDTO> findAll(final String filter, final Pageable pageable) {
+        Page<GarminRun> page;
+        if (filter != null) {
+            Long longFilter = null;
+            try {
+                longFilter = Long.parseLong(filter);
+            } catch (final NumberFormatException numberFormatException) {
+                // keep null - no parseable input
+            }
+            page = garminRunRepository.findAllById(longFilter, pageable);
+        } else {
+            page = garminRunRepository.findAll(pageable);
+        }
+        return new PageImpl<>(page.getContent()
+                .stream()
                 .map(garminRun -> mapToDTO(garminRun, new GarminRunDTO()))
-                .toList();
+                .toList(),
+                pageable, page.getTotalElements());
     }
 
     @Override

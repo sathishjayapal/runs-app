@@ -1,11 +1,12 @@
 package me.sathish.runsapp.runs_app.shedlock;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 
 public interface ShedlockService {
 
-    List<ShedlockDTO> findAll();
+    Page<ShedlockDTO> findAll(String filter, Pageable pageable);
 
     ShedlockDTO get(Long name);
 

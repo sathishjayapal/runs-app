@@ -29,6 +29,12 @@
       "headline": "Users",
       "createNew": "Create new User",
       "empty": "No Users could be found.",
+      "sort": {
+        "id,ASC": "Sort by Id (Ascending)",
+        "email,ASC": "Sort by Email (Ascending)",
+        "name,ASC": "Sort by Name (Ascending)"
+      },
+      "filter": "Filter by Id",
       "edit": "Edit",
       "delete": "Delete"
     },
@@ -88,6 +94,12 @@
       "headline": "Garmin Runs",
       "createNew": "Create new Garmin Run",
       "empty": "No Garmin Runs could be found.",
+      "sort": {
+        "id,ASC": "Sort by Id (Ascending)",
+        "activityId,ASC": "Sort by Activity Id (Ascending)",
+        "activityDate,ASC": "Sort by Activity Date (Ascending)"
+      },
+      "filter": "Filter by Id",
       "edit": "Edit",
       "delete": "Delete"
     },
@@ -156,6 +168,12 @@
       "headline": "Shedlocks",
       "createNew": "Create new Shedlock",
       "empty": "No Shedlocks could be found.",
+      "sort": {
+        "name,ASC": "Sort by Name (Ascending)",
+        "lockUntil,ASC": "Sort by Lock Until (Ascending)",
+        "lockedAt,ASC": "Sort by Locked At (Ascending)"
+      },
+      "filter": "Filter by Name",
       "edit": "Edit",
       "delete": "Delete"
     },
@@ -194,6 +212,12 @@
       "headline": "File Name Trackers",
       "createNew": "Create new File Name Tracker",
       "empty": "No File Name Trackers could be found.",
+      "sort": {
+        "id,ASC": "Sort by Id (Ascending)",
+        "fileName,ASC": "Sort by File Name (Ascending)",
+        "createdAt,ASC": "Sort by Created At (Ascending)"
+      },
+      "filter": "Filter by Id",
       "edit": "Edit",
       "delete": "Delete"
     },
@@ -238,6 +262,12 @@
       "headline": "Strava Runs",
       "createNew": "Create new Strava Run",
       "empty": "No Strava Runs could be found.",
+      "sort": {
+        "runNumber,ASC": "Sort by Run Number (Ascending)",
+        "customerId,ASC": "Sort by Customer Id (Ascending)",
+        "runName,ASC": "Sort by Run Name (Ascending)"
+      },
+      "filter": "Filter by Run Number",
       "edit": "Edit",
       "delete": "Delete"
     },
@@ -309,5 +339,13 @@
       "format": "Please provide a valid numeric number.",
       "digits": "Your provided value is out of the valid range: <{{precision}} digits>.<{{scale}} digits> expected."
     }
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "elements": "Item {{range}} of {{total}}"
+  },
+  "searchFilter": {
+    "apply": "Apply"
   }
 }

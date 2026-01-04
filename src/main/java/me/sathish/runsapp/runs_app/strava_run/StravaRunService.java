@@ -1,11 +1,12 @@
 package me.sathish.runsapp.runs_app.strava_run;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 
 public interface StravaRunService {
 
-    List<StravaRunDTO> findAll();
+    Page<StravaRunDTO> findAll(String filter, Pageable pageable);
 
     StravaRunDTO get(Long runNumber);
 

@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router';
-import { handleServerError } from 'app/common/utils';
+import { Link, useNavigate, useSearchParams } from 'react-router';
+import { handleServerError, getListParams } from 'app/common/utils';
 import { UserDTO } from 'app/user/user-model';
+import { PagedModel, Pagination } from 'app/common/list-helper/pagination';
 import axios from 'axios';
+import SearchFilter from 'app/common/list-helper/search-filter';
+import Sorting from 'app/common/list-helper/sorting';
 import useDocumentTitle from 'app/common/use-document-title';
 
 
@@ -11,12 +14,19 @@ export default function UserList() {
   const { t } = useTranslation();
   useDocumentTitle(t('user.list.headline'));
 
-  const [users, setUsers] = useState<UserDTO[]>([]);
+  const [users, setUsers] = useState<PagedModel<UserDTO>|undefined>(undefined);
   const navigate = useNavigate();
+  const [searchParams, ] = useSearchParams();
+  const listParams = getListParams();
+  const sortOptions = {
+    'id,ASC': t('user.list.sort.id,ASC'), 
+    'email,ASC': t('user.list.sort.email,ASC'), 
+    'name,ASC': t('user.list.sort.name,ASC')
+  };
 
   const getAllUsers = async () => {
     try {
-      const response = await axios.get('/api/users');
+      const response = await axios.get('/api/users?' + listParams);
       setUsers(response.data);
     } catch (error: any) {
       handleServerError(error, navigate);
@@ -51,7 +61,7 @@ export default function UserList() {
 
   useEffect(() => {
     getAllUsers();
-  }, []);
+  }, [searchParams]);
 
   return (<>
     <div className="flex flex-wrap mb-6">
@@ -60,9 +70,15 @@ export default function UserList() {
         <Link to="/users/add" className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2">{t('user.list.createNew')}</Link>
       </div>
     </div>
-    {!users || users.length === 0 ? (
+    {((users && users.page.totalElements !== 0) || searchParams.get('filter')) && (
+    <div className="flex flex-wrap justify-between">
+      <SearchFilter placeholder={t('user.list.filter')} />
+      <Sorting sortOptions={sortOptions} />
+    </div>
+    )}
+    {!users || users.page.totalElements === 0 ? (
     <div>{t('user.list.empty')}</div>
-    ) : (
+    ) : (<>
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
@@ -76,7 +92,7 @@ export default function UserList() {
           </tr>
         </thead>
         <tbody className="border-t-2 border-black">
-          {users.map((user) => (
+          {users.content.map((user) => (
           <tr key={user.id} className="odd:bg-gray-100">
             <td className="p-2">{user.id}</td>
             <td className="p-2">{user.email}</td>
@@ -95,6 +111,7 @@ export default function UserList() {
         </tbody>
       </table>
     </div>
-    )}
+    <Pagination page={users.page} />
+    </>)}
   </>);
 }

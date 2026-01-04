@@ -1,11 +1,12 @@
 package me.sathish.runsapp.runs_app.garmin_run;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 
 public interface GarminRunService {
 
-    List<GarminRunDTO> findAll();
+    Page<GarminRunDTO> findAll(String filter, Pageable pageable);
 
     GarminRunDTO get(Long id);
 

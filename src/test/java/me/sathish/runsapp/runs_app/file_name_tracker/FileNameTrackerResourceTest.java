@@ -24,8 +24,23 @@ public class FileNameTrackerResourceTest extends BaseIT {
                     .get("/api/fileNameTrackers")
                 .then()
                     .statusCode(HttpStatus.OK.value())
-                    .body("size()", Matchers.equalTo(2))
-                    .body("get(0).id", Matchers.equalTo(1300));
+                    .body("page.totalElements", Matchers.equalTo(2))
+                    .body("content.get(0).id", Matchers.equalTo(1300));
+    }
+
+    @Test
+    @Sql("/data/fileNameTrackerData.sql")
+    void getAllFileNameTrackers_filtered() {
+        RestAssured
+                .given()
+                    .auth().preemptive().basic(ROLE_ADMIN, PASSWORD)
+                    .accept(ContentType.JSON)
+                .when()
+                    .get("/api/fileNameTrackers?filter=1301")
+                .then()
+                    .statusCode(HttpStatus.OK.value())
+                    .body("page.totalElements", Matchers.equalTo(1))
+                    .body("content.get(0).id", Matchers.equalTo(1301));
     }
 
     @Test
