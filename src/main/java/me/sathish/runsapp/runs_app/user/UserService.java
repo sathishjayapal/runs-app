@@ -1,12 +1,13 @@
 package me.sathish.runsapp.runs_app.user;
 
-import java.util.List;
 import java.util.Map;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 
 public interface UserService {
 
-    List<UserDTO> findAll();
+    Page<UserDTO> findAll(String filter, Pageable pageable);
 
     UserDTO get(Long id);
 

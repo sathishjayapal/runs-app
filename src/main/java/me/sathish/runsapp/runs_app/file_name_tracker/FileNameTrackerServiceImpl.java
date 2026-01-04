@@ -1,13 +1,14 @@
 package me.sathish.runsapp.runs_app.file_name_tracker;
 
-import java.util.List;
 import me.sathish.runsapp.runs_app.events.BeforeDeleteUser;
 import me.sathish.runsapp.runs_app.user.User;
 import me.sathish.runsapp.runs_app.user.UserRepository;
 import me.sathish.runsapp.runs_app.util.NotFoundException;
 import me.sathish.runsapp.runs_app.util.ReferencedException;
 import org.springframework.context.event.EventListener;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 
@@ -24,11 +25,24 @@ public class FileNameTrackerServiceImpl implements FileNameTrackerService {
     }
 
     @Override
-    public List<FileNameTrackerDTO> findAll() {
-        final List<FileNameTracker> fileNameTrackers = fileNameTrackerRepository.findAll(Sort.by("id"));
-        return fileNameTrackers.stream()
+    public Page<FileNameTrackerDTO> findAll(final String filter, final Pageable pageable) {
+        Page<FileNameTracker> page;
+        if (filter != null) {
+            Long longFilter = null;
+            try {
+                longFilter = Long.parseLong(filter);
+            } catch (final NumberFormatException numberFormatException) {
+                // keep null - no parseable input
+            }
+            page = fileNameTrackerRepository.findAllById(longFilter, pageable);
+        } else {
+            page = fileNameTrackerRepository.findAll(pageable);
+        }
+        return new PageImpl<>(page.getContent()
+                .stream()
                 .map(fileNameTracker -> mapToDTO(fileNameTracker, new FileNameTrackerDTO()))
-                .toList();
+                .toList(),
+                pageable, page.getTotalElements());
     }
 
     @Override

@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router';
-import { handleServerError } from 'app/common/utils';
+import { Link, useNavigate, useSearchParams } from 'react-router';
+import { handleServerError, getListParams } from 'app/common/utils';
 import { GarminRunDTO } from 'app/garmin-run/garmin-run-model';
+import { PagedModel, Pagination } from 'app/common/list-helper/pagination';
 import axios from 'axios';
+import SearchFilter from 'app/common/list-helper/search-filter';
+import Sorting from 'app/common/list-helper/sorting';
 import useDocumentTitle from 'app/common/use-document-title';
 
 
@@ -11,12 +14,19 @@ export default function GarminRunList() {
   const { t } = useTranslation();
   useDocumentTitle(t('garminRun.list.headline'));
 
-  const [garminRuns, setGarminRuns] = useState<GarminRunDTO[]>([]);
+  const [garminRuns, setGarminRuns] = useState<PagedModel<GarminRunDTO>|undefined>(undefined);
   const navigate = useNavigate();
+  const [searchParams, ] = useSearchParams();
+  const listParams = getListParams();
+  const sortOptions = {
+    'id,ASC': t('garminRun.list.sort.id,ASC'), 
+    'activityId,ASC': t('garminRun.list.sort.activityId,ASC'), 
+    'activityDate,ASC': t('garminRun.list.sort.activityDate,ASC')
+  };
 
   const getAllGarminRuns = async () => {
     try {
-      const response = await axios.get('/api/garminRuns');
+      const response = await axios.get('/api/garminRuns?' + listParams);
       setGarminRuns(response.data);
     } catch (error: any) {
       handleServerError(error, navigate);
@@ -42,7 +52,7 @@ export default function GarminRunList() {
 
   useEffect(() => {
     getAllGarminRuns();
-  }, []);
+  }, [searchParams]);
 
   return (<>
     <div className="flex flex-wrap mb-6">
@@ -51,9 +61,15 @@ export default function GarminRunList() {
         <Link to="/garminRuns/add" className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2">{t('garminRun.list.createNew')}</Link>
       </div>
     </div>
-    {!garminRuns || garminRuns.length === 0 ? (
+    {((garminRuns && garminRuns.page.totalElements !== 0) || searchParams.get('filter')) && (
+    <div className="flex flex-wrap justify-between">
+      <SearchFilter placeholder={t('garminRun.list.filter')} />
+      <Sorting sortOptions={sortOptions} />
+    </div>
+    )}
+    {!garminRuns || garminRuns.page.totalElements === 0 ? (
     <div>{t('garminRun.list.empty')}</div>
-    ) : (
+    ) : (<>
     <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
@@ -68,7 +84,7 @@ export default function GarminRunList() {
           </tr>
         </thead>
         <tbody className="border-t-2 border-black">
-          {garminRuns.map((garminRun) => (
+          {garminRuns.content.map((garminRun) => (
           <tr key={garminRun.id} className="odd:bg-gray-100">
             <td className="p-2">{garminRun.id}</td>
             <td className="p-2">{garminRun.activityId}</td>
@@ -88,6 +104,7 @@ export default function GarminRunList() {
         </tbody>
       </table>
     </div>
-    )}
+    <Pagination page={garminRuns.page} />
+    </>)}
   </>);
 }

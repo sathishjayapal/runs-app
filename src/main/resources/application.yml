@@ -45,10 +45,12 @@ management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,loggers,integrationgraph,shutdown
   endpoint:
     health:
       show-details: always
+    shutdown:
+      access: unrestricted
 springdoc:
   pathsToMatch: /api/**
 app:

@@ -24,8 +24,23 @@ public class ShedlockResourceTest extends BaseIT {
                     .get("/api/shedlocks")
                 .then()
                     .statusCode(HttpStatus.OK.value())
-                    .body("size()", Matchers.equalTo(2))
-                    .body("get(0).name", Matchers.equalTo(1200));
+                    .body("page.totalElements", Matchers.equalTo(2))
+                    .body("content.get(0).name", Matchers.equalTo(1200));
+    }
+
+    @Test
+    @Sql("/data/shedlockData.sql")
+    void getAllShedlocks_filtered() {
+        RestAssured
+                .given()
+                    .auth().preemptive().basic(ROLE_ADMIN, PASSWORD)
+                    .accept(ContentType.JSON)
+                .when()
+                    .get("/api/shedlocks?filter=1201")
+                .then()
+                    .statusCode(HttpStatus.OK.value())
+                    .body("page.totalElements", Matchers.equalTo(1))
+                    .body("content.get(0).name", Matchers.equalTo(1201));
     }
 
     @Test
