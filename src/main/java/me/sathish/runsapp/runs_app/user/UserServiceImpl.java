@@ -2,6 +2,7 @@ package me.sathish.runsapp.runs_app.user;
 
 import java.util.Map;
 import me.sathish.runsapp.runs_app.events.BeforeDeleteUser;
+import me.sathish.runsapp.runs_app.role.RoleRepository;
 import me.sathish.runsapp.runs_app.util.CustomCollectors;
 import me.sathish.runsapp.runs_app.util.NotFoundException;
 import org.springframework.context.ApplicationEventPublisher;
@@ -17,14 +18,16 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final ApplicationEventPublisher publisher;
     private final PasswordEncoder passwordEncoder;
 
     public UserServiceImpl(final UserRepository userRepository,
-            final ApplicationEventPublisher publisher, final PasswordEncoder passwordEncoder) {
+            final ApplicationEventPublisher publisher, final PasswordEncoder passwordEncoder, final RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.publisher = publisher;
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository= roleRepository;
     }
 
     @Override
@@ -82,8 +85,8 @@ public class UserServiceImpl implements UserService {
         userDTO.setId(user.getId());
         userDTO.setEmail(user.getEmail());
         userDTO.setName(user.getName());
-        userDTO.setRole(user.getRole());
-        userDTO.setCreatedAt(user.getCreatedAt());
+        userDTO.setRoleId(user.getRole().getId());
+        userDTO.setRoleName(user.getRole().getName());
         return userDTO;
     }
 
@@ -91,8 +94,8 @@ public class UserServiceImpl implements UserService {
         user.setEmail(userDTO.getEmail());
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setName(userDTO.getName());
-        user.setRole(userDTO.getRole());
-        user.setCreatedAt(userDTO.getCreatedAt());
+        user.setRole(userDTO.getRoleId() != null ?
+                roleRepository.getReferenceById(userDTO.getRoleId()) : null);
         return user;
     }
 
