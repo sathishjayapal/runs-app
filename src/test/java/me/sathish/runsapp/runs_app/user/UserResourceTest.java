@@ -22,8 +22,22 @@ public class UserResourceTest extends BaseIT {
                     .get("/api/users")
                 .then()
                     .statusCode(HttpStatus.OK.value())
-                    .body("size()", Matchers.equalTo(2))
-                    .body("get(0).id", Matchers.equalTo(1000));
+                    .body("page.totalElements", Matchers.equalTo(2))
+                    .body("content.get(0).id", Matchers.equalTo(1000));
+    }
+
+    @Test
+    void getAllUsers_filtered() {
+        RestAssured
+                .given()
+                    .auth().preemptive().basic(ROLE_ADMIN, PASSWORD)
+                    .accept(ContentType.JSON)
+                .when()
+                    .get("/api/users?filter=1001")
+                .then()
+                    .statusCode(HttpStatus.OK.value())
+                    .body("page.totalElements", Matchers.equalTo(1))
+                    .body("content.get(0).id", Matchers.equalTo(1001));
     }
 
     @Test

@@ -1,8 +1,9 @@
 package me.sathish.runsapp.runs_app.shedlock;
 
-import java.util.List;
 import me.sathish.runsapp.runs_app.util.NotFoundException;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 
@@ -16,11 +17,24 @@ public class ShedlockServiceImpl implements ShedlockService {
     }
 
     @Override
-    public List<ShedlockDTO> findAll() {
-        final List<Shedlock> shedlocks = shedlockRepository.findAll(Sort.by("name"));
-        return shedlocks.stream()
+    public Page<ShedlockDTO> findAll(final String filter, final Pageable pageable) {
+        Page<Shedlock> page;
+        if (filter != null) {
+            Long longFilter = null;
+            try {
+                longFilter = Long.parseLong(filter);
+            } catch (final NumberFormatException numberFormatException) {
+                // keep null - no parseable input
+            }
+            page = shedlockRepository.findAllByName(longFilter, pageable);
+        } else {
+            page = shedlockRepository.findAll(pageable);
+        }
+        return new PageImpl<>(page.getContent()
+                .stream()
                 .map(shedlock -> mapToDTO(shedlock, new ShedlockDTO()))
-                .toList();
+                .toList(),
+                pageable, page.getTotalElements());
     }
 
     @Override

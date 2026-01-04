@@ -1,13 +1,14 @@
 package me.sathish.runsapp.runs_app.strava_run;
 
-import java.util.List;
 import me.sathish.runsapp.runs_app.events.BeforeDeleteUser;
 import me.sathish.runsapp.runs_app.user.User;
 import me.sathish.runsapp.runs_app.user.UserRepository;
 import me.sathish.runsapp.runs_app.util.NotFoundException;
 import me.sathish.runsapp.runs_app.util.ReferencedException;
 import org.springframework.context.event.EventListener;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 
@@ -24,11 +25,24 @@ public class StravaRunServiceImpl implements StravaRunService {
     }
 
     @Override
-    public List<StravaRunDTO> findAll() {
-        final List<StravaRun> stravaRuns = stravaRunRepository.findAll(Sort.by("runNumber"));
-        return stravaRuns.stream()
+    public Page<StravaRunDTO> findAll(final String filter, final Pageable pageable) {
+        Page<StravaRun> page;
+        if (filter != null) {
+            Long longFilter = null;
+            try {
+                longFilter = Long.parseLong(filter);
+            } catch (final NumberFormatException numberFormatException) {
+                // keep null - no parseable input
+            }
+            page = stravaRunRepository.findAllByRunNumber(longFilter, pageable);
+        } else {
+            page = stravaRunRepository.findAll(pageable);
+        }
+        return new PageImpl<>(page.getContent()
+                .stream()
                 .map(stravaRun -> mapToDTO(stravaRun, new StravaRunDTO()))
-                .toList();
+                .toList(),
+                pageable, page.getTotalElements());
     }
 
     @Override

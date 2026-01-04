@@ -24,8 +24,23 @@ public class StravaRunResourceTest extends BaseIT {
                     .get("/api/stravaRuns")
                 .then()
                     .statusCode(HttpStatus.OK.value())
-                    .body("size()", Matchers.equalTo(2))
-                    .body("get(0).runNumber", Matchers.equalTo(1400));
+                    .body("page.totalElements", Matchers.equalTo(2))
+                    .body("content.get(0).runNumber", Matchers.equalTo(1400));
+    }
+
+    @Test
+    @Sql("/data/stravaRunData.sql")
+    void getAllStravaRuns_filtered() {
+        RestAssured
+                .given()
+                    .auth().preemptive().basic(ROLE_ADMIN, PASSWORD)
+                    .accept(ContentType.JSON)
+                .when()
+                    .get("/api/stravaRuns?filter=1401")
+                .then()
+                    .statusCode(HttpStatus.OK.value())
+                    .body("page.totalElements", Matchers.equalTo(1))
+                    .body("content.get(0).runNumber", Matchers.equalTo(1401));
     }
 
     @Test

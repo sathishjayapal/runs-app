@@ -1,11 +1,13 @@
 package me.sathish.runsapp.runs_app.user;
 
-import java.util.List;
 import java.util.Map;
 import me.sathish.runsapp.runs_app.events.BeforeDeleteUser;
 import me.sathish.runsapp.runs_app.util.CustomCollectors;
 import me.sathish.runsapp.runs_app.util.NotFoundException;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,11 +28,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDTO> findAll() {
-        final List<User> users = userRepository.findAll(Sort.by("id"));
-        return users.stream()
+    public Page<UserDTO> findAll(final String filter, final Pageable pageable) {
+        Page<User> page;
+        if (filter != null) {
+            Long longFilter = null;
+            try {
+                longFilter = Long.parseLong(filter);
+            } catch (final NumberFormatException numberFormatException) {
+                // keep null - no parseable input
+            }
+            page = userRepository.findAllById(longFilter, pageable);
+        } else {
+            page = userRepository.findAll(pageable);
+        }
+        return new PageImpl<>(page.getContent()
+                .stream()
                 .map(user -> mapToDTO(user, new UserDTO()))
-                .toList();
+                .toList(),
+                pageable, page.getTotalElements());
     }
 
     @Override
