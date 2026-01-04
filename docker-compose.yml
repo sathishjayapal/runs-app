@@ -1,9 +1,10 @@
 services:
   postgres:
     image: postgres:18.1
+    container_name: 'runs-app-db'
     environment:
     - POSTGRES_DB=runs-app
-    - POSTGRES_USER=postgres
-    - POSTGRES_PASSWORD=P4ssword!
+    - POSTGRES_USER=<<YOUR_USERNAME>>
+    - POSTGRES_PASSWORD=<<YOUR_PASSWORD>>
     ports:
-    - 5433:5432
+    - 5442:5432

@@ -1,8 +1,17 @@
+docker:  # ✅ Moved to spring level
+  compose:
+    lifecycle-management: start-only
+    enabled: true
+    file: ${DOCKER_COMPOSE_FILE}
+    profiles:
+      active: runs-app
 spring:
+  flyway:
+    create-schemas: true
   datasource:
-    url: ${JDBC_DATABASE_URL:jdbc:postgresql://localhost:5432/runs-app}
-    username: ${JDBC_DATABASE_USERNAME:postgres}
-    password: ${JDBC_DATABASE_PASSWORD:<<YOUR_PASSWORD>>}
+    url: ${RUNS_APP_DATABASE_URL}
+    username: ${RUNS_APP_JDBC_DATABASE_USERNAME}
+    password: ${RUNS_APP_JDBC_DATABASE_PASSWORD}
     hikari:
       connection-timeout: 30000
       maximum-pool-size: 10
@@ -29,9 +38,6 @@ spring:
         required: true
       connectiontimeout: 15000
       timeout: 45000
-  docker:
-    compose:
-      lifecycle-management: start-only
 error:
   handling:
     http-status-in-json-response: true
@@ -51,6 +57,9 @@ management:
       show-details: always
     shutdown:
       access: unrestricted
+  health:
+    jms:
+      enabled: false
 springdoc:
   pathsToMatch: /api/**
 app:

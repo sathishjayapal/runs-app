@@ -1,26 +1,19 @@
 package me.sathish.runsapp.runs_app.user;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
-import java.time.OffsetDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import me.sathish.runsapp.runs_app.file_name_tracker.FileNameTracker;
 import me.sathish.runsapp.runs_app.garmin_run.GarminRun;
+import me.sathish.runsapp.runs_app.role.Role;
 import me.sathish.runsapp.runs_app.strava_run.StravaRun;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.OffsetDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "\"user\"")
@@ -52,10 +45,12 @@ public class User {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false, length = 20)
-    private String role;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
-    @Column(nullable = false)
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
     @OneToMany(mappedBy = "createdBy")
@@ -67,12 +62,7 @@ public class User {
     @OneToMany(mappedBy = "createdBy")
     private Set<StravaRun> createdByStravaRunses = new HashSet<>();
 
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
     @LastModifiedDate
     @Column(nullable = false)
     private OffsetDateTime updatedAt;
-
 }

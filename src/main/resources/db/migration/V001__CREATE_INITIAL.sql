@@ -7,7 +7,6 @@ CREATE TABLE users (
     name VARCHAR(100) NOT NULL,
     role VARCHAR(20) NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     CONSTRAINT users_pkey PRIMARY KEY (id)
 );
@@ -23,8 +22,6 @@ CREATE TABLE garmin_runs (
     distance TEXT NOT NULL,
     max_heart_rate TEXT,
     calories TEXT,
-    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_by VARCHAR(40),
     created_by_id BIGINT NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -45,8 +42,6 @@ CREATE TABLE shedlock (
 CREATE TABLE file_name_tracker (
     id BIGINT NOT NULL,
     file_name TEXT NOT NULL,
-    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_by VARCHAR(40),
     created_by_id BIGINT NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -61,9 +56,7 @@ CREATE TABLE strava_runs (
     run_date date NOT NULL,
     miles INTEGER NOT NULL,
     start_location BIGINT NOT NULL,
-    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    updated_by VARCHAR(20),
+    updated_by_id BIGINT NOT NULL,
     created_by_id BIGINT NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,

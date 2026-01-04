@@ -55,12 +55,5 @@ public class FileNameTracker {
     @JoinColumn(name = "created_by_id", nullable = false)
     private User createdBy;
 
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(nullable = false)
-    private OffsetDateTime updatedAt;
 
 }

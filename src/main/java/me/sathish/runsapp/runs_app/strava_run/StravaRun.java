@@ -56,24 +56,17 @@ public class StravaRun {
     private Long startLocation;
 
     @Column(nullable = false)
-    private LocalDate createdAt;
+    private OffsetDateTime createdAt;
 
     @Column
-    private LocalDate updatedAt;
+    private OffsetDateTime updatedAt;
 
-    @Column(length = 20)
-    private String updatedBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "updated_by_id", nullable = false)
+    private User updatedBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_id", nullable = false)
     private User createdBy;
-
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(nullable = false)
-    private OffsetDateTime updatedAt;
 
 }

@@ -3,6 +3,8 @@ package me.sathish.runsapp.runs_app.strava_run;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,12 +32,12 @@ public class StravaRunDTO {
     private Long startLocation;
 
     @NotNull
-    private LocalDate createdAt;
+    private OffsetDateTime createdAt;
 
-    private LocalDate updatedAt;
+    private OffsetDateTime updatedAt;
 
-    @Size(max = 20)
-    private String updatedBy;
+    @NotNull
+    private Long updatedBy;
 
     @NotNull
     private Long createdBy;
