@@ -42,12 +42,6 @@ public class FileNameTracker {
     @Column(nullable = false, columnDefinition = "text")
     private String fileName;
 
-    @Column(nullable = false)
-    private OffsetDateTime createdAt;
-
-    @Column
-    private OffsetDateTime updatedAt;
-
     @Column(length = 40)
     private String updatedBy;
 

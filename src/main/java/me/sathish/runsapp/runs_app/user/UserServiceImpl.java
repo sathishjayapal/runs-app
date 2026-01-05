@@ -83,7 +83,6 @@ public class UserServiceImpl implements UserService {
         userDTO.setEmail(user.getEmail());
         userDTO.setName(user.getName());
         userDTO.setRole(user.getRole());
-        userDTO.setCreatedAt(user.getCreatedAt());
         return userDTO;
     }
 
@@ -92,7 +91,6 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setName(userDTO.getName());
         user.setRole(userDTO.getRole());
-        user.setCreatedAt(userDTO.getCreatedAt());
         return user;
     }
 

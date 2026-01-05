@@ -17,8 +17,7 @@ function getSchema() {
     email: yup.string().emptyToNull().max(100).required(),
     password: yup.string().emptyToNull().max(100).required(),
     name: yup.string().emptyToNull().max(100).required(),
-    role: yup.string().emptyToNull().max(20).required(),
-    createdAt: yup.string().emptyToNull().offsetDateTime().required()
+    role: yup.string().emptyToNull().max(20).required()
   });
 }
 
@@ -74,7 +73,6 @@ export default function UserEdit() {
       <InputRow useFormResult={useFormResult} object="user" field="password" required={true} type="password" />
       <InputRow useFormResult={useFormResult} object="user" field="name" required={true} />
       <InputRow useFormResult={useFormResult} object="user" field="role" required={true} />
-      <InputRow useFormResult={useFormResult} object="user" field="createdAt" required={true} />
       <input type="submit" value={t('user.edit.headline')} className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2 cursor-pointer mt-6" />
     </form>
   </>);

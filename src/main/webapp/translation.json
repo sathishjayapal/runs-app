@@ -57,9 +57,6 @@
     "role": {
       "label": "Role"
     },
-    "createdAt": {
-      "label": "Created At"
-    },
     "edit": {
       "headline": "Edit User",
       "back": "Back to list"
@@ -215,7 +212,7 @@
       "sort": {
         "id,ASC": "Sort by Id (Ascending)",
         "fileName,ASC": "Sort by File Name (Ascending)",
-        "createdAt,ASC": "Sort by Created At (Ascending)"
+        "updatedBy,ASC": "Sort by Updated By (Ascending)"
       },
       "filter": "Filter by Id",
       "edit": "Edit",
@@ -230,12 +227,6 @@
     },
     "fileName": {
       "label": "File Name"
-    },
-    "createdAt": {
-      "label": "Created At"
-    },
-    "updatedAt": {
-      "label": "Updated At"
     },
     "updatedBy": {
       "label": "Updated By"
@@ -292,12 +283,6 @@
     },
     "startLocation": {
       "label": "Start Location"
-    },
-    "createdAt": {
-      "label": "Created At"
-    },
-    "updatedAt": {
-      "label": "Updated At"
     },
     "updatedBy": {
       "label": "Updated By"

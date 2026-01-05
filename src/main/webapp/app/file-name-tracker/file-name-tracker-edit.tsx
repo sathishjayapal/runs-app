@@ -15,8 +15,6 @@ function getSchema() {
   setYupDefaults();
   return yup.object({
     fileName: yup.string().emptyToNull().required(),
-    createdAt: yup.string().emptyToNull().offsetDateTime().required(),
-    updatedAt: yup.string().emptyToNull().offsetDateTime(),
     updatedBy: yup.string().emptyToNull().max(40),
     createdBy: yup.number().integer().emptyToNull().required()
   });
@@ -74,8 +72,6 @@ export default function FileNameTrackerEdit() {
     <form onSubmit={useFormResult.handleSubmit(updateFileNameTracker)} noValidate>
       <InputRow useFormResult={useFormResult} object="fileNameTracker" field="id" disabled={true} type="number" />
       <InputRow useFormResult={useFormResult} object="fileNameTracker" field="fileName" required={true} type="textarea" />
-      <InputRow useFormResult={useFormResult} object="fileNameTracker" field="createdAt" required={true} />
-      <InputRow useFormResult={useFormResult} object="fileNameTracker" field="updatedAt" />
       <InputRow useFormResult={useFormResult} object="fileNameTracker" field="updatedBy" />
       <InputRow useFormResult={useFormResult} object="fileNameTracker" field="createdBy" required={true} type="select" options={createdByValues} />
       <input type="submit" value={t('fileNameTracker.edit.headline')} className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2 cursor-pointer mt-6" />

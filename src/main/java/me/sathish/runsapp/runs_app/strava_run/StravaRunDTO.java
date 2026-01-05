@@ -29,11 +29,6 @@ public class StravaRunDTO {
     @NotNull
     private Long startLocation;
 
-    @NotNull
-    private LocalDate createdAt;
-
-    private LocalDate updatedAt;
-
     @Size(max = 20)
     private String updatedBy;
 

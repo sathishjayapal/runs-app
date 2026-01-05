@@ -9,6 +9,5 @@ export class UserDTO {
   password?: string|null;
   name?: string|null;
   role?: string|null;
-  createdAt?: string|null;
 
 }

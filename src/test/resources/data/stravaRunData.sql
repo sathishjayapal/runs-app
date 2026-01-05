@@ -5,10 +5,10 @@ INSERT INTO strava_run (
     run_date,
     miles,
     start_location,
-    created_at,
-    updated_at,
     updated_by,
-    created_by_id
+    created_by_id,
+    created_at,
+    updated_at
 ) VALUES (
     1400,
     15,
@@ -16,10 +16,10 @@ INSERT INTO strava_run (
     '2025-07-04 00:00:00',
     78,
     67,
-    '2025-09-02 14:30:00',
-    '2025-09-02 14:30:00',
     'Viverra suspendisse.',
-    1000
+    1000,
+    '2025-09-02 14:30:00',
+    '2025-09-02 14:30:00'
 );
 
 INSERT INTO strava_run (
@@ -29,10 +29,10 @@ INSERT INTO strava_run (
     run_date,
     miles,
     start_location,
-    created_at,
-    updated_at,
     updated_by,
-    created_by_id
+    created_by_id,
+    created_at,
+    updated_at
 ) VALUES (
     1401,
     14,
@@ -40,8 +40,8 @@ INSERT INTO strava_run (
     '2025-07-05 00:00:00',
     79,
     68,
-    '2025-09-03 14:30:00',
-    '2025-09-03 14:30:00',
     'Nec ullamcorper.',
-    1001
+    1001,
+    '2025-09-03 14:30:00',
+    '2025-09-03 14:30:00'
 );

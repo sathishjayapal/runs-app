@@ -2,7 +2,6 @@ package me.sathish.runsapp.runs_app.user;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.time.OffsetDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,8 +27,5 @@ public class UserDTO {
     @NotNull
     @Size(max = 20)
     private String role;
-
-    @NotNull
-    private OffsetDateTime createdAt;
 
 }

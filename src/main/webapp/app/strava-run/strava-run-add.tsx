@@ -19,8 +19,6 @@ function getSchema() {
     runDate: yup.string().emptyToNull().required(),
     miles: yup.number().integer().emptyToNull().required(),
     startLocation: yup.number().integer().emptyToNull().required(),
-    createdAt: yup.string().emptyToNull().required(),
-    updatedAt: yup.string().emptyToNull(),
     updatedBy: yup.string().emptyToNull().max(20),
     createdBy: yup.number().integer().emptyToNull().required()
   });
@@ -77,8 +75,6 @@ export default function StravaRunAdd() {
       <InputRow useFormResult={useFormResult} object="stravaRun" field="runDate" required={true} type="datepicker" />
       <InputRow useFormResult={useFormResult} object="stravaRun" field="miles" required={true} type="number" />
       <InputRow useFormResult={useFormResult} object="stravaRun" field="startLocation" required={true} type="number" />
-      <InputRow useFormResult={useFormResult} object="stravaRun" field="createdAt" required={true} type="datepicker" />
-      <InputRow useFormResult={useFormResult} object="stravaRun" field="updatedAt" type="datepicker" />
       <InputRow useFormResult={useFormResult} object="stravaRun" field="updatedBy" />
       <InputRow useFormResult={useFormResult} object="stravaRun" field="createdBy" required={true} type="select" options={createdByValues} />
       <input type="submit" value={t('stravaRun.add.headline')} className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2 cursor-pointer mt-6" />
