@@ -1,4 +1,4 @@
-package me.sathish.runsapp.runs_app.user;
+package me.sathish.runsapp.runs_app.run_app_user;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,15 +28,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping(value = "/api/users", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/runAppUsers", produces = MediaType.APPLICATION_JSON_VALUE)
 @PreAuthorize("hasAuthority('" + UserRoles.ROLE_ADMIN + "')")
 @SecurityRequirement(name = "basic-auth")
-public class UserResource {
+public class RunAppUserResource {
 
-    private final UserService userService;
+    private final RunAppUserService runAppUserService;
 
-    public UserResource(final UserService userService) {
-        this.userService = userService;
+    public RunAppUserResource(final RunAppUserService runAppUserService) {
+        this.runAppUserService = runAppUserService;
     }
 
     @Operation(
@@ -59,35 +59,36 @@ public class UserResource {
             }
     )
     @GetMapping
-    public ResponseEntity<Page<UserDTO>> getAllUsers(
+    public ResponseEntity<Page<RunAppUserDTO>> getAllRunAppUsers(
             @RequestParam(name = "filter", required = false) final String filter,
             @Parameter(hidden = true) @SortDefault(sort = "id") @PageableDefault(size = 20) final Pageable pageable) {
-        return ResponseEntity.ok(userService.findAll(filter, pageable));
+        return ResponseEntity.ok(runAppUserService.findAll(filter, pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUser(@PathVariable(name = "id") final Long id) {
-        return ResponseEntity.ok(userService.get(id));
+    public ResponseEntity<RunAppUserDTO> getRunAppUser(@PathVariable(name = "id") final Long id) {
+        return ResponseEntity.ok(runAppUserService.get(id));
     }
 
     @PostMapping
     @ApiResponse(responseCode = "201")
-    public ResponseEntity<Long> createUser(@RequestBody @Valid final UserDTO userDTO) {
-        final Long createdId = userService.create(userDTO);
+    public ResponseEntity<Long> createRunAppUser(
+            @RequestBody @Valid final RunAppUserDTO runAppUserDTO) {
+        final Long createdId = runAppUserService.create(runAppUserDTO);
         return new ResponseEntity<>(createdId, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Long> updateUser(@PathVariable(name = "id") final Long id,
-            @RequestBody @Valid final UserDTO userDTO) {
-        userService.update(id, userDTO);
+    public ResponseEntity<Long> updateRunAppUser(@PathVariable(name = "id") final Long id,
+            @RequestBody @Valid final RunAppUserDTO runAppUserDTO) {
+        runAppUserService.update(id, runAppUserDTO);
         return ResponseEntity.ok(id);
     }
 
     @DeleteMapping("/{id}")
     @ApiResponse(responseCode = "204")
-    public ResponseEntity<Void> deleteUser(@PathVariable(name = "id") final Long id) {
-        userService.delete(id);
+    public ResponseEntity<Void> deleteRunAppUser(@PathVariable(name = "id") final Long id) {
+        runAppUserService.delete(id);
         return ResponseEntity.noContent().build();
     }
 

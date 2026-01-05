@@ -19,8 +19,8 @@ function getSchema() {
     runDate: yup.string().emptyToNull().required(),
     miles: yup.number().integer().emptyToNull().required(),
     startLocation: yup.number().integer().emptyToNull().required(),
-    updatedBy: yup.string().emptyToNull().max(20),
-    createdBy: yup.number().integer().emptyToNull().required()
+    createdBy: yup.number().integer().emptyToNull().required(),
+    updatedBy: yup.number().integer().emptyToNull().required()
   });
 }
 
@@ -30,6 +30,7 @@ export default function StravaRunAdd() {
 
   const navigate = useNavigate();
   const [createdByValues, setCreatedByValues] = useState<Map<number,string>>(new Map());
+  const [updatedByValues, setUpdatedByValues] = useState<Map<number,string>>(new Map());
 
   const useFormResult = useForm({
     resolver: yupResolver(getSchema()),
@@ -39,6 +40,8 @@ export default function StravaRunAdd() {
     try {
       const createdByValuesResponse = await axios.get('/api/stravaRuns/createdByValues');
       setCreatedByValues(createdByValuesResponse.data);
+      const updatedByValuesResponse = await axios.get('/api/stravaRuns/updatedByValues');
+      setUpdatedByValues(updatedByValuesResponse.data);
     } catch (error: any) {
       handleServerError(error, navigate);
     }
@@ -75,8 +78,8 @@ export default function StravaRunAdd() {
       <InputRow useFormResult={useFormResult} object="stravaRun" field="runDate" required={true} type="datepicker" />
       <InputRow useFormResult={useFormResult} object="stravaRun" field="miles" required={true} type="number" />
       <InputRow useFormResult={useFormResult} object="stravaRun" field="startLocation" required={true} type="number" />
-      <InputRow useFormResult={useFormResult} object="stravaRun" field="updatedBy" />
       <InputRow useFormResult={useFormResult} object="stravaRun" field="createdBy" required={true} type="select" options={createdByValues} />
+      <InputRow useFormResult={useFormResult} object="stravaRun" field="updatedBy" required={true} type="select" options={updatedByValues} />
       <input type="submit" value={t('stravaRun.add.headline')} className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2 cursor-pointer mt-6" />
     </form>
   </>);

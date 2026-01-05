@@ -13,7 +13,7 @@ import jakarta.persistence.SequenceGenerator;
 import java.time.OffsetDateTime;
 import lombok.Getter;
 import lombok.Setter;
-import me.sathish.runsapp.runs_app.user.User;
+import me.sathish.runsapp.runs_app.run_app_user.RunAppUser;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -47,7 +47,7 @@ public class FileNameTracker {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_id", nullable = false)
-    private User createdBy;
+    private RunAppUser createdBy;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

@@ -8,8 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import java.util.Map;
+import me.sathish.runsapp.runs_app.run_app_user.RunAppUserService;
 import me.sathish.runsapp.runs_app.security.UserRoles;
-import me.sathish.runsapp.runs_app.user.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -36,12 +36,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class FileNameTrackerResource {
 
     private final FileNameTrackerService fileNameTrackerService;
-    private final UserService userService;
+    private final RunAppUserService runAppUserService;
 
     public FileNameTrackerResource(final FileNameTrackerService fileNameTrackerService,
-            final UserService userService) {
+            final RunAppUserService runAppUserService) {
         this.fileNameTrackerService = fileNameTrackerService;
-        this.userService = userService;
+        this.runAppUserService = runAppUserService;
     }
 
     @Operation(
@@ -100,7 +100,7 @@ public class FileNameTrackerResource {
 
     @GetMapping("/createdByValues")
     public ResponseEntity<Map<Long, String>> getCreatedByValues() {
-        return ResponseEntity.ok(userService.getUserValues());
+        return ResponseEntity.ok(runAppUserService.getRunAppUserValues());
     }
 
 }

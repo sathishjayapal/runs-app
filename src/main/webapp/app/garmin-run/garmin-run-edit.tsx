@@ -24,7 +24,8 @@ function getSchema() {
     maxHeartRate: yup.string().emptyToNull(),
     calories: yup.string().emptyToNull(),
     updatedBy: yup.string().emptyToNull().max(40),
-    createdBy: yup.number().integer().emptyToNull().required()
+    createdBy: yup.number().integer().emptyToNull().required(),
+    updateBy: yup.number().integer().emptyToNull()
   });
 }
 
@@ -34,6 +35,7 @@ export default function GarminRunEdit() {
 
   const navigate = useNavigate();
   const [createdByValues, setCreatedByValues] = useState<Map<number,string>>(new Map());
+  const [updateByValues, setUpdateByValues] = useState<Map<number,string>>(new Map());
   const params = useParams();
   const currentId = +params.id!;
 
@@ -45,6 +47,8 @@ export default function GarminRunEdit() {
     try {
       const createdByValuesResponse = await axios.get('/api/garminRuns/createdByValues');
       setCreatedByValues(createdByValuesResponse.data);
+      const updateByValuesResponse = await axios.get('/api/garminRuns/updateByValues');
+      setUpdateByValues(updateByValuesResponse.data);
       const data = (await axios.get('/api/garminRuns/' + currentId)).data;
       useFormResult.reset(data);
     } catch (error: any) {
@@ -91,6 +95,7 @@ export default function GarminRunEdit() {
       <InputRow useFormResult={useFormResult} object="garminRun" field="calories" type="textarea" />
       <InputRow useFormResult={useFormResult} object="garminRun" field="updatedBy" />
       <InputRow useFormResult={useFormResult} object="garminRun" field="createdBy" required={true} type="select" options={createdByValues} />
+      <InputRow useFormResult={useFormResult} object="garminRun" field="updateBy" type="select" options={updateByValues} />
       <input type="submit" value={t('garminRun.edit.headline')} className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2 cursor-pointer mt-6" />
     </form>
   </>);

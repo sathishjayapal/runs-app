@@ -1,8 +1,8 @@
 package me.sathish.runsapp.runs_app.strava_run;
 
-import me.sathish.runsapp.runs_app.events.BeforeDeleteUser;
-import me.sathish.runsapp.runs_app.user.User;
-import me.sathish.runsapp.runs_app.user.UserRepository;
+import me.sathish.runsapp.runs_app.events.BeforeDeleteRunAppUser;
+import me.sathish.runsapp.runs_app.run_app_user.RunAppUser;
+import me.sathish.runsapp.runs_app.run_app_user.RunAppUserRepository;
 import me.sathish.runsapp.runs_app.util.NotFoundException;
 import me.sathish.runsapp.runs_app.util.ReferencedException;
 import org.springframework.context.event.EventListener;
@@ -16,12 +16,12 @@ import org.springframework.stereotype.Service;
 public class StravaRunServiceImpl implements StravaRunService {
 
     private final StravaRunRepository stravaRunRepository;
-    private final UserRepository userRepository;
+    private final RunAppUserRepository runAppUserRepository;
 
     public StravaRunServiceImpl(final StravaRunRepository stravaRunRepository,
-            final UserRepository userRepository) {
+            final RunAppUserRepository runAppUserRepository) {
         this.stravaRunRepository = stravaRunRepository;
-        this.userRepository = userRepository;
+        this.runAppUserRepository = runAppUserRepository;
     }
 
     @Override
@@ -81,8 +81,8 @@ public class StravaRunServiceImpl implements StravaRunService {
         stravaRunDTO.setRunDate(stravaRun.getRunDate());
         stravaRunDTO.setMiles(stravaRun.getMiles());
         stravaRunDTO.setStartLocation(stravaRun.getStartLocation());
-        stravaRunDTO.setUpdatedBy(stravaRun.getUpdatedBy());
         stravaRunDTO.setCreatedBy(stravaRun.getCreatedBy() == null ? null : stravaRun.getCreatedBy().getId());
+        stravaRunDTO.setUpdatedBy(stravaRun.getUpdatedBy() == null ? null : stravaRun.getUpdatedBy().getId());
         return stravaRunDTO;
     }
 
@@ -92,20 +92,28 @@ public class StravaRunServiceImpl implements StravaRunService {
         stravaRun.setRunDate(stravaRunDTO.getRunDate());
         stravaRun.setMiles(stravaRunDTO.getMiles());
         stravaRun.setStartLocation(stravaRunDTO.getStartLocation());
-        stravaRun.setUpdatedBy(stravaRunDTO.getUpdatedBy());
-        final User createdBy = stravaRunDTO.getCreatedBy() == null ? null : userRepository.findById(stravaRunDTO.getCreatedBy())
+        final RunAppUser createdBy = stravaRunDTO.getCreatedBy() == null ? null : runAppUserRepository.findById(stravaRunDTO.getCreatedBy())
                 .orElseThrow(() -> new NotFoundException("createdBy not found"));
         stravaRun.setCreatedBy(createdBy);
+        final RunAppUser updatedBy = stravaRunDTO.getUpdatedBy() == null ? null : runAppUserRepository.findById(stravaRunDTO.getUpdatedBy())
+                .orElseThrow(() -> new NotFoundException("updatedBy not found"));
+        stravaRun.setUpdatedBy(updatedBy);
         return stravaRun;
     }
 
-    @EventListener(BeforeDeleteUser.class)
-    public void on(final BeforeDeleteUser event) {
+    @EventListener(BeforeDeleteRunAppUser.class)
+    public void on(final BeforeDeleteRunAppUser event) {
         final ReferencedException referencedException = new ReferencedException();
         final StravaRun createdByStravaRun = stravaRunRepository.findFirstByCreatedById(event.getId());
         if (createdByStravaRun != null) {
-            referencedException.setKey("user.stravaRun.createdBy.referenced");
+            referencedException.setKey("runAppUser.stravaRun.createdBy.referenced");
             referencedException.addParam(createdByStravaRun.getRunNumber());
+            throw referencedException;
+        }
+        final StravaRun updatedByStravaRun = stravaRunRepository.findFirstByUpdatedById(event.getId());
+        if (updatedByStravaRun != null) {
+            referencedException.setKey("runAppUser.stravaRun.updatedBy.referenced");
+            referencedException.addParam(updatedByStravaRun.getRunNumber());
             throw referencedException;
         }
     }

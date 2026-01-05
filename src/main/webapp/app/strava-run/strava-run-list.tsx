@@ -80,8 +80,8 @@ export default function StravaRunList() {
             <th scope="col" className="text-left p-2">{t('stravaRun.runDate.label')}</th>
             <th scope="col" className="text-left p-2">{t('stravaRun.miles.label')}</th>
             <th scope="col" className="text-left p-2">{t('stravaRun.startLocation.label')}</th>
-            <th scope="col" className="text-left p-2">{t('stravaRun.updatedBy.label')}</th>
             <th scope="col" className="text-left p-2">{t('stravaRun.createdBy.label')}</th>
+            <th scope="col" className="text-left p-2">{t('stravaRun.updatedBy.label')}</th>
             <th></th>
           </tr>
         </thead>
@@ -94,8 +94,8 @@ export default function StravaRunList() {
             <td className="p-2">{stravaRun.runDate}</td>
             <td className="p-2">{stravaRun.miles}</td>
             <td className="p-2">{stravaRun.startLocation}</td>
-            <td className="p-2">{stravaRun.updatedBy}</td>
             <td className="p-2">{stravaRun.createdBy}</td>
+            <td className="p-2">{stravaRun.updatedBy}</td>
             <td className="p-2">
               <div className="float-right whitespace-nowrap">
                 <Link to={'/stravaRuns/edit/' + stravaRun.runNumber} className="inline-block text-white bg-gray-500 hover:bg-gray-600 focus:ring-gray-200 focus:ring-3 rounded px-2.5 py-1.5 text-sm">{t('stravaRun.list.edit')}</Link>

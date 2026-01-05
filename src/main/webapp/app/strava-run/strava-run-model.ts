@@ -10,7 +10,7 @@ export class StravaRunDTO {
   runDate?: string|null;
   miles?: number|null;
   startLocation?: number|null;
-  updatedBy?: string|null;
   createdBy?: number|null;
+  updatedBy?: number|null;
 
 }

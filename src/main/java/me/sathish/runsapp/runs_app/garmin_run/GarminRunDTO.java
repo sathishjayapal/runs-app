@@ -48,4 +48,6 @@ public class GarminRunDTO {
     @NotNull
     private Long createdBy;
 
+    private Long updateBy;
+
 }

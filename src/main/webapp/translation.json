@@ -24,11 +24,11 @@
       "message": "The page you are looking for is not available right now."
     }
   },
-  "user": {
+  "runAppUser": {
     "list": {
-      "headline": "Users",
-      "createNew": "Create new User",
-      "empty": "No Users could be found.",
+      "headline": "Run App Users",
+      "createNew": "Create new Run App User",
+      "empty": "No Run App Users could be found.",
       "sort": {
         "id,ASC": "Sort by Id (Ascending)",
         "email,ASC": "Sort by Email (Ascending)",
@@ -39,7 +39,7 @@
       "delete": "Delete"
     },
     "add": {
-      "headline": "Add User",
+      "headline": "Add Run App User",
       "back": "Back to list"
     },
     "id": {
@@ -58,12 +58,15 @@
       "label": "Role"
     },
     "edit": {
-      "headline": "Edit User",
+      "headline": "Edit Run App User",
       "back": "Back to list"
     },
     "garminRun": {
       "createdBy": {
         "referenced": "This entity is still referenced by Garmin Run {{id}} via field Created By."
+      },
+      "updateBy": {
+        "referenced": "This entity is still referenced by Garmin Run {{id}} via field Update By."
       }
     },
     "fileNameTracker": {
@@ -74,16 +77,24 @@
     "stravaRun": {
       "createdBy": {
         "referenced": "This entity is still referenced by Strava Run {{id}} via field Created By."
+      },
+      "updatedBy": {
+        "referenced": "This entity is still referenced by Strava Run {{id}} via field Updated By."
+      }
+    },
+    "runnerAppRole": {
+      "runnerUserRoles": {
+        "referenced": "This entity is still referenced by Runner App Role {{id}} via field Runner User Roles."
       }
     },
     "create": {
-      "success": "User was created successfully."
+      "success": "Run App User was created successfully."
     },
     "update": {
-      "success": "User was updated successfully."
+      "success": "Run App User was updated successfully."
     },
     "delete": {
-      "success": "User was removed successfully."
+      "success": "Run App User was removed successfully."
     }
   },
   "garminRun": {
@@ -139,6 +150,9 @@
     },
     "createdBy": {
       "label": "Created By"
+    },
+    "updateBy": {
+      "label": "Update By"
     },
     "edit": {
       "headline": "Edit Garmin Run",
@@ -278,11 +292,11 @@
     "startLocation": {
       "label": "Start Location"
     },
-    "updatedBy": {
-      "label": "Updated By"
-    },
     "createdBy": {
       "label": "Created By"
+    },
+    "updatedBy": {
+      "label": "Updated By"
     },
     "edit": {
       "headline": "Edit Strava Run",

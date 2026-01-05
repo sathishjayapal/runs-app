@@ -1,4 +1,4 @@
-package me.sathish.runsapp.runs_app.garmin_run;
+package me.sathish.runsapp.runs_app.runner_app_role;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,7 +23,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
-public class GarminRun {
+public class RunnerAppRole {
 
     @Id
     @Column(nullable = false, updatable = false)
@@ -40,43 +39,12 @@ public class GarminRun {
     )
     private Long id;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal activityId;
-
-    @Column(nullable = false, columnDefinition = "text")
-    private String activityDate;
-
-    @Column(nullable = false, columnDefinition = "text")
-    private String activityType;
-
-    @Column(nullable = false, columnDefinition = "text")
-    private String activityName;
-
-    @Column(columnDefinition = "text")
-    private String activityDescription;
-
-    @Column(columnDefinition = "text")
-    private String elapsedTime;
-
-    @Column(nullable = false, columnDefinition = "text")
-    private String distance;
-
-    @Column(columnDefinition = "text")
-    private String maxHeartRate;
-
-    @Column(columnDefinition = "text")
-    private String calories;
-
-    @Column(length = 40)
-    private String updatedBy;
+    @Column(nullable = false, unique = true)
+    private String roleName;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by_id", nullable = false)
-    private RunAppUser createdBy;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "update_by_id")
-    private RunAppUser updateBy;
+    @JoinColumn(name = "runner_user_roles_id", nullable = false)
+    private RunAppUser runnerUserRoles;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

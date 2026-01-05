@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class BeforeDeleteUser {
+public class BeforeDeleteRunAppUser {
 
     private Long id;
 

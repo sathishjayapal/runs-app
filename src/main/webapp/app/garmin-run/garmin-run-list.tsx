@@ -78,6 +78,7 @@ export default function GarminRunList() {
             <th scope="col" className="text-left p-2">{t('garminRun.activityId.label')}</th>
             <th scope="col" className="text-left p-2">{t('garminRun.updatedBy.label')}</th>
             <th scope="col" className="text-left p-2">{t('garminRun.createdBy.label')}</th>
+            <th scope="col" className="text-left p-2">{t('garminRun.updateBy.label')}</th>
             <th></th>
           </tr>
         </thead>
@@ -88,6 +89,7 @@ export default function GarminRunList() {
             <td className="p-2">{garminRun.activityId}</td>
             <td className="p-2">{garminRun.updatedBy}</td>
             <td className="p-2">{garminRun.createdBy}</td>
+            <td className="p-2">{garminRun.updateBy}</td>
             <td className="p-2">
               <div className="float-right whitespace-nowrap">
                 <Link to={'/garminRuns/edit/' + garminRun.id} className="inline-block text-white bg-gray-500 hover:bg-gray-600 focus:ring-gray-200 focus:ring-3 rounded px-2.5 py-1.5 text-sm">{t('garminRun.list.edit')}</Link>

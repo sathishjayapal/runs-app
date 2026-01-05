@@ -41,6 +41,8 @@ error:
       5xx: ERROR
     http-statuses:
       org.springframework.security.authorization.AuthorizationDeniedException: unauthorized
+    codes:
+      RunnerAppRoleRoleNameUnique: RUNNER_APP_ROLE_ROLE_NAME_UNIQUE
 management:
   endpoints:
     web:
