@@ -85,8 +85,6 @@ public class GarminRunServiceImpl implements GarminRunService {
         garminRunDTO.setDistance(garminRun.getDistance());
         garminRunDTO.setMaxHeartRate(garminRun.getMaxHeartRate());
         garminRunDTO.setCalories(garminRun.getCalories());
-        garminRunDTO.setCreatedAt(garminRun.getCreatedAt());
-        garminRunDTO.setUpdatedAt(garminRun.getUpdatedAt());
         garminRunDTO.setUpdatedBy(garminRun.getUpdatedBy());
         garminRunDTO.setCreatedBy(garminRun.getCreatedBy() == null ? null : garminRun.getCreatedBy().getId());
         return garminRunDTO;
@@ -102,8 +100,6 @@ public class GarminRunServiceImpl implements GarminRunService {
         garminRun.setDistance(garminRunDTO.getDistance());
         garminRun.setMaxHeartRate(garminRunDTO.getMaxHeartRate());
         garminRun.setCalories(garminRunDTO.getCalories());
-        garminRun.setCreatedAt(garminRunDTO.getCreatedAt());
-        garminRun.setUpdatedAt(garminRunDTO.getUpdatedAt());
         garminRun.setUpdatedBy(garminRunDTO.getUpdatedBy());
         final User createdBy = garminRunDTO.getCreatedBy() == null ? null : userRepository.findById(garminRunDTO.getCreatedBy())
                 .orElseThrow(() -> new NotFoundException("createdBy not found"));

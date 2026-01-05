@@ -23,8 +23,6 @@ function getSchema() {
     distance: yup.string().emptyToNull().required(),
     maxHeartRate: yup.string().emptyToNull(),
     calories: yup.string().emptyToNull(),
-    createdAt: yup.string().emptyToNull().offsetDateTime().required(),
-    updatedAt: yup.string().emptyToNull().offsetDateTime(),
     updatedBy: yup.string().emptyToNull().max(40),
     createdBy: yup.number().integer().emptyToNull().required()
   });
@@ -91,8 +89,6 @@ export default function GarminRunEdit() {
       <InputRow useFormResult={useFormResult} object="garminRun" field="distance" required={true} type="textarea" />
       <InputRow useFormResult={useFormResult} object="garminRun" field="maxHeartRate" type="textarea" />
       <InputRow useFormResult={useFormResult} object="garminRun" field="calories" type="textarea" />
-      <InputRow useFormResult={useFormResult} object="garminRun" field="createdAt" required={true} />
-      <InputRow useFormResult={useFormResult} object="garminRun" field="updatedAt" />
       <InputRow useFormResult={useFormResult} object="garminRun" field="updatedBy" />
       <InputRow useFormResult={useFormResult} object="garminRun" field="createdBy" required={true} type="select" options={createdByValues} />
       <input type="submit" value={t('garminRun.edit.headline')} className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2 cursor-pointer mt-6" />

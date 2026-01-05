@@ -67,12 +67,6 @@ public class GarminRun {
     @Column(columnDefinition = "text")
     private String calories;
 
-    @Column(nullable = false)
-    private OffsetDateTime createdAt;
-
-    @Column
-    private OffsetDateTime updatedAt;
-
     @Column(length = 40)
     private String updatedBy;
 

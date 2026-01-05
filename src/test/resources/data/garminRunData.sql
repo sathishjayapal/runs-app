@@ -9,10 +9,10 @@ INSERT INTO garmin_run (
     distance,
     max_heart_rate,
     calories,
-    created_at,
-    updated_at,
     updated_by,
-    created_by_id
+    created_by_id,
+    created_at,
+    updated_at
 ) VALUES (
     1100,
     58.08,
@@ -24,10 +24,10 @@ INSERT INTO garmin_run (
     'Donec pretium vulputate sapien nec sagittis aliquam malesuada.',
     'Elementum tempus egestas sed sed risus pretium.',
     'Pellentesque nec nam aliquam sem. Risus viverra adipiscing at in tellus.',
-    '2025-09-02 14:30:00',
-    '2025-09-02 14:30:00',
     'Viverra suspendisse.',
-    1000
+    1000,
+    '2025-09-02 14:30:00',
+    '2025-09-02 14:30:00'
 );
 
 INSERT INTO garmin_run (
@@ -41,10 +41,10 @@ INSERT INTO garmin_run (
     distance,
     max_heart_rate,
     calories,
-    created_at,
-    updated_at,
     updated_by,
-    created_by_id
+    created_by_id,
+    created_at,
+    updated_at
 ) VALUES (
     1101,
     59.08,
@@ -56,8 +56,8 @@ INSERT INTO garmin_run (
     'Duis ultricies lacus sed turpis tincidunt.',
     'Sed faucibus turpis in eu mi bibendum neque.',
     'Sed blandit libero volutpat sed cras ornare arcu dui vivamus.',
-    '2025-09-03 14:30:00',
-    '2025-09-03 14:30:00',
     'Nec ullamcorper.',
-    1001
+    1001,
+    '2025-09-03 14:30:00',
+    '2025-09-03 14:30:00'
 );

@@ -134,12 +134,6 @@
     "calories": {
       "label": "Calories"
     },
-    "createdAt": {
-      "label": "Created At"
-    },
-    "updatedAt": {
-      "label": "Updated At"
-    },
     "updatedBy": {
       "label": "Updated By"
     },

@@ -4,6 +4,10 @@ ALTER TABLE "user" DROP COLUMN created_at;
 
 ALTER TABLE garmin_runs RENAME TO garmin_run;
 
+ALTER TABLE garmin_run DROP COLUMN created_at;
+
+ALTER TABLE garmin_run DROP COLUMN updated_at;
+
 ALTER TABLE file_name_tracker DROP COLUMN created_at;
 
 ALTER TABLE file_name_tracker DROP COLUMN updated_at;
