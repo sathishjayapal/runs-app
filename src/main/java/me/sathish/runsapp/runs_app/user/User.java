@@ -55,9 +55,6 @@ public class User {
     @Column(nullable = false, length = 20)
     private String role;
 
-    @Column(nullable = false)
-    private OffsetDateTime createdAt;
-
     @OneToMany(mappedBy = "createdBy")
     private Set<GarminRun> createdByGarminRunses = new HashSet<>();
 

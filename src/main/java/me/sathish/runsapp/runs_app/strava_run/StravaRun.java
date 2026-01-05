@@ -55,12 +55,6 @@ public class StravaRun {
     @Column(nullable = false)
     private Long startLocation;
 
-    @Column(nullable = false)
-    private LocalDate createdAt;
-
-    @Column
-    private LocalDate updatedAt;
-
     @Column(length = 20)
     private String updatedBy;
 

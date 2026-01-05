@@ -21,7 +21,7 @@ export default function FileNameTrackerList() {
   const sortOptions = {
     'id,ASC': t('fileNameTracker.list.sort.id,ASC'), 
     'fileName,ASC': t('fileNameTracker.list.sort.fileName,ASC'), 
-    'createdAt,ASC': t('fileNameTracker.list.sort.createdAt,ASC')
+    'updatedBy,ASC': t('fileNameTracker.list.sort.updatedBy,ASC')
   };
 
   const getAllFileNameTrackers = async () => {
@@ -75,8 +75,6 @@ export default function FileNameTrackerList() {
         <thead>
           <tr>
             <th scope="col" className="text-left p-2">{t('fileNameTracker.id.label')}</th>
-            <th scope="col" className="text-left p-2">{t('fileNameTracker.createdAt.label')}</th>
-            <th scope="col" className="text-left p-2">{t('fileNameTracker.updatedAt.label')}</th>
             <th scope="col" className="text-left p-2">{t('fileNameTracker.updatedBy.label')}</th>
             <th scope="col" className="text-left p-2">{t('fileNameTracker.createdBy.label')}</th>
             <th></th>
@@ -86,8 +84,6 @@ export default function FileNameTrackerList() {
           {fileNameTrackers.content.map((fileNameTracker) => (
           <tr key={fileNameTracker.id} className="odd:bg-gray-100">
             <td className="p-2">{fileNameTracker.id}</td>
-            <td className="p-2">{fileNameTracker.createdAt}</td>
-            <td className="p-2">{fileNameTracker.updatedAt}</td>
             <td className="p-2">{fileNameTracker.updatedBy}</td>
             <td className="p-2">{fileNameTracker.createdBy}</td>
             <td className="p-2">

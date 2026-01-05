@@ -87,7 +87,6 @@ export default function UserList() {
             <th scope="col" className="text-left p-2">{t('user.email.label')}</th>
             <th scope="col" className="text-left p-2">{t('user.name.label')}</th>
             <th scope="col" className="text-left p-2">{t('user.role.label')}</th>
-            <th scope="col" className="text-left p-2">{t('user.createdAt.label')}</th>
             <th></th>
           </tr>
         </thead>
@@ -98,7 +97,6 @@ export default function UserList() {
             <td className="p-2">{user.email}</td>
             <td className="p-2">{user.name}</td>
             <td className="p-2">{user.role}</td>
-            <td className="p-2">{user.createdAt}</td>
             <td className="p-2">
               <div className="float-right whitespace-nowrap">
                 <Link to={'/users/edit/' + user.id} className="inline-block text-white bg-gray-500 hover:bg-gray-600 focus:ring-gray-200 focus:ring-3 rounded px-2.5 py-1.5 text-sm">{t('user.list.edit')}</Link>

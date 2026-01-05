@@ -81,8 +81,6 @@ public class StravaRunServiceImpl implements StravaRunService {
         stravaRunDTO.setRunDate(stravaRun.getRunDate());
         stravaRunDTO.setMiles(stravaRun.getMiles());
         stravaRunDTO.setStartLocation(stravaRun.getStartLocation());
-        stravaRunDTO.setCreatedAt(stravaRun.getCreatedAt());
-        stravaRunDTO.setUpdatedAt(stravaRun.getUpdatedAt());
         stravaRunDTO.setUpdatedBy(stravaRun.getUpdatedBy());
         stravaRunDTO.setCreatedBy(stravaRun.getCreatedBy() == null ? null : stravaRun.getCreatedBy().getId());
         return stravaRunDTO;
@@ -94,8 +92,6 @@ public class StravaRunServiceImpl implements StravaRunService {
         stravaRun.setRunDate(stravaRunDTO.getRunDate());
         stravaRun.setMiles(stravaRunDTO.getMiles());
         stravaRun.setStartLocation(stravaRunDTO.getStartLocation());
-        stravaRun.setCreatedAt(stravaRunDTO.getCreatedAt());
-        stravaRun.setUpdatedAt(stravaRunDTO.getUpdatedAt());
         stravaRun.setUpdatedBy(stravaRunDTO.getUpdatedBy());
         final User createdBy = stravaRunDTO.getCreatedBy() == null ? null : userRepository.findById(stravaRunDTO.getCreatedBy())
                 .orElseThrow(() -> new NotFoundException("createdBy not found"));
