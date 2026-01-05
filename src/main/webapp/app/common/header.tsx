@@ -57,7 +57,7 @@ export default function Header() {
                   <span className="text-[9px] align-[3px] pl-0.5">&#9660;</span>
                 </button>
                 <ul className="hidden block absolute right-0 bg-white border border-gray-300 rounded min-w-[10rem] py-2" aria-labelledby="navbarEntitiesLink">
-                  <li><Link to="/users" className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('user.list.headline')}</Link></li>
+                  <li><Link to="/runAppUsers" className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('runAppUser.list.headline')}</Link></li>
                   <li><Link to="/garminRuns" className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('garminRun.list.headline')}</Link></li>
                   <li><Link to="/shedlocks" className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('shedlock.list.headline')}</Link></li>
                   <li><Link to="/fileNameTrackers" className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('fileNameTracker.list.headline')}</Link></li>

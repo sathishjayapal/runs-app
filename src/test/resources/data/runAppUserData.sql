@@ -1,4 +1,4 @@
-INSERT INTO "user" (
+INSERT INTO run_app_user (
     id,
     email,
     password,
@@ -16,7 +16,7 @@ INSERT INTO "user" (
     '2025-09-02 14:30:00'
 );
 
-INSERT INTO "user" (
+INSERT INTO run_app_user (
     id,
     email,
     password,

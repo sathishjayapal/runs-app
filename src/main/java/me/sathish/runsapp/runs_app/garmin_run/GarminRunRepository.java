@@ -11,4 +11,6 @@ public interface GarminRunRepository extends JpaRepository<GarminRun, Long> {
 
     GarminRun findFirstByCreatedById(Long id);
 
+    GarminRun findFirstByUpdateById(Long id);
+
 }

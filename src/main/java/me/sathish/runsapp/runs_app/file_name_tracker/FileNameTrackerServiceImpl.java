@@ -1,8 +1,8 @@
 package me.sathish.runsapp.runs_app.file_name_tracker;
 
-import me.sathish.runsapp.runs_app.events.BeforeDeleteUser;
-import me.sathish.runsapp.runs_app.user.User;
-import me.sathish.runsapp.runs_app.user.UserRepository;
+import me.sathish.runsapp.runs_app.events.BeforeDeleteRunAppUser;
+import me.sathish.runsapp.runs_app.run_app_user.RunAppUser;
+import me.sathish.runsapp.runs_app.run_app_user.RunAppUserRepository;
 import me.sathish.runsapp.runs_app.util.NotFoundException;
 import me.sathish.runsapp.runs_app.util.ReferencedException;
 import org.springframework.context.event.EventListener;
@@ -16,12 +16,12 @@ import org.springframework.stereotype.Service;
 public class FileNameTrackerServiceImpl implements FileNameTrackerService {
 
     private final FileNameTrackerRepository fileNameTrackerRepository;
-    private final UserRepository userRepository;
+    private final RunAppUserRepository runAppUserRepository;
 
     public FileNameTrackerServiceImpl(final FileNameTrackerRepository fileNameTrackerRepository,
-            final UserRepository userRepository) {
+            final RunAppUserRepository runAppUserRepository) {
         this.fileNameTrackerRepository = fileNameTrackerRepository;
-        this.userRepository = userRepository;
+        this.runAppUserRepository = runAppUserRepository;
     }
 
     @Override
@@ -87,18 +87,18 @@ public class FileNameTrackerServiceImpl implements FileNameTrackerService {
             final FileNameTracker fileNameTracker) {
         fileNameTracker.setFileName(fileNameTrackerDTO.getFileName());
         fileNameTracker.setUpdatedBy(fileNameTrackerDTO.getUpdatedBy());
-        final User createdBy = fileNameTrackerDTO.getCreatedBy() == null ? null : userRepository.findById(fileNameTrackerDTO.getCreatedBy())
+        final RunAppUser createdBy = fileNameTrackerDTO.getCreatedBy() == null ? null : runAppUserRepository.findById(fileNameTrackerDTO.getCreatedBy())
                 .orElseThrow(() -> new NotFoundException("createdBy not found"));
         fileNameTracker.setCreatedBy(createdBy);
         return fileNameTracker;
     }
 
-    @EventListener(BeforeDeleteUser.class)
-    public void on(final BeforeDeleteUser event) {
+    @EventListener(BeforeDeleteRunAppUser.class)
+    public void on(final BeforeDeleteRunAppUser event) {
         final ReferencedException referencedException = new ReferencedException();
         final FileNameTracker createdByFileNameTracker = fileNameTrackerRepository.findFirstByCreatedById(event.getId());
         if (createdByFileNameTracker != null) {
-            referencedException.setKey("user.fileNameTracker.createdBy.referenced");
+            referencedException.setKey("runAppUser.fileNameTracker.createdBy.referenced");
             referencedException.addParam(createdByFileNameTracker.getId());
             throw referencedException;
         }

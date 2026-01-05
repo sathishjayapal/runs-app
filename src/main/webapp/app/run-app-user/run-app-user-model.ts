@@ -1,6 +1,6 @@
-export class UserDTO {
+export class RunAppUserDTO {
 
-  constructor(data:Partial<UserDTO>) {
+  constructor(data:Partial<RunAppUserDTO>) {
     Object.assign(this, data);
   }
 

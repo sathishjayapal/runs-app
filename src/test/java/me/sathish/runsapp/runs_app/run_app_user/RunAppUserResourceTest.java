@@ -1,4 +1,4 @@
-package me.sathish.runsapp.runs_app.user;
+package me.sathish.runsapp.runs_app.run_app_user;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -10,16 +10,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
 
-public class UserResourceTest extends BaseIT {
+public class RunAppUserResourceTest extends BaseIT {
 
     @Test
-    void getAllUsers_success() {
+    void getAllRunAppUsers_success() {
         RestAssured
                 .given()
                     .auth().preemptive().basic(ROLE_ADMIN, PASSWORD)
                     .accept(ContentType.JSON)
                 .when()
-                    .get("/api/users")
+                    .get("/api/runAppUsers")
                 .then()
                     .statusCode(HttpStatus.OK.value())
                     .body("page.totalElements", Matchers.equalTo(2))
@@ -27,13 +27,13 @@ public class UserResourceTest extends BaseIT {
     }
 
     @Test
-    void getAllUsers_filtered() {
+    void getAllRunAppUsers_filtered() {
         RestAssured
                 .given()
                     .auth().preemptive().basic(ROLE_ADMIN, PASSWORD)
                     .accept(ContentType.JSON)
                 .when()
-                    .get("/api/users?filter=1001")
+                    .get("/api/runAppUsers?filter=1001")
                 .then()
                     .statusCode(HttpStatus.OK.value())
                     .body("page.totalElements", Matchers.equalTo(1))
@@ -41,69 +41,69 @@ public class UserResourceTest extends BaseIT {
     }
 
     @Test
-    void getAllUsers_unauthorized() {
+    void getAllRunAppUsers_unauthorized() {
         RestAssured
                 .given()
                     .redirects().follow(false)
                     .accept(ContentType.JSON)
                 .when()
-                    .get("/api/users")
+                    .get("/api/runAppUsers")
                 .then()
                     .statusCode(HttpStatus.UNAUTHORIZED.value())
                     .body("code", Matchers.equalTo("AUTHORIZATION_DENIED"));
     }
 
     @Test
-    void getUser_success() {
+    void getRunAppUser_success() {
         RestAssured
                 .given()
                     .auth().preemptive().basic(ROLE_ADMIN, PASSWORD)
                     .accept(ContentType.JSON)
                 .when()
-                    .get("/api/users/1000")
+                    .get("/api/runAppUsers/1000")
                 .then()
                     .statusCode(HttpStatus.OK.value())
                     .body("name", Matchers.equalTo("Zed diam voluptua."));
     }
 
     @Test
-    void getUser_notFound() {
+    void getRunAppUser_notFound() {
         RestAssured
                 .given()
                     .auth().preemptive().basic(ROLE_ADMIN, PASSWORD)
                     .accept(ContentType.JSON)
                 .when()
-                    .get("/api/users/1666")
+                    .get("/api/runAppUsers/1666")
                 .then()
                     .statusCode(HttpStatus.NOT_FOUND.value())
                     .body("code", Matchers.equalTo("NOT_FOUND"));
     }
 
     @Test
-    void createUser_success() {
+    void createRunAppUser_success() {
         RestAssured
                 .given()
                     .auth().preemptive().basic(ROLE_ADMIN, PASSWORD)
                     .accept(ContentType.JSON)
                     .contentType(ContentType.JSON)
-                    .body(readResource("/requests/userDTORequest.json"))
+                    .body(readResource("/requests/runAppUserDTORequest.json"))
                 .when()
-                    .post("/api/users")
+                    .post("/api/runAppUsers")
                 .then()
                     .statusCode(HttpStatus.CREATED.value());
-        assertEquals(1, userRepository.count());
+        assertEquals(1, runAppUserRepository.count());
     }
 
     @Test
-    void createUser_missingField() {
+    void createRunAppUser_missingField() {
         RestAssured
                 .given()
                     .auth().preemptive().basic(ROLE_ADMIN, PASSWORD)
                     .accept(ContentType.JSON)
                     .contentType(ContentType.JSON)
-                    .body(readResource("/requests/userDTORequest_missingField.json"))
+                    .body(readResource("/requests/runAppUserDTORequest_missingField.json"))
                 .when()
-                    .post("/api/users")
+                    .post("/api/runAppUsers")
                 .then()
                     .statusCode(HttpStatus.BAD_REQUEST.value())
                     .body("code", Matchers.equalTo("VALIDATION_FAILED"))
@@ -112,32 +112,32 @@ public class UserResourceTest extends BaseIT {
     }
 
     @Test
-    void updateUser_success() {
+    void updateRunAppUser_success() {
         RestAssured
                 .given()
                     .auth().preemptive().basic(ROLE_ADMIN, PASSWORD)
                     .accept(ContentType.JSON)
                     .contentType(ContentType.JSON)
-                    .body(readResource("/requests/userDTORequest.json"))
+                    .body(readResource("/requests/runAppUserDTORequest.json"))
                 .when()
-                    .put("/api/users/1000")
+                    .put("/api/runAppUsers/1000")
                 .then()
                     .statusCode(HttpStatus.OK.value());
-        assertEquals("Duis autem vel.", userRepository.findById(((long)1000)).orElseThrow().getName());
-        assertEquals(2, userRepository.count());
+        assertEquals("Duis autem vel.", runAppUserRepository.findById(((long)1000)).orElseThrow().getName());
+        assertEquals(2, runAppUserRepository.count());
     }
 
     @Test
-    void deleteUser_success() {
+    void deleteRunAppUser_success() {
         RestAssured
                 .given()
                     .auth().preemptive().basic(ROLE_ADMIN, PASSWORD)
                     .accept(ContentType.JSON)
                 .when()
-                    .delete("/api/users/1000")
+                    .delete("/api/runAppUsers/1000")
                 .then()
                     .statusCode(HttpStatus.NO_CONTENT.value());
-        assertEquals(1, userRepository.count());
+        assertEquals(1, runAppUserRepository.count());
     }
 
 }

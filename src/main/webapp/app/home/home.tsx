@@ -20,7 +20,7 @@ export default function Home() {
     <div className="md:w-2/5 mb-12">
       <h4 className="text-2xl font-medium mb-4">{t('home.index.exploreEntities')}</h4>
       <div className="flex flex-col border border-gray-300 rounded">
-        <Link to="/users" className="w-full border-gray-300 hover:bg-gray-100 border-b rounded-t px-4 py-2">{t('user.list.headline')}</Link>
+        <Link to="/runAppUsers" className="w-full border-gray-300 hover:bg-gray-100 border-b rounded-t px-4 py-2">{t('runAppUser.list.headline')}</Link>
         <Link to="/garminRuns" className="w-full border-gray-300 hover:bg-gray-100 border-b px-4 py-2">{t('garminRun.list.headline')}</Link>
         <Link to="/shedlocks" className="w-full border-gray-300 hover:bg-gray-100 border-b px-4 py-2">{t('shedlock.list.headline')}</Link>
         <Link to="/fileNameTrackers" className="w-full border-gray-300 hover:bg-gray-100 border-b px-4 py-2">{t('fileNameTracker.list.headline')}</Link>

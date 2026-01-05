@@ -1,4 +1,4 @@
-package me.sathish.runsapp.runs_app.user;
+package me.sathish.runsapp.runs_app.run_app_user;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,7 +8,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 import me.sathish.runsapp.runs_app.file_name_tracker.FileNameTracker;
 import me.sathish.runsapp.runs_app.garmin_run.GarminRun;
+import me.sathish.runsapp.runs_app.runner_app_role.RunnerAppRole;
 import me.sathish.runsapp.runs_app.strava_run.StravaRun;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -23,11 +23,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 @Entity
-@Table(name = "\"user\"")
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
-public class User {
+public class RunAppUser {
 
     @Id
     @Column(nullable = false, updatable = false)
@@ -56,13 +55,22 @@ public class User {
     private String role;
 
     @OneToMany(mappedBy = "createdBy")
-    private Set<GarminRun> createdByGarminRunses = new HashSet<>();
+    private Set<GarminRun> createdByGarminRuns = new HashSet<>();
 
     @OneToMany(mappedBy = "createdBy")
     private Set<FileNameTracker> createdByFileNameTrackers = new HashSet<>();
 
     @OneToMany(mappedBy = "createdBy")
-    private Set<StravaRun> createdByStravaRunses = new HashSet<>();
+    private Set<StravaRun> createdByStravaRuns = new HashSet<>();
+
+    @OneToMany(mappedBy = "updateBy")
+    private Set<GarminRun> updatedByGarminRuns = new HashSet<>();
+
+    @OneToMany(mappedBy = "updatedBy")
+    private Set<StravaRun> updatedByStravaRun = new HashSet<>();
+
+    @OneToMany(mappedBy = "runnerUserRoles")
+    private Set<RunnerAppRole> runUserRoles = new HashSet<>();
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

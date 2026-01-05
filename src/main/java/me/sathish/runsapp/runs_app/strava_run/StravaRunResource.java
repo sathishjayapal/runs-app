@@ -8,8 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import java.util.Map;
+import me.sathish.runsapp.runs_app.run_app_user.RunAppUserService;
 import me.sathish.runsapp.runs_app.security.UserRoles;
-import me.sathish.runsapp.runs_app.user.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -36,12 +36,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class StravaRunResource {
 
     private final StravaRunService stravaRunService;
-    private final UserService userService;
+    private final RunAppUserService runAppUserService;
 
     public StravaRunResource(final StravaRunService stravaRunService,
-            final UserService userService) {
+            final RunAppUserService runAppUserService) {
         this.stravaRunService = stravaRunService;
-        this.userService = userService;
+        this.runAppUserService = runAppUserService;
     }
 
     @Operation(
@@ -102,7 +102,12 @@ public class StravaRunResource {
 
     @GetMapping("/createdByValues")
     public ResponseEntity<Map<Long, String>> getCreatedByValues() {
-        return ResponseEntity.ok(userService.getUserValues());
+        return ResponseEntity.ok(runAppUserService.getRunAppUserValues());
+    }
+
+    @GetMapping("/updatedByValues")
+    public ResponseEntity<Map<Long, String>> getUpdatedByValues() {
+        return ResponseEntity.ok(runAppUserService.getRunAppUserValues());
     }
 
 }

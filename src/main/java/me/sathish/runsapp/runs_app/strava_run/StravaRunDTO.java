@@ -29,10 +29,10 @@ public class StravaRunDTO {
     @NotNull
     private Long startLocation;
 
-    @Size(max = 20)
-    private String updatedBy;
-
     @NotNull
     private Long createdBy;
+
+    @NotNull
+    private Long updatedBy;
 
 }

@@ -1,8 +1,8 @@
 package me.sathish.runsapp.runs_app.garmin_run;
 
-import me.sathish.runsapp.runs_app.events.BeforeDeleteUser;
-import me.sathish.runsapp.runs_app.user.User;
-import me.sathish.runsapp.runs_app.user.UserRepository;
+import me.sathish.runsapp.runs_app.events.BeforeDeleteRunAppUser;
+import me.sathish.runsapp.runs_app.run_app_user.RunAppUser;
+import me.sathish.runsapp.runs_app.run_app_user.RunAppUserRepository;
 import me.sathish.runsapp.runs_app.util.NotFoundException;
 import me.sathish.runsapp.runs_app.util.ReferencedException;
 import org.springframework.context.event.EventListener;
@@ -16,12 +16,12 @@ import org.springframework.stereotype.Service;
 public class GarminRunServiceImpl implements GarminRunService {
 
     private final GarminRunRepository garminRunRepository;
-    private final UserRepository userRepository;
+    private final RunAppUserRepository runAppUserRepository;
 
     public GarminRunServiceImpl(final GarminRunRepository garminRunRepository,
-            final UserRepository userRepository) {
+            final RunAppUserRepository runAppUserRepository) {
         this.garminRunRepository = garminRunRepository;
-        this.userRepository = userRepository;
+        this.runAppUserRepository = runAppUserRepository;
     }
 
     @Override
@@ -87,6 +87,7 @@ public class GarminRunServiceImpl implements GarminRunService {
         garminRunDTO.setCalories(garminRun.getCalories());
         garminRunDTO.setUpdatedBy(garminRun.getUpdatedBy());
         garminRunDTO.setCreatedBy(garminRun.getCreatedBy() == null ? null : garminRun.getCreatedBy().getId());
+        garminRunDTO.setUpdateBy(garminRun.getUpdateBy() == null ? null : garminRun.getUpdateBy().getId());
         return garminRunDTO;
     }
 
@@ -101,19 +102,28 @@ public class GarminRunServiceImpl implements GarminRunService {
         garminRun.setMaxHeartRate(garminRunDTO.getMaxHeartRate());
         garminRun.setCalories(garminRunDTO.getCalories());
         garminRun.setUpdatedBy(garminRunDTO.getUpdatedBy());
-        final User createdBy = garminRunDTO.getCreatedBy() == null ? null : userRepository.findById(garminRunDTO.getCreatedBy())
+        final RunAppUser createdBy = garminRunDTO.getCreatedBy() == null ? null : runAppUserRepository.findById(garminRunDTO.getCreatedBy())
                 .orElseThrow(() -> new NotFoundException("createdBy not found"));
         garminRun.setCreatedBy(createdBy);
+        final RunAppUser updateBy = garminRunDTO.getUpdateBy() == null ? null : runAppUserRepository.findById(garminRunDTO.getUpdateBy())
+                .orElseThrow(() -> new NotFoundException("updateBy not found"));
+        garminRun.setUpdateBy(updateBy);
         return garminRun;
     }
 
-    @EventListener(BeforeDeleteUser.class)
-    public void on(final BeforeDeleteUser event) {
+    @EventListener(BeforeDeleteRunAppUser.class)
+    public void on(final BeforeDeleteRunAppUser event) {
         final ReferencedException referencedException = new ReferencedException();
         final GarminRun createdByGarminRun = garminRunRepository.findFirstByCreatedById(event.getId());
         if (createdByGarminRun != null) {
-            referencedException.setKey("user.garminRun.createdBy.referenced");
+            referencedException.setKey("runAppUser.garminRun.createdBy.referenced");
             referencedException.addParam(createdByGarminRun.getId());
+            throw referencedException;
+        }
+        final GarminRun updateByGarminRun = garminRunRepository.findFirstByUpdateById(event.getId());
+        if (updateByGarminRun != null) {
+            referencedException.setKey("runAppUser.garminRun.updateBy.referenced");
+            referencedException.addParam(updateByGarminRun.getId());
             throw referencedException;
         }
     }

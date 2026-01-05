@@ -1,4 +1,4 @@
-package me.sathish.runsapp.runs_app.garmin_run;
+package me.sathish.runsapp.runs_app.runner_app_role;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -7,8 +7,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
-import java.util.Map;
-import me.sathish.runsapp.runs_app.run_app_user.RunAppUserService;
 import me.sathish.runsapp.runs_app.security.UserRoles;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,18 +28,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping(value = "/api/garminRuns", produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasAnyAuthority('" + UserRoles.ROLE_ADMIN + "', '" + UserRoles.ROLE_USER + "')")
+@RequestMapping(value = "/api/runnerAppRoles", produces = MediaType.APPLICATION_JSON_VALUE)
+@PreAuthorize("hasAuthority('" + UserRoles.ROLE_ADMIN + "')")
 @SecurityRequirement(name = "basic-auth")
-public class GarminRunResource {
+public class RunnerAppRoleResource {
 
-    private final GarminRunService garminRunService;
-    private final RunAppUserService runAppUserService;
+    private final RunnerAppRoleService runnerAppRoleService;
 
-    public GarminRunResource(final GarminRunService garminRunService,
-            final RunAppUserService runAppUserService) {
-        this.garminRunService = garminRunService;
-        this.runAppUserService = runAppUserService;
+    public RunnerAppRoleResource(final RunnerAppRoleService runnerAppRoleService) {
+        this.runnerAppRoleService = runnerAppRoleService;
     }
 
     @Operation(
@@ -64,47 +59,38 @@ public class GarminRunResource {
             }
     )
     @GetMapping
-    public ResponseEntity<Page<GarminRunDTO>> getAllGarminRuns(
+    public ResponseEntity<Page<RunnerAppRoleDTO>> getAllRunnerAppRoles(
             @RequestParam(name = "filter", required = false) final String filter,
             @Parameter(hidden = true) @SortDefault(sort = "id") @PageableDefault(size = 20) final Pageable pageable) {
-        return ResponseEntity.ok(garminRunService.findAll(filter, pageable));
+        return ResponseEntity.ok(runnerAppRoleService.findAll(filter, pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GarminRunDTO> getGarminRun(@PathVariable(name = "id") final Long id) {
-        return ResponseEntity.ok(garminRunService.get(id));
+    public ResponseEntity<RunnerAppRoleDTO> getRunnerAppRole(
+            @PathVariable(name = "id") final Long id) {
+        return ResponseEntity.ok(runnerAppRoleService.get(id));
     }
 
     @PostMapping
     @ApiResponse(responseCode = "201")
-    public ResponseEntity<Long> createGarminRun(
-            @RequestBody @Valid final GarminRunDTO garminRunDTO) {
-        final Long createdId = garminRunService.create(garminRunDTO);
+    public ResponseEntity<Long> createRunnerAppRole(
+            @RequestBody @Valid final RunnerAppRoleDTO runnerAppRoleDTO) {
+        final Long createdId = runnerAppRoleService.create(runnerAppRoleDTO);
         return new ResponseEntity<>(createdId, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Long> updateGarminRun(@PathVariable(name = "id") final Long id,
-            @RequestBody @Valid final GarminRunDTO garminRunDTO) {
-        garminRunService.update(id, garminRunDTO);
+    public ResponseEntity<Long> updateRunnerAppRole(@PathVariable(name = "id") final Long id,
+            @RequestBody @Valid final RunnerAppRoleDTO runnerAppRoleDTO) {
+        runnerAppRoleService.update(id, runnerAppRoleDTO);
         return ResponseEntity.ok(id);
     }
 
     @DeleteMapping("/{id}")
     @ApiResponse(responseCode = "204")
-    public ResponseEntity<Void> deleteGarminRun(@PathVariable(name = "id") final Long id) {
-        garminRunService.delete(id);
+    public ResponseEntity<Void> deleteRunnerAppRole(@PathVariable(name = "id") final Long id) {
+        runnerAppRoleService.delete(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/createdByValues")
-    public ResponseEntity<Map<Long, String>> getCreatedByValues() {
-        return ResponseEntity.ok(runAppUserService.getRunAppUserValues());
-    }
-
-    @GetMapping("/updateByValues")
-    public ResponseEntity<Map<Long, String>> getUpdateByValues() {
-        return ResponseEntity.ok(runAppUserService.getRunAppUserValues());
     }
 
 }

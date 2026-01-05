@@ -11,4 +11,6 @@ public interface StravaRunRepository extends JpaRepository<StravaRun, Long> {
 
     StravaRun findFirstByCreatedById(Long id);
 
+    StravaRun findFirstByUpdatedById(Long id);
+
 }

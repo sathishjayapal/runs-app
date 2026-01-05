@@ -16,5 +16,6 @@ export class GarminRunDTO {
   calories?: string|null;
   updatedBy?: string|null;
   createdBy?: number|null;
+  updateBy?: number|null;
 
 }

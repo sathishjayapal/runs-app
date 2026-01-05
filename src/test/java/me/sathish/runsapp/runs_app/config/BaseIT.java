@@ -11,9 +11,10 @@ import lombok.SneakyThrows;
 import me.sathish.runsapp.runs_app.RunsAppApplication;
 import me.sathish.runsapp.runs_app.file_name_tracker.FileNameTrackerRepository;
 import me.sathish.runsapp.runs_app.garmin_run.GarminRunRepository;
+import me.sathish.runsapp.runs_app.run_app_user.RunAppUserRepository;
+import me.sathish.runsapp.runs_app.runner_app_role.RunnerAppRoleRepository;
 import me.sathish.runsapp.runs_app.shedlock.ShedlockRepository;
 import me.sathish.runsapp.runs_app.strava_run.StravaRunRepository;
-import me.sathish.runsapp.runs_app.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,7 +42,7 @@ import tools.jackson.databind.ObjectMapper;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @ActiveProfiles("it")
-@Sql({"/data/clearAll.sql", "/data/userData.sql"})
+@Sql({"/data/clearAll.sql", "/data/runAppUserData.sql"})
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 public abstract class BaseIT {
 
@@ -86,7 +87,10 @@ public abstract class BaseIT {
     public StravaRunRepository stravaRunRepository;
 
     @Autowired
-    public UserRepository userRepository;
+    public RunnerAppRoleRepository runnerAppRoleRepository;
+
+    @Autowired
+    public RunAppUserRepository runAppUserRepository;
 
     @PostConstruct
     public void initRestAssured() {

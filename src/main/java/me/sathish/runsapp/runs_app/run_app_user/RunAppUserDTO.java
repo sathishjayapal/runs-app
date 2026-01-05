@@ -1,4 +1,4 @@
-package me.sathish.runsapp.runs_app.user;
+package me.sathish.runsapp.runs_app.run_app_user;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserDTO {
+public class RunAppUserDTO {
 
     private Long id;
 

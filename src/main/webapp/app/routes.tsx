@@ -2,9 +2,9 @@ import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import App from "./app";
 import Home from './home/home';
-import UserList from './user/user-list';
-import UserAdd from './user/user-add';
-import UserEdit from './user/user-edit';
+import RunAppUserList from './run-app-user/run-app-user-list';
+import RunAppUserAdd from './run-app-user/run-app-user-add';
+import RunAppUserEdit from './run-app-user/run-app-user-edit';
 import GarminRunList from './garmin-run/garmin-run-list';
 import GarminRunAdd from './garmin-run/garmin-run-add';
 import GarminRunEdit from './garmin-run/garmin-run-edit';
@@ -26,9 +26,9 @@ export default function AppRoutes() {
       element: <App />,
       children: [
         { path: '', element: <Home /> },
-        { path: 'users', element: <UserList /> },
-        { path: 'users/add', element: <UserAdd /> },
-        { path: 'users/edit/:id', element: <UserEdit /> },
+        { path: 'runAppUsers', element: <RunAppUserList /> },
+        { path: 'runAppUsers/add', element: <RunAppUserAdd /> },
+        { path: 'runAppUsers/edit/:id', element: <RunAppUserEdit /> },
         { path: 'garminRuns', element: <GarminRunList /> },
         { path: 'garminRuns/add', element: <GarminRunAdd /> },
         { path: 'garminRuns/edit/:id', element: <GarminRunEdit /> },
