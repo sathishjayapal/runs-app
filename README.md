@@ -22,17 +22,11 @@ The DevServer can be started as follows:
 npm run devserver
 ```
 
-Using a proxy the whole application is now accessible under `localhost:3000`. All changes to the templates and JS/CSS files are immediately visible in the browser.
-
-## Testing requirements
-
-Testcontainers is used for running the integration tests. Due to the reuse flag, the container will not shut down after the tests. It can be stopped manually if needed.
-
-Frontend unit tests can be executed with `npm run test`.
+Using a proxy the whole application is now accessible under `localhost:3000`. All changes to the templates and JS/CSS files are immediately visible in the browser. Frontend unit tests can be executed with `npm run test`.
 
 ## Build
 
-The application can be tested and built using the following command:
+The application can be built using the following command:
 
 ```
 mvnw clean package
@@ -49,7 +43,7 @@ java -Dspring.profiles.active=production -jar ./target/runs-app-0.0.1-SNAPSHOT.j
 If required, a Docker image can be created with the Spring Boot plugin. Add `SPRING_PROFILES_ACTIVE=production` as environment variable when running the container.
 
 ```
-mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=me.sathish.runsapp/runs-app
+mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=me.sathish/runs-app
 ```
 
 ## Further readings
