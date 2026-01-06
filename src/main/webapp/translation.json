@@ -145,9 +145,6 @@
     "calories": {
       "label": "Calories"
     },
-    "updatedBy": {
-      "label": "Updated By"
-    },
     "createdBy": {
       "label": "Created By"
     },

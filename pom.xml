@@ -8,7 +8,7 @@
         <version>4.0.1</version>
         <relativePath /><!-- lookup parent from repository -->
     </parent>
-    <groupId>me.sathish.runsapp</groupId>
+    <groupId>me.sathish</groupId>
     <artifactId>runs-app</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>runs-app</name>
@@ -97,23 +97,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>rest-assured</artifactId>
-            <version>6.0.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-testcontainers</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers-postgresql</artifactId>
-            <version>2.0.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

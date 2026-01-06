@@ -20,7 +20,7 @@ function getSchema() {
     miles: yup.number().integer().emptyToNull().required(),
     startLocation: yup.number().integer().emptyToNull().required(),
     createdBy: yup.number().integer().emptyToNull().required(),
-    updatedBy: yup.number().integer().emptyToNull().required()
+    updatedBy: yup.number().integer().emptyToNull()
   });
 }
 
@@ -79,7 +79,7 @@ export default function StravaRunAdd() {
       <InputRow useFormResult={useFormResult} object="stravaRun" field="miles" required={true} type="number" />
       <InputRow useFormResult={useFormResult} object="stravaRun" field="startLocation" required={true} type="number" />
       <InputRow useFormResult={useFormResult} object="stravaRun" field="createdBy" required={true} type="select" options={createdByValues} />
-      <InputRow useFormResult={useFormResult} object="stravaRun" field="updatedBy" required={true} type="select" options={updatedByValues} />
+      <InputRow useFormResult={useFormResult} object="stravaRun" field="updatedBy" type="select" options={updatedByValues} />
       <input type="submit" value={t('stravaRun.add.headline')} className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2 cursor-pointer mt-6" />
     </form>
   </>);

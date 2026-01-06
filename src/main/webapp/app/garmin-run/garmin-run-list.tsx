@@ -76,7 +76,6 @@ export default function GarminRunList() {
           <tr>
             <th scope="col" className="text-left p-2">{t('garminRun.id.label')}</th>
             <th scope="col" className="text-left p-2">{t('garminRun.activityId.label')}</th>
-            <th scope="col" className="text-left p-2">{t('garminRun.updatedBy.label')}</th>
             <th scope="col" className="text-left p-2">{t('garminRun.createdBy.label')}</th>
             <th scope="col" className="text-left p-2">{t('garminRun.updateBy.label')}</th>
             <th></th>
@@ -87,7 +86,6 @@ export default function GarminRunList() {
           <tr key={garminRun.id} className="odd:bg-gray-100">
             <td className="p-2">{garminRun.id}</td>
             <td className="p-2">{garminRun.activityId}</td>
-            <td className="p-2">{garminRun.updatedBy}</td>
             <td className="p-2">{garminRun.createdBy}</td>
             <td className="p-2">{garminRun.updateBy}</td>
             <td className="p-2">
