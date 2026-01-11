@@ -1,9 +1,0 @@
-services:
-  postgres:
-    image: postgres:18.1
-    environment:
-    - POSTGRES_DB=runs-app
-    - POSTGRES_USER=postgres
-    - POSTGRES_PASSWORD=P4ssword!
-    ports:
-    - 5442:5432
