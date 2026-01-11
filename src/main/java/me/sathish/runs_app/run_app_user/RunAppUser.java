@@ -6,6 +6,9 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import java.time.OffsetDateTime;
@@ -64,6 +67,14 @@ public class RunAppUser {
 
     @OneToMany(mappedBy = "updatedBy")
     private Set<StravaRun> updatedByStravaRun = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "run_app_user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<me.sathish.runs_app.runner_app_role.RunnerAppRole> roles = new HashSet<>();
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

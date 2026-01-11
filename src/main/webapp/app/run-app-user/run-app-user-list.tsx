@@ -15,6 +15,7 @@ export default function RunAppUserList() {
   useDocumentTitle(t('runAppUser.list.headline'));
 
   const [runAppUsers, setRunAppUsers] = useState<PagedModel<RunAppUserDTO>|undefined>(undefined);
+  const [availableRoles, setAvailableRoles] = useState<Map<number, string>>(new Map());
   const navigate = useNavigate();
   const [searchParams, ] = useSearchParams();
   const listParams = getListParams();
@@ -22,6 +23,19 @@ export default function RunAppUserList() {
     'id,ASC': t('runAppUser.list.sort.id,ASC'), 
     'email,ASC': t('runAppUser.list.sort.email,ASC'), 
     'name,ASC': t('runAppUser.list.sort.name,ASC')
+  };
+
+  const fetchRoles = async () => {
+    try {
+      const response = await axios.get('/api/runnerAppRoles?size=100');
+      const roleMap = new Map();
+      response.data.content?.forEach((role: any) => {
+        roleMap.set(role.id, role.roleName);
+      });
+      setAvailableRoles(roleMap);
+    } catch (error: any) {
+      console.error('Failed to fetch roles:', error);
+    }
   };
 
   const getAllRunAppUsers = async () => {
@@ -60,6 +74,10 @@ export default function RunAppUserList() {
   };
 
   useEffect(() => {
+    fetchRoles();
+  }, []);
+
+  useEffect(() => {
     getAllRunAppUsers();
   }, [searchParams]);
 
@@ -86,6 +104,7 @@ export default function RunAppUserList() {
             <th scope="col" className="text-left p-2">{t('runAppUser.id.label')}</th>
             <th scope="col" className="text-left p-2">{t('runAppUser.email.label')}</th>
             <th scope="col" className="text-left p-2">{t('runAppUser.name.label')}</th>
+            <th scope="col" className="text-left p-2">{t('runAppUser.roles.label')}</th>
             <th></th>
           </tr>
         </thead>
@@ -95,6 +114,9 @@ export default function RunAppUserList() {
             <td className="p-2">{runAppUser.id}</td>
             <td className="p-2">{runAppUser.email}</td>
             <td className="p-2">{runAppUser.name}</td>
+            <td className="p-2">
+              {runAppUser.roles?.map(roleId => availableRoles.get(roleId)).filter(Boolean).join(', ') || '-'}
+            </td>
             <td className="p-2">
               <div className="float-right whitespace-nowrap">
                 <Link to={'/runAppUsers/edit/' + runAppUser.id} className="inline-block text-white bg-gray-500 hover:bg-gray-600 focus:ring-gray-200 focus:ring-3 rounded px-2.5 py-1.5 text-sm">{t('runAppUser.list.edit')}</Link>

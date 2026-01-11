@@ -37,8 +37,10 @@ public class RunsAppSecuritySecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
                 .authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers("/", "/index.html", "/js/**", "/css/**", "/images/**", "/favicon.ico", "/manifest.json").permitAll()
+                    .requestMatchers("/api/**").authenticated()
                     .requestMatchers(EndpointRequest.toAnyEndpoint()).hasAnyAuthority(UserRoles.ROLE_ADMIN, UserRoles.ROLE_USER)
-                    .anyRequest().permitAll())
+                    .anyRequest().authenticated())
                 .httpBasic(basic -> basic.realmName("runsAppSecurity realm"))
                 .build();
     }

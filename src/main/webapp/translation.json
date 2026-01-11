@@ -54,6 +54,9 @@
     "name": {
       "label": "Name"
     },
+    "roles": {
+      "label": "Roles"
+    },
     "edit": {
       "headline": "Edit Run App User",
       "back": "Back to list"
