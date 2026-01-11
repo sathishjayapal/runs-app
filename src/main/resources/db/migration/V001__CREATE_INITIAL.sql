@@ -5,7 +5,6 @@ CREATE TABLE run_app_user (
     email VARCHAR(100) NOT NULL,
     password VARCHAR(100) NOT NULL,
     name VARCHAR(100) NOT NULL,
-    role VARCHAR(20) NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     CONSTRAINT run_app_user_pkey PRIMARY KEY (id)

@@ -50,9 +50,6 @@ public class RunAppUser {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false, length = 20)
-    private String role;
-
     @OneToMany(mappedBy = "createdBy")
     private Set<GarminRun> createdByGarminRuns = new HashSet<>();
 

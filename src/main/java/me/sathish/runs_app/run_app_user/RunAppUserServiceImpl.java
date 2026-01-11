@@ -82,7 +82,6 @@ public class RunAppUserServiceImpl implements RunAppUserService {
         runAppUserDTO.setId(runAppUser.getId());
         runAppUserDTO.setEmail(runAppUser.getEmail());
         runAppUserDTO.setName(runAppUser.getName());
-        runAppUserDTO.setRole(runAppUser.getRole());
         return runAppUserDTO;
     }
 
@@ -90,7 +89,6 @@ public class RunAppUserServiceImpl implements RunAppUserService {
         runAppUser.setEmail(runAppUserDTO.getEmail());
         runAppUser.setPassword(passwordEncoder.encode(runAppUserDTO.getPassword()));
         runAppUser.setName(runAppUserDTO.getName());
-        runAppUser.setRole(runAppUserDTO.getRole());
         return runAppUser;
     }
 

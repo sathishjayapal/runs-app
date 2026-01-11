@@ -86,7 +86,6 @@ export default function RunAppUserList() {
             <th scope="col" className="text-left p-2">{t('runAppUser.id.label')}</th>
             <th scope="col" className="text-left p-2">{t('runAppUser.email.label')}</th>
             <th scope="col" className="text-left p-2">{t('runAppUser.name.label')}</th>
-            <th scope="col" className="text-left p-2">{t('runAppUser.role.label')}</th>
             <th></th>
           </tr>
         </thead>
@@ -96,7 +95,6 @@ export default function RunAppUserList() {
             <td className="p-2">{runAppUser.id}</td>
             <td className="p-2">{runAppUser.email}</td>
             <td className="p-2">{runAppUser.name}</td>
-            <td className="p-2">{runAppUser.role}</td>
             <td className="p-2">
               <div className="float-right whitespace-nowrap">
                 <Link to={'/runAppUsers/edit/' + runAppUser.id} className="inline-block text-white bg-gray-500 hover:bg-gray-600 focus:ring-gray-200 focus:ring-3 rounded px-2.5 py-1.5 text-sm">{t('runAppUser.list.edit')}</Link>
