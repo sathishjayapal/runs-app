@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
 import { handleServerError, setYupDefaults } from 'app/common/utils';
@@ -27,10 +27,20 @@ export default function RunAppUserEdit() {
   const navigate = useNavigate();
   const params = useParams();
   const currentId = +params.id!;
+  const [availableRoles, setAvailableRoles] = useState<any[]>([]);
 
   const useFormResult = useForm({
     resolver: yupResolver(getSchema()),
   });
+
+  const fetchRoles = async () => {
+    try {
+      const response = await axios.get('/api/runnerAppRoles?size=100');
+      setAvailableRoles(response.data.content || []);
+    } catch (error: any) {
+      console.error('Failed to fetch roles:', error);
+    }
+  };
 
   const prepareForm = async () => {
     try {
@@ -42,6 +52,7 @@ export default function RunAppUserEdit() {
   };
 
   useEffect(() => {
+    fetchRoles();
     prepareForm();
   }, []);
 
@@ -71,6 +82,32 @@ export default function RunAppUserEdit() {
       <InputRow useFormResult={useFormResult} object="runAppUser" field="email" required={true} />
       <InputRow useFormResult={useFormResult} object="runAppUser" field="password" required={true} type="password" />
       <InputRow useFormResult={useFormResult} object="runAppUser" field="name" required={true} />
+      <div className="mb-3">
+        <label className="block mb-2 text-sm font-medium">
+          {t('runAppUser.roles.label')}
+        </label>
+        <select
+          multiple
+          {...useFormResult.register('roles' as any)}
+          className="border border-gray-300 text-sm rounded block w-full p-2.5"
+          size={Math.min(availableRoles.length, 5)}
+          value={useFormResult.watch('roles' as any) || []}
+          onChange={(e) => {
+            const selected = Array.from(e.target.selectedOptions).map(option => Number(option.value));
+            useFormResult.setValue('roles' as any, selected);
+          }}
+        >
+          {availableRoles.map((role) => (
+            <option 
+              key={role.id} 
+              value={role.id}
+            >
+              {role.roleName}
+            </option>
+          ))}
+        </select>
+        <small className="text-gray-600">Hold Ctrl/Cmd to select multiple roles</small>
+      </div>
       <input type="submit" value={t('runAppUser.edit.headline')} className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2 cursor-pointer mt-6" />
     </form>
   </>);

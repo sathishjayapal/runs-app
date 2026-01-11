@@ -9,8 +9,8 @@ public interface RunnerAppRoleRepository extends JpaRepository<RunnerAppRole, Lo
 
     Page<RunnerAppRole> findAllById(Long id, Pageable pageable);
 
-    RunnerAppRole findFirstByRunnerUserRolesId(Long id);
-
     boolean existsByRoleNameIgnoreCase(String roleName);
+
+    RunnerAppRole findByRoleNameIgnoreCase(String roleName);
 
 }

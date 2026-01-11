@@ -2,6 +2,7 @@ package me.sathish.runs_app.run_app_user;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,5 +24,7 @@ public class RunAppUserDTO {
     @NotNull
     @Size(max = 100)
     private String name;
+
+    private List<Long> roles;
 
 }
