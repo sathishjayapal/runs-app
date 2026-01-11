@@ -1,0 +1,341 @@
+{
+  "app": {
+    "title": "Runs App"
+  },
+  "navigation": {
+    "toggle": "Toggle navigation",
+    "home": "Home",
+    "entities": "Entities"
+  },
+  "home": {
+    "index": {
+      "headline": "Welcome to your new app!",
+      "text": "Your app was created with <a href=\"https://bootify.io\" target=\"_blank\" className=\"underline\">Bootify.io</a> and can now be customized. If you are happy with the result, <strong>please recommend us to other developers</strong> - so Bootify.io can grow further.",
+      "swagger": {
+        "text": "Swagger is",
+        "link": "available here"
+      },
+      "exploreEntities": "Explore your entities"
+    }
+  },
+  "error": {
+    "page": {
+      "headline": "Error",
+      "message": "The page you are looking for is not available right now."
+    }
+  },
+  "runAppUser": {
+    "list": {
+      "headline": "Run App Users",
+      "createNew": "Create new Run App User",
+      "empty": "No Run App Users could be found.",
+      "sort": {
+        "id,ASC": "Sort by Id (Ascending)",
+        "email,ASC": "Sort by Email (Ascending)",
+        "name,ASC": "Sort by Name (Ascending)"
+      },
+      "filter": "Filter by Id",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "add": {
+      "headline": "Add Run App User",
+      "back": "Back to list"
+    },
+    "id": {
+      "label": "Id"
+    },
+    "email": {
+      "label": "Email"
+    },
+    "password": {
+      "label": "Password"
+    },
+    "name": {
+      "label": "Name"
+    },
+    "role": {
+      "label": "Role"
+    },
+    "edit": {
+      "headline": "Edit Run App User",
+      "back": "Back to list"
+    },
+    "garminRun": {
+      "createdBy": {
+        "referenced": "This entity is still referenced by Garmin Run {{id}} via field Created By."
+      },
+      "updateBy": {
+        "referenced": "This entity is still referenced by Garmin Run {{id}} via field Update By."
+      }
+    },
+    "fileNameTracker": {
+      "createdBy": {
+        "referenced": "This entity is still referenced by File Name Tracker {{id}} via field Created By."
+      }
+    },
+    "stravaRun": {
+      "createdBy": {
+        "referenced": "This entity is still referenced by Strava Run {{id}} via field Created By."
+      },
+      "updatedBy": {
+        "referenced": "This entity is still referenced by Strava Run {{id}} via field Updated By."
+      }
+    },
+    "runnerAppRole": {
+      "runnerUserRoles": {
+        "referenced": "This entity is still referenced by Runner App Role {{id}} via field Runner User Roles."
+      }
+    },
+    "create": {
+      "success": "Run App User was created successfully."
+    },
+    "update": {
+      "success": "Run App User was updated successfully."
+    },
+    "delete": {
+      "success": "Run App User was removed successfully."
+    }
+  },
+  "garminRun": {
+    "list": {
+      "headline": "Garmin Runs",
+      "createNew": "Create new Garmin Run",
+      "empty": "No Garmin Runs could be found.",
+      "sort": {
+        "id,ASC": "Sort by Id (Ascending)",
+        "activityId,ASC": "Sort by Activity Id (Ascending)",
+        "activityDate,ASC": "Sort by Activity Date (Ascending)"
+      },
+      "filter": "Filter by Id",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "add": {
+      "headline": "Add Garmin Run",
+      "back": "Back to list"
+    },
+    "id": {
+      "label": "Id"
+    },
+    "activityId": {
+      "label": "Activity Id"
+    },
+    "activityDate": {
+      "label": "Activity Date"
+    },
+    "activityType": {
+      "label": "Activity Type"
+    },
+    "activityName": {
+      "label": "Activity Name"
+    },
+    "activityDescription": {
+      "label": "Activity Description"
+    },
+    "elapsedTime": {
+      "label": "Elapsed Time"
+    },
+    "distance": {
+      "label": "Distance"
+    },
+    "maxHeartRate": {
+      "label": "Max Heart Rate"
+    },
+    "calories": {
+      "label": "Calories"
+    },
+    "createdBy": {
+      "label": "Created By"
+    },
+    "updateBy": {
+      "label": "Update By"
+    },
+    "edit": {
+      "headline": "Edit Garmin Run",
+      "back": "Back to list"
+    },
+    "create": {
+      "success": "Garmin Run was created successfully."
+    },
+    "update": {
+      "success": "Garmin Run was updated successfully."
+    },
+    "delete": {
+      "success": "Garmin Run was removed successfully."
+    }
+  },
+  "shedlock": {
+    "list": {
+      "headline": "Shedlocks",
+      "createNew": "Create new Shedlock",
+      "empty": "No Shedlocks could be found.",
+      "sort": {
+        "name,ASC": "Sort by Name (Ascending)",
+        "lockUntil,ASC": "Sort by Lock Until (Ascending)",
+        "lockedAt,ASC": "Sort by Locked At (Ascending)"
+      },
+      "filter": "Filter by Name",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "add": {
+      "headline": "Add Shedlock",
+      "back": "Back to list"
+    },
+    "name": {
+      "label": "Name"
+    },
+    "lockUntil": {
+      "label": "Lock Until"
+    },
+    "lockedAt": {
+      "label": "Locked At"
+    },
+    "lockedBy": {
+      "label": "Locked By"
+    },
+    "edit": {
+      "headline": "Edit Shedlock",
+      "back": "Back to list"
+    },
+    "create": {
+      "success": "Shedlock was created successfully."
+    },
+    "update": {
+      "success": "Shedlock was updated successfully."
+    },
+    "delete": {
+      "success": "Shedlock was removed successfully."
+    }
+  },
+  "fileNameTracker": {
+    "list": {
+      "headline": "File Name Trackers",
+      "createNew": "Create new File Name Tracker",
+      "empty": "No File Name Trackers could be found.",
+      "sort": {
+        "id,ASC": "Sort by Id (Ascending)",
+        "fileName,ASC": "Sort by File Name (Ascending)",
+        "updatedBy,ASC": "Sort by Updated By (Ascending)"
+      },
+      "filter": "Filter by Id",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "add": {
+      "headline": "Add File Name Tracker",
+      "back": "Back to list"
+    },
+    "id": {
+      "label": "Id"
+    },
+    "fileName": {
+      "label": "File Name"
+    },
+    "updatedBy": {
+      "label": "Updated By"
+    },
+    "createdBy": {
+      "label": "Created By"
+    },
+    "edit": {
+      "headline": "Edit File Name Tracker",
+      "back": "Back to list"
+    },
+    "create": {
+      "success": "File Name Tracker was created successfully."
+    },
+    "update": {
+      "success": "File Name Tracker was updated successfully."
+    },
+    "delete": {
+      "success": "File Name Tracker was removed successfully."
+    }
+  },
+  "stravaRun": {
+    "list": {
+      "headline": "Strava Runs",
+      "createNew": "Create new Strava Run",
+      "empty": "No Strava Runs could be found.",
+      "sort": {
+        "runNumber,ASC": "Sort by Run Number (Ascending)",
+        "customerId,ASC": "Sort by Customer Id (Ascending)",
+        "runName,ASC": "Sort by Run Name (Ascending)"
+      },
+      "filter": "Filter by Run Number",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "add": {
+      "headline": "Add Strava Run",
+      "back": "Back to list"
+    },
+    "runNumber": {
+      "label": "Run Number"
+    },
+    "customerId": {
+      "label": "Customer Id"
+    },
+    "runName": {
+      "label": "Run Name"
+    },
+    "runDate": {
+      "label": "Run Date"
+    },
+    "miles": {
+      "label": "Miles"
+    },
+    "startLocation": {
+      "label": "Start Location"
+    },
+    "createdBy": {
+      "label": "Created By"
+    },
+    "updatedBy": {
+      "label": "Updated By"
+    },
+    "edit": {
+      "headline": "Edit Strava Run",
+      "back": "Back to list"
+    },
+    "create": {
+      "success": "Strava Run was created successfully."
+    },
+    "update": {
+      "success": "Strava Run was updated successfully."
+    },
+    "delete": {
+      "success": "Strava Run was removed successfully."
+    }
+  },
+  "select": {
+    "empty": {
+      "label": "Please select"
+    }
+  },
+  "delete": {
+    "confirm": "Do you really want to delete this element? This cannot be undone."
+  },
+  "operation": {
+    "success": "Your operation was successful."
+  },
+  "required": "Please provide a value.",
+  "maxlength": "Your value must have a length of less then ${max} characters.",
+  "valid": {
+    "offsetDateTime": "Please provide a valid date with offset, for example \"2026-01-23T14:55:00+01:00\".",
+    "number": "Please provide a valid number.",
+    "numeric": {
+      "format": "Please provide a valid numeric number.",
+      "digits": "Your provided value is out of the valid range: <{{precision}} digits>.<{{scale}} digits> expected."
+    }
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "elements": "Item {{range}} of {{total}}"
+  },
+  "searchFilter": {
+    "apply": "Apply"
+  }
+}
