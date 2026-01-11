@@ -8,6 +8,5 @@ export class RunAppUserDTO {
   email?: string|null;
   password?: string|null;
   name?: string|null;
-  role?: string|null;
 
 }

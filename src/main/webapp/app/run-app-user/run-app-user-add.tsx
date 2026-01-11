@@ -16,8 +16,7 @@ function getSchema() {
   return yup.object({
     email: yup.string().emptyToNull().max(100).required(),
     password: yup.string().emptyToNull().max(100).required(),
-    name: yup.string().emptyToNull().max(100).required(),
-    role: yup.string().emptyToNull().max(20).required()
+    name: yup.string().emptyToNull().max(100).required()
   });
 }
 
@@ -56,7 +55,6 @@ export default function RunAppUserAdd() {
       <InputRow useFormResult={useFormResult} object="runAppUser" field="email" required={true} />
       <InputRow useFormResult={useFormResult} object="runAppUser" field="password" required={true} type="password" />
       <InputRow useFormResult={useFormResult} object="runAppUser" field="name" required={true} />
-      <InputRow useFormResult={useFormResult} object="runAppUser" field="role" required={true} />
       <input type="submit" value={t('runAppUser.add.headline')} className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2 cursor-pointer mt-6" />
     </form>
   </>);
