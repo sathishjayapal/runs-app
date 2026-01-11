@@ -15,7 +15,6 @@ import lombok.Getter;
 import lombok.Setter;
 import me.sathish.runs_app.file_name_tracker.FileNameTracker;
 import me.sathish.runs_app.garmin_run.GarminRun;
-import me.sathish.runs_app.runner_app_role.RunnerAppRole;
 import me.sathish.runs_app.strava_run.StravaRun;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -68,9 +67,6 @@ public class RunAppUser {
 
     @OneToMany(mappedBy = "updatedBy")
     private Set<StravaRun> updatedByStravaRun = new HashSet<>();
-
-    @OneToMany(mappedBy = "runnerUserRoles")
-    private Set<RunnerAppRole> runUserRoles = new HashSet<>();
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
