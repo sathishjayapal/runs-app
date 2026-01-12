@@ -14,7 +14,7 @@ import * as yup from 'yup';
 function getSchema() {
   setYupDefaults();
   return yup.object({
-    activityId: yup.string().emptyToNull().numeric(10, 2).required(),
+    activityId: yup.string().emptyToNull().required(),
     activityDate: yup.string().emptyToNull().required(),
     activityType: yup.string().emptyToNull().required(),
     activityName: yup.string().emptyToNull().required(),

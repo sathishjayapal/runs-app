@@ -17,7 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
-public class RunsAppSecuritySecurityConfig {
+public class RunsAppSecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {

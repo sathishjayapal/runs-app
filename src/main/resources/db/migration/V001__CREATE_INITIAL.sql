@@ -12,7 +12,7 @@ CREATE TABLE run_app_user (
 
 CREATE TABLE garmin_run (
     id BIGINT NOT NULL,
-    activity_id numeric(10, 2) NOT NULL,
+    activity_id TEXT NOT NULL,
     activity_date TEXT NOT NULL,
     activity_type TEXT NOT NULL,
     activity_name TEXT NOT NULL,
