@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Configuration
@@ -97,7 +96,7 @@ public class DataInitializer {
             log.info("Created Strava run: {}", stravaRun3.getRunName());
 
             GarminRun garminRun1 = new GarminRun();
-            garminRun1.setActivityId(new BigDecimal("12345678.90"));
+            garminRun1.setActivityId("12345678");
             garminRun1.setActivityDate("2026-01-04T06:30:00Z");
             garminRun1.setActivityType("Running");
             garminRun1.setActivityName("Morning Interval Training");
@@ -111,7 +110,7 @@ public class DataInitializer {
             log.info("Created Garmin run: {}", garminRun1.getActivityName());
 
             GarminRun garminRun2 = new GarminRun();
-            garminRun2.setActivityId(new BigDecimal("12345679.00"));
+            garminRun2.setActivityId("12345679");
             garminRun2.setActivityDate("2026-01-06T17:00:00Z");
             garminRun2.setActivityType("Running");
             garminRun2.setActivityName("Easy Recovery Run");
@@ -125,7 +124,7 @@ public class DataInitializer {
             log.info("Created Garmin run: {}", garminRun2.getActivityName());
 
             GarminRun garminRun3 = new GarminRun();
-            garminRun3.setActivityId(new BigDecimal("12345680.50"));
+            garminRun3.setActivityId("12345680");
             garminRun3.setActivityDate("2026-01-09T07:00:00Z");
             garminRun3.setActivityType("Running");
             garminRun3.setActivityName("Hill Repeats Workout");
