@@ -123,6 +123,6 @@ interface InputRowParams {
   required?: boolean;
   disabled?: boolean;
   inputClass?: string;
-  options?: Record<string, string>|Map<number, string>;
+  options?: Record<string, string>|Map<number, string>|Map<string, string>;
 
 }

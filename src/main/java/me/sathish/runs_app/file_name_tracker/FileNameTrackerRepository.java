@@ -11,4 +11,8 @@ public interface FileNameTrackerRepository extends JpaRepository<FileNameTracker
 
     FileNameTracker findFirstByCreatedById(Long id);
 
+    boolean existsByFileName(String fileName);
+
+    FileNameTracker findByFileName(String fileName);
+
 }
