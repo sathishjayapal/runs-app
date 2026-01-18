@@ -7,6 +7,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { GarminRunDTO } from 'app/garmin-run/garmin-run-model';
 import axios from 'axios';
 import InputRow from 'app/common/input-row/input-row';
+import ElapsedTimeInput from 'app/common/elapsed-time-input/elapsed-time-input';
 import useDocumentTitle from 'app/common/use-document-title';
 import * as yup from 'yup';
 
@@ -16,13 +17,28 @@ function getSchema() {
   return yup.object({
     activityId: yup.string().emptyToNull().required(),
     activityDate: yup.string().emptyToNull().required(),
-    activityType: yup.string().emptyToNull().required(),
+    activityType: yup.string().emptyToNull().required().oneOf(['running', 'strength_training', 'elliptical'], 'Invalid activity type'),
     activityName: yup.string().emptyToNull().required(),
     activityDescription: yup.string().emptyToNull(),
-    elapsedTime: yup.string().emptyToNull(),
-    distance: yup.string().emptyToNull().required(),
-    maxHeartRate: yup.string().emptyToNull(),
-    calories: yup.string().emptyToNull(),
+    elapsedTime: yup.string().emptyToNull().matches(/^\d{2}:\d{2}:\d{2}$/, 'Time must be in HH:MM:SS format'),
+    distance: yup.string().emptyToNull().required()
+      .test('is-valid-distance', 'Distance must be between 0.01 and 200 miles', function(value) {
+        if (!value) return true;
+        const num = parseFloat(value);
+        return !isNaN(num) && num >= 0.01 && num <= 200;
+      }),
+    maxHeartRate: yup.string().emptyToNull()
+      .test('is-valid-heart-rate', 'Max heart rate must be between 40 and 220 bpm', function(value) {
+        if (!value) return true;
+        const num = parseInt(value);
+        return !isNaN(num) && num >= 40 && num <= 220;
+      }),
+    calories: yup.string().emptyToNull()
+      .test('is-valid-calories', 'Calories must be between 1 and 10000', function(value) {
+        if (!value) return true;
+        const num = parseInt(value);
+        return !isNaN(num) && num >= 1 && num <= 10000;
+      }),
     createdBy: yup.number().integer().emptyToNull().required(),
     updateBy: yup.number().integer().emptyToNull()
   });
@@ -35,6 +51,11 @@ export default function GarminRunEdit() {
   const navigate = useNavigate();
   const [createdByValues, setCreatedByValues] = useState<Map<number,string>>(new Map());
   const [updateByValues, setUpdateByValues] = useState<Map<number,string>>(new Map());
+  const activityTypeOptions = new Map([
+    ['running', 'Running'],
+    ['strength_training', 'Strength Training'],
+    ['elliptical', 'Elliptical']
+  ]);
   const params = useParams();
   const currentId = +params.id!;
 
@@ -84,14 +105,14 @@ export default function GarminRunEdit() {
       <input type="submit" value={t('garminRun.edit.headline')} className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2 cursor-pointer mt-6 mb-5" />
       <InputRow useFormResult={useFormResult} object="garminRun" field="id" disabled={true} type="number" />
       <InputRow useFormResult={useFormResult} object="garminRun" field="activityId" required={true} />
-      <InputRow useFormResult={useFormResult} object="garminRun" field="activityDate" required={true} type="textarea" />
-      <InputRow useFormResult={useFormResult} object="garminRun" field="activityType" required={true} type="textarea" />
+      <InputRow useFormResult={useFormResult} object="garminRun" field="activityDate" required={true} type="datepicker" />
+      <InputRow useFormResult={useFormResult} object="garminRun" field="activityType" required={true} type="select" options={activityTypeOptions} />
       <InputRow useFormResult={useFormResult} object="garminRun" field="activityName" required={true} type="textarea" />
       <InputRow useFormResult={useFormResult} object="garminRun" field="activityDescription" type="textarea" />
-      <InputRow useFormResult={useFormResult} object="garminRun" field="elapsedTime" type="textarea" />
-      <InputRow useFormResult={useFormResult} object="garminRun" field="distance" required={true} type="textarea" />
-      <InputRow useFormResult={useFormResult} object="garminRun" field="maxHeartRate" type="textarea" />
-      <InputRow useFormResult={useFormResult} object="garminRun" field="calories" type="textarea" />
+      <ElapsedTimeInput useFormResult={useFormResult} object="garminRun" field="elapsedTime" />
+      <InputRow useFormResult={useFormResult} object="garminRun" field="distance" required={true} type="number" inputClass="w-full xl:w-1/4" />
+      <InputRow useFormResult={useFormResult} object="garminRun" field="maxHeartRate" type="number" inputClass="w-full xl:w-1/4" />
+      <InputRow useFormResult={useFormResult} object="garminRun" field="calories" type="number" inputClass="w-full xl:w-1/4" />
       <InputRow useFormResult={useFormResult} object="garminRun" field="createdBy" required={true} type="select" options={createdByValues} />
       <InputRow useFormResult={useFormResult} object="garminRun" field="updateBy" type="select" options={updateByValues} />
       <input type="submit" value={t('garminRun.edit.headline')} className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2 cursor-pointer mt-6" />

@@ -18,8 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -37,11 +39,19 @@ public class GarminRunResource {
 
     private final GarminRunService garminRunService;
     private final RunAppUserService runAppUserService;
+    private final GarminRunValidator garminRunValidator;
 
     public GarminRunResource(final GarminRunService garminRunService,
-            final RunAppUserService runAppUserService) {
+            final RunAppUserService runAppUserService,
+            final GarminRunValidator garminRunValidator) {
         this.garminRunService = garminRunService;
         this.runAppUserService = runAppUserService;
+        this.garminRunValidator = garminRunValidator;
+    }
+
+    @InitBinder
+    protected void initBinder(WebDataBinder binder) {
+        binder.addValidators(garminRunValidator);
     }
 
     @Operation(

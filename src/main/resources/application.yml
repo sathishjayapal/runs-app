@@ -60,3 +60,7 @@ app:
   mail:
     from: sathishk.dot@gmail.com
     displayName: Sathish Jayapal
+  garmin:
+    import:
+      folder: ${GARMIN_IMPORT_FOLDER:/data/garmin-fit-files}
+      systemUserId: ${GARMIN_SYSTEM_USER_ID:10000}

@@ -337,5 +337,10 @@
   },
   "searchFilter": {
     "apply": "Apply"
+  },
+  "elapsedTime": {
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "seconds": "Seconds"
   }
 }
