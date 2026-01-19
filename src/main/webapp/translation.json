@@ -167,24 +167,17 @@
   },
   "shedlock": {
     "list": {
-      "headline": "Shedlocks",
-      "createNew": "Create new Shedlock",
-      "empty": "No Shedlocks could be found.",
+      "headline": "Distributed Lock Monitor",
+      "empty": "No active locks found.",
       "sort": {
         "name,ASC": "Sort by Name (Ascending)",
         "lockUntil,ASC": "Sort by Lock Until (Ascending)",
         "lockedAt,ASC": "Sort by Locked At (Ascending)"
       },
-      "filter": "Filter by Name",
-      "edit": "Edit",
-      "delete": "Delete"
-    },
-    "add": {
-      "headline": "Add Shedlock",
-      "back": "Back to list"
+      "filter": "Filter by Name"
     },
     "name": {
-      "label": "Name"
+      "label": "Lock Name"
     },
     "lockUntil": {
       "label": "Lock Until"
@@ -194,19 +187,6 @@
     },
     "lockedBy": {
       "label": "Locked By"
-    },
-    "edit": {
-      "headline": "Edit Shedlock",
-      "back": "Back to list"
-    },
-    "create": {
-      "success": "Shedlock was created successfully."
-    },
-    "update": {
-      "success": "Shedlock was updated successfully."
-    },
-    "delete": {
-      "success": "Shedlock was removed successfully."
     }
   },
   "fileNameTracker": {

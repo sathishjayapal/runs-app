@@ -4,7 +4,7 @@ export class ShedlockDTO {
     Object.assign(this, data);
   }
 
-  name?: number|null;
+  name?: string | null;
   lockUntil?: string|null;
   lockedAt?: string|null;
   lockedBy?: string|null;

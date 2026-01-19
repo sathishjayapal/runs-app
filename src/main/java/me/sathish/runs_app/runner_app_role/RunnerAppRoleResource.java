@@ -16,20 +16,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
 @RequestMapping(value = "/api/runnerAppRoles", produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasAuthority('" + UserRoles.ROLE_ADMIN + "')")
 @SecurityRequirement(name = "basic-auth")
 public class RunnerAppRoleResource {
 
@@ -72,6 +63,7 @@ public class RunnerAppRoleResource {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('" + UserRoles.ROLE_ADMIN + "')")
     @ApiResponse(responseCode = "201")
     public ResponseEntity<Long> createRunnerAppRole(
             @RequestBody @Valid final RunnerAppRoleDTO runnerAppRoleDTO) {
@@ -80,6 +72,7 @@ public class RunnerAppRoleResource {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + UserRoles.ROLE_ADMIN + "')")
     public ResponseEntity<Long> updateRunnerAppRole(@PathVariable(name = "id") final Long id,
             @RequestBody @Valid final RunnerAppRoleDTO runnerAppRoleDTO) {
         runnerAppRoleService.update(id, runnerAppRoleDTO);
@@ -87,6 +80,7 @@ public class RunnerAppRoleResource {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + UserRoles.ROLE_ADMIN + "')")
     @ApiResponse(responseCode = "204")
     public ResponseEntity<Void> deleteRunnerAppRole(@PathVariable(name = "id") final Long id) {
         runnerAppRoleService.delete(id);

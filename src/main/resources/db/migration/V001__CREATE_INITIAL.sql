@@ -38,6 +38,7 @@ CREATE TABLE shedlock (
     CONSTRAINT shedlock_pkey PRIMARY KEY (name)
 );
 
+
 CREATE TABLE file_name_tracker (
     id BIGINT NOT NULL,
     file_name TEXT NOT NULL,

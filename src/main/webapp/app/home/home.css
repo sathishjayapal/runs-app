@@ -1,1 +1,47 @@
 
+.tech-stack-section {
+    margin-top: 3rem;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.tech-stack-section h2 {
+    color: #212529;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.tech-stack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.tech-category h3 {
+    color: #495057;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 0.5rem;
+}
+
+.tech-category ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tech-category li {
+    padding: 0.5rem 0;
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+.tech-category li:before {
+    content: "▸ ";
+    color: #007bff;
+    font-weight: bold;
+    margin-right: 0.5rem;
+}

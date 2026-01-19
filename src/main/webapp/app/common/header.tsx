@@ -1,10 +1,12 @@
-import React, { useEffect, useRef } from 'react';
-import { Link } from 'react-router';
-import { useTranslation } from 'react-i18next';
+import React, {useEffect, useRef} from 'react';
+import {Link} from 'react-router';
+import {useTranslation} from 'react-i18next';
+import {useAuth} from 'app/common/use-auth';
 
 
 export default function Header() {
   const { t } = useTranslation();
+  const {currentUser, isAdmin, logout} = useAuth();
   const headerRef = useRef<HTMLElement|null>(null);
 
   const handleClick = (event: Event) => {
@@ -22,6 +24,11 @@ export default function Header() {
       $clickedDropdown.ariaExpanded = '' + ($clickedDropdown.ariaExpanded !== 'true');
       $clickedDropdown.nextElementSibling!.classList.toggle('hidden');
     }
+  };
+
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    logout();
   };
 
   useEffect(() => {
@@ -46,7 +53,7 @@ export default function Header() {
             </div>
           </button>
           <div className="hidden md:block flex grow md:grow-0 justify-end basis-full md:basis-auto pt-3 md:pt-1 pb-1" id="navbarToggle">
-            <ul className="flex">
+            <ul className="flex items-center">
               <li>
                 <Link to="/" className="block text-gray-500 p-2">{t('navigation.home')}</Link>
               </li>
@@ -57,13 +64,39 @@ export default function Header() {
                   <span className="text-[9px] align-[3px] pl-0.5">&#9660;</span>
                 </button>
                 <ul className="hidden block absolute right-0 bg-white border border-gray-300 rounded min-w-[10rem] py-2" aria-labelledby="navbarEntitiesLink">
-                  <li><Link to="/runAppUsers" className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('runAppUser.list.headline')}</Link></li>
+                  {isAdmin() && <li><Link to="/runAppUsers"
+                                          className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('runAppUser.list.headline')}</Link>
+                  </li>}
                   <li><Link to="/garminRuns" className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('garminRun.list.headline')}</Link></li>
-                  <li><Link to="/shedlocks" className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('shedlock.list.headline')}</Link></li>
+                  {isAdmin() && <li><Link to="/shedlocks"
+                                          className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('shedlock.list.headline')}</Link>
+                  </li>}
                   <li><Link to="/fileNameTrackers" className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('fileNameTracker.list.headline')}</Link></li>
                   <li><Link to="/stravaRuns" className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('stravaRun.list.headline')}</Link></li>
                 </ul>
               </li>
+              {currentUser && (
+                  <li className="relative ml-2">
+                    <button type="button"
+                            className="js-dropdown flex items-center text-gray-700 bg-gray-200 hover:bg-gray-300 rounded px-3 py-1.5 cursor-pointer"
+                            id="navbarUserLink" aria-expanded="false">
+                      <span className="text-sm font-medium">{currentUser.username}</span>
+                      <span className="text-[9px] align-[3px] pl-1">&#9660;</span>
+                    </button>
+                    <ul className="hidden block absolute right-0 bg-white border border-gray-300 rounded min-w-[10rem] py-2"
+                        aria-labelledby="navbarUserLink">
+                      <li className="px-4 py-1 text-xs text-gray-500 border-b border-gray-200">
+                        {currentUser.roles.join(', ')}
+                      </li>
+                      <li>
+                        <button onClick={handleLogout}
+                                className="inline-block w-full text-left hover:bg-gray-200 px-4 py-1 text-red-600">
+                          Logout
+                        </button>
+                      </li>
+                    </ul>
+                  </li>
+              )}
             </ul>
           </div>
         </nav>

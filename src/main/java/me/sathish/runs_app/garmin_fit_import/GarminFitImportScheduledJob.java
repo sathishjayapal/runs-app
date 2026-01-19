@@ -17,18 +17,18 @@ public class GarminFitImportScheduledJob {
     }
 
     /**
-     * Scheduled job that runs every 30 minutes to process Garmin FIT files.
+     * Scheduled job that runs every 5 minutes to process Garmin FIT files.
      * Uses ShedLock to ensure only one instance runs at a time in distributed environments.
      * 
      * Lock configuration:
-     * - lockAtMostFor: 25 minutes (job should complete within this time)
-     * - lockAtLeastFor: 1 minute (minimum lock duration to prevent rapid re-execution)
+     * - lockAtMostFor: 4 minutes (job should complete within this time)
+     * - lockAtLeastFor: 30 seconds (minimum lock duration to prevent rapid re-execution)
      */
-    @Scheduled(cron = "0 */30 * * * *") // Every 30 minutes at :00 and :30
+    @Scheduled(cron = "0 */5 * * * *") // Every 5 minutes
     @SchedulerLock(
             name = "garminFitImportJob",
-            lockAtMostFor = "25m",
-            lockAtLeastFor = "1m"
+            lockAtMostFor = "4m",
+            lockAtLeastFor = "30s"
     )
     public void processGarminFitFiles() {
         log.info("=== Starting Garmin FIT Import Scheduled Job ===");
