@@ -1,7 +1,5 @@
 package me.sathish.runs_app.config;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 import me.sathish.runs_app.security.UserRoles;
 import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +11,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 
 @Configuration
@@ -32,17 +32,21 @@ public class RunsAppSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain runsAppSecurityFilterChain(final HttpSecurity http) {
-        return http.cors(withDefaults())
+    public SecurityFilterChain runsAppSecurityFilterChain(final HttpSecurity http) throws Exception {
+        http.cors(withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
                 .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers("/", "/index.html", "/js/**", "/css/**", "/images/**", "/favicon.ico", "/manifest.json").permitAll()
+                        .requestMatchers("/user-logout", "/runAppUsers", "/runAppUsers/**", "/garminRuns", "/garminRuns/**",
+                                "/shedlocks", "/fileNameTrackers", "/fileNameTrackers/**",
+                                "/stravaRuns", "/stravaRuns/**", "/error").permitAll()
                     .requestMatchers("/api/**").authenticated()
                     .requestMatchers(EndpointRequest.toAnyEndpoint()).hasAnyAuthority(UserRoles.ROLE_ADMIN, UserRoles.ROLE_USER)
                     .anyRequest().authenticated())
-                .httpBasic(basic -> basic.realmName("runsAppSecurity realm"))
-                .build();
+                .httpBasic(basic -> basic.realmName("runsAppSecurity realm"));
+
+        return http.build();
     }
 
 }

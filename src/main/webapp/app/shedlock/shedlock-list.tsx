@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useSearchParams } from 'react-router';
-import { handleServerError, getListParams } from 'app/common/utils';
-import { ShedlockDTO } from 'app/shedlock/shedlock-model';
-import { PagedModel, Pagination } from 'app/common/list-helper/pagination';
+import React, {useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {useNavigate, useSearchParams} from 'react-router';
+import {getListParams, handleServerError} from 'app/common/utils';
+import {ShedlockDTO} from 'app/shedlock/shedlock-model';
+import {PagedModel, Pagination} from 'app/common/list-helper/pagination';
 import axios from 'axios';
 import SearchFilter from 'app/common/list-helper/search-filter';
 import Sorting from 'app/common/list-helper/sorting';
@@ -33,32 +33,16 @@ export default function ShedlockList() {
     }
   };
 
-  const confirmDelete = async (name: number) => {
-    if (!confirm(t('delete.confirm'))) {
-      return;
-    }
-    try {
-      await axios.delete('/api/shedlocks/' + name);
-      navigate('/shedlocks', {
-            state: {
-              msgInfo: t('shedlock.delete.success')
-            }
-          });
-      getAllShedlocks();
-    } catch (error: any) {
-      handleServerError(error, navigate);
-    }
-  };
-
   useEffect(() => {
     getAllShedlocks();
   }, [searchParams]);
 
   return (<>
     <div className="flex flex-wrap mb-6">
-      <h1 className="grow text-3xl md:text-4xl font-medium mb-2">{t('shedlock.list.headline')}</h1>
-      <div>
-        <Link to="/shedlocks/add" className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2">{t('shedlock.list.createNew')}</Link>
+      <div className="grow">
+        <h1 className="text-3xl md:text-4xl font-medium mb-2">{t('shedlock.list.headline')}</h1>
+        <p className="text-gray-600 text-sm">Read-only view of distributed lock entries. Locks are managed automatically
+          by the system.</p>
       </div>
     </div>
     {((shedlocks && shedlocks.page.totalElements !== 0) || searchParams.get('filter')) && (
@@ -68,7 +52,11 @@ export default function ShedlockList() {
     </div>
     )}
     {!shedlocks || shedlocks.page.totalElements === 0 ? (
-    <div>{t('shedlock.list.empty')}</div>
+        <div className="bg-blue-50 border border-blue-200 rounded p-4">
+          <p className="text-blue-800">{t('shedlock.list.empty')}</p>
+          <p className="text-blue-600 text-sm mt-2">Locks appear here only while scheduled jobs are running. This table
+            is usually empty.</p>
+        </div>
     ) : (<>
     <div className="overflow-x-auto">
       <table className="w-full">
@@ -77,22 +65,16 @@ export default function ShedlockList() {
             <th scope="col" className="text-left p-2">{t('shedlock.name.label')}</th>
             <th scope="col" className="text-left p-2">{t('shedlock.lockUntil.label')}</th>
             <th scope="col" className="text-left p-2">{t('shedlock.lockedAt.label')}</th>
-            <th></th>
+            <th scope="col" className="text-left p-2">{t('shedlock.lockedBy.label')}</th>
           </tr>
         </thead>
         <tbody className="border-t-2 border-black">
           {shedlocks.content.map((shedlock) => (
           <tr key={shedlock.name} className="odd:bg-gray-100">
-            <td className="p-2">{shedlock.name}</td>
-            <td className="p-2">{shedlock.lockUntil}</td>
-            <td className="p-2">{shedlock.lockedAt}</td>
-            <td className="p-2">
-              <div className="float-right whitespace-nowrap">
-                <Link to={'/shedlocks/edit/' + shedlock.name} className="inline-block text-white bg-gray-500 hover:bg-gray-600 focus:ring-gray-200 focus:ring-3 rounded px-2.5 py-1.5 text-sm">{t('shedlock.list.edit')}</Link>
-                <span> </span>
-                <button type="button" onClick={() => confirmDelete(shedlock.name!)} className="inline-block text-white bg-gray-500 hover:bg-gray-600 focus:ring-gray-200 focus:ring-3 rounded px-2.5 py-1.5 text-sm cursor-pointer">{t('shedlock.list.delete')}</button>
-              </div>
-            </td>
+            <td className="p-2 font-mono text-sm">{shedlock.name}</td>
+            <td className="p-2 text-sm">{shedlock.lockUntil}</td>
+            <td className="p-2 text-sm">{shedlock.lockedAt}</td>
+            <td className="p-2 text-sm">{shedlock.lockedBy}</td>
           </tr>
           ))}
         </tbody>
