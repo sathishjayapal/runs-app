@@ -183,6 +183,8 @@ public class GarminFitImportService {
         // Format distance
         if (activityData.getDistanceMiles() != null) {
             dto.setDistance(String.format("%.2f", activityData.getDistanceMiles()));
+        }else {
+            dto.setDistance("0.0");
         }
         
         // Max heart rate

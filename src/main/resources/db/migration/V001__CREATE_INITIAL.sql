@@ -42,8 +42,8 @@ CREATE TABLE shedlock (
 CREATE TABLE file_name_tracker (
     id BIGINT NOT NULL,
     file_name TEXT NOT NULL,
-    updated_by VARCHAR(40),
     created_by_id BIGINT NOT NULL,
+    update_by_id BIGINT,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     CONSTRAINT file_name_tracker_pkey PRIMARY KEY (id)
