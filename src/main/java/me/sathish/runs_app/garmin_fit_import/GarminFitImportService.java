@@ -211,7 +211,7 @@ public class GarminFitImportService {
     private void trackProcessedFile(String fileName) {
         FileNameTracker tracker = new FileNameTracker();
         tracker.setFileName(fileName);
-        tracker.setUpdatedBy("SYSTEM");
+//        tracker.setUpdatedBy("SYSTEM");
         
         // Get system user
         RunAppUser systemUser = runAppUserRepository.findById(systemUserId)

@@ -59,6 +59,9 @@ public class RunAppUser {
     @OneToMany(mappedBy = "createdBy")
     private Set<FileNameTracker> createdByFileNameTrackers = new HashSet<>();
 
+    @OneToMany(mappedBy = "updatedBy")
+    private Set<FileNameTracker> updatedByFileNameTrackers = new HashSet<>();
+
     @OneToMany(mappedBy = "createdBy")
     private Set<StravaRun> createdByStravaRuns = new HashSet<>();
 

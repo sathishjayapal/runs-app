@@ -42,8 +42,9 @@ public class FileNameTracker {
     @Column(nullable = false, columnDefinition = "text")
     private String fileName;
 
-    @Column(length = 40)
-    private String updatedBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "update_by_id")
+    private RunAppUser updatedBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_id", nullable = false)
