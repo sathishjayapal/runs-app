@@ -78,7 +78,7 @@ public class FileNameTrackerServiceImpl implements FileNameTrackerService {
             final FileNameTrackerDTO fileNameTrackerDTO) {
         fileNameTrackerDTO.setId(fileNameTracker.getId());
         fileNameTrackerDTO.setFileName(fileNameTracker.getFileName());
-        fileNameTrackerDTO.setUpdatedBy(fileNameTracker.getUpdatedBy());
+        fileNameTrackerDTO.setUpdatedBy(fileNameTracker.getUpdatedBy() == null ? null : fileNameTracker.getUpdatedBy().getName());
         fileNameTrackerDTO.setCreatedBy(fileNameTracker.getCreatedBy() == null ? null : fileNameTracker.getCreatedBy().getId());
         return fileNameTrackerDTO;
     }
@@ -86,7 +86,9 @@ public class FileNameTrackerServiceImpl implements FileNameTrackerService {
     private FileNameTracker mapToEntity(final FileNameTrackerDTO fileNameTrackerDTO,
             final FileNameTracker fileNameTracker) {
         fileNameTracker.setFileName(fileNameTrackerDTO.getFileName());
-        fileNameTracker.setUpdatedBy(fileNameTrackerDTO.getUpdatedBy());
+        final RunAppUser updatedBy = fileNameTrackerDTO.getCreatedBy() == null ? null : runAppUserRepository.findById(fileNameTrackerDTO.getCreatedBy())
+                .orElseThrow(() -> new NotFoundException("updatedBy not found"));
+        fileNameTracker.setUpdatedBy(updatedBy);
         final RunAppUser createdBy = fileNameTrackerDTO.getCreatedBy() == null ? null : runAppUserRepository.findById(fileNameTrackerDTO.getCreatedBy())
                 .orElseThrow(() -> new NotFoundException("createdBy not found"));
         fileNameTracker.setCreatedBy(createdBy);
