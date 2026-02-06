@@ -21,7 +21,7 @@ export default function FileNameTrackerList() {
   const sortOptions = {
     'id,ASC': t('fileNameTracker.list.sort.id,ASC'), 
     'fileName,ASC': t('fileNameTracker.list.sort.fileName,ASC'), 
-    'updatedBy,ASC': t('fileNameTracker.list.sort.updatedBy,ASC')
+    'createdAt,ASC': t('fileNameTracker.list.sort.createdAt,ASC')
   };
 
   const getAllFileNameTrackers = async () => {
@@ -74,8 +74,8 @@ export default function FileNameTrackerList() {
       <table className="w-full">
         <thead>
           <tr>
-            <th scope="col" className="text-left p-2">{t('fileNameTracker.id.label')}</th>
-            <th scope="col" className="text-left p-2">{t('fileNameTracker.updatedBy.label')}</th>
+            <th scope="col" className="text-left p-2">{t('fileNameTracker.fileName.label')}</th>
+            <th scope="col" className="text-left p-2">{t('fileNameTracker.createdAt.label')}</th>
             <th scope="col" className="text-left p-2">{t('fileNameTracker.createdBy.label')}</th>
             <th></th>
           </tr>
@@ -83,9 +83,9 @@ export default function FileNameTrackerList() {
         <tbody className="border-t-2 border-black">
           {fileNameTrackers.content.map((fileNameTracker) => (
           <tr key={fileNameTracker.id} className="odd:bg-gray-100">
-            <td className="p-2">{fileNameTracker.id}</td>
-            <td className="p-2">{fileNameTracker.updatedBy}</td>
-            <td className="p-2">{fileNameTracker.createdBy}</td>
+            <td className="p-2">{fileNameTracker.fileName}</td>
+            <td className="p-2">{fileNameTracker.createdAt || '-'}</td>
+            <td className="p-2">{fileNameTracker.createdByName || '-'}</td>
             <td className="p-2">
               <div className="float-right whitespace-nowrap">
                 <Link to={'/fileNameTrackers/edit/' + fileNameTracker.id} className="inline-block text-white bg-gray-500 hover:bg-gray-600 focus:ring-gray-200 focus:ring-3 rounded px-2.5 py-1.5 text-sm">{t('fileNameTracker.list.edit')}</Link>

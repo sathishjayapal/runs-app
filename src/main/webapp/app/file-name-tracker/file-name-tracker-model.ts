@@ -8,5 +8,7 @@ export class FileNameTrackerDTO {
   fileName?: string|null;
   updatedBy?: string|null;
   createdBy?: number|null;
+  createdByName?: string|null;
+  createdAt?: string|null;
 
 }
