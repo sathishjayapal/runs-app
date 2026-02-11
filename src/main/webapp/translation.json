@@ -197,7 +197,7 @@
       "sort": {
         "id,ASC": "Sort by Id (Ascending)",
         "fileName,ASC": "Sort by File Name (Ascending)",
-        "updatedBy,ASC": "Sort by Updated By (Ascending)"
+        "createdAt,ASC": "Sort by Created At (Ascending)"
       },
       "filter": "Filter by Id",
       "edit": "Edit",
@@ -218,6 +218,9 @@
     },
     "createdBy": {
       "label": "Created By"
+    },
+    "createdAt": {
+      "label": "Created At"
     },
     "edit": {
       "headline": "Edit File Name Tracker",

@@ -25,6 +25,8 @@ public class RunAppUserDTO {
     @Size(max = 100)
     private String name;
 
+    @NotNull
+    @Size(min = 1, message = "At least one role is required")
     private List<Long> roles;
 
 }
