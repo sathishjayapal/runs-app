@@ -43,9 +43,9 @@ public class GarminFitImportScheduledJob {
             log.info("Failed: {}", result.getFailedCount());
             
             if (result.getFailedCount() > 0) {
-                log.warn("Failed files details:");
+                log.error("Failed files details:");
                 result.getFailedFiles().forEach((file, error) -> 
-                    log.warn("  - {}: {}", file, error));
+                    log.error("  - {}: {}", file, error));
             }
             
         } catch (Exception e) {
