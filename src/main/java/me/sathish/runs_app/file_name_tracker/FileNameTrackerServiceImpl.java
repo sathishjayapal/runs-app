@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -25,6 +26,7 @@ public class FileNameTrackerServiceImpl implements FileNameTrackerService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<FileNameTrackerDTO> findAll(final String filter, final Pageable pageable) {
         Page<FileNameTracker> page;
         if (filter != null) {
@@ -46,6 +48,7 @@ public class FileNameTrackerServiceImpl implements FileNameTrackerService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public FileNameTrackerDTO get(final Long id) {
         return fileNameTrackerRepository.findById(id)
                 .map(fileNameTracker -> mapToDTO(fileNameTracker, new FileNameTrackerDTO()))
@@ -76,10 +79,30 @@ public class FileNameTrackerServiceImpl implements FileNameTrackerService {
 
     private FileNameTrackerDTO mapToDTO(final FileNameTracker fileNameTracker,
             final FileNameTrackerDTO fileNameTrackerDTO) {
+        Long createdBy=null;
+        String createdByName = null;
+        String updatedByName = null;
+        String createdAt = null;
+        String updatedAt = null;
+        String createdAtDate = null;
+        String updatedAtDate = null;
         fileNameTrackerDTO.setId(fileNameTracker.getId());
         fileNameTrackerDTO.setFileName(fileNameTracker.getFileName());
+        if(fileNameTracker.getCreatedBy()==null){
+            createdByName=null;
+            createdBy=null;
+            createdAtDate=null;
+            createdAt=null;
+        }else{
+            createdBy=fileNameTracker.getCreatedBy().getId();
+            createdByName=fileNameTracker.getCreatedBy().getName();
+            createdAtDate=fileNameTracker.getCreatedAt().toString();
+            createdAt=fileNameTracker.getCreatedAt().toString();
+        }
         fileNameTrackerDTO.setUpdatedBy(fileNameTracker.getUpdatedBy() == null ? null : fileNameTracker.getUpdatedBy().getName());
-        fileNameTrackerDTO.setCreatedBy(fileNameTracker.getCreatedBy() == null ? null : fileNameTracker.getCreatedBy().getId());
+        fileNameTrackerDTO.setCreatedBy(createdBy);
+        fileNameTrackerDTO.setCreatedAt(createdAt);
+        fileNameTrackerDTO.setCreatedByName(createdByName);
         return fileNameTrackerDTO;
     }
 

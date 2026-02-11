@@ -15,10 +15,13 @@ public class FileNameTrackerDTO {
     @NotNull
     private String fileName;
 
-    @Size(max = 40)
+    @Size(max = 255)
     private String updatedBy;
 
     @NotNull
     private Long createdBy;
+
+    private String createdByName;
+    private String createdAt;
 
 }
