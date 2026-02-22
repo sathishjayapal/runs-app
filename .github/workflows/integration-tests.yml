@@ -12,8 +12,7 @@ jobs:
     name: Run Integration Tests
     runs-on: ubuntu-latest
 
-    services:
-      # No services needed - TestContainers will manage PostgreSQL
+    # No services needed - TestContainers will manage PostgreSQL
 
     steps:
       - name: Checkout code
