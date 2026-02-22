@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${JDBC_DATABASE_URL:jdbc:postgresql://localhost:5443/runs-app}
+    url: ${JDBC_DATABASE_URL:jdbc:postgresql://localhost:5445/runsapp_db}
     username: ${JDBC_DATABASE_USERNAME:postgres}
-    password: ${JDBC_DATABASE_PASSWORD}
+    password: ${JDBC_DATABASE_PASSWORD:P4ssword!}
     hikari:
       connection-timeout: 30000
       maximum-pool-size: 10
@@ -31,7 +31,7 @@ spring:
       timeout: 45000
   docker:
     compose:
-      lifecycle-management: start-only
+      enabled: false
 error:
   handling:
     http-status-in-json-response: true

@@ -1,0 +1,12 @@
+{
+  "activityId": "12345678901",
+  "activityDate": "2026-02-15",
+  "activityType": "running",
+  "activityName": "Morning Run",
+  "activityDescription": "Easy 5K run in the park",
+  "elapsedTime": "00:28:45",
+  "distance": "5.2",
+  "maxHeartRate": "165",
+  "calories": "420",
+  "createdBy": 10004
+}
