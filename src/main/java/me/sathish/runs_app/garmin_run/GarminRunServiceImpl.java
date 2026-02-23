@@ -30,7 +30,7 @@ public class GarminRunServiceImpl implements GarminRunService {
         if (filter != null) {
             Long longFilter = null;
             try {
-                longFilter = Long.parseLong(filter);
+                longFilter = (Long) Long.parseLong(filter);
             } catch (final NumberFormatException numberFormatException) {
                 // keep null - no parseable input
             }

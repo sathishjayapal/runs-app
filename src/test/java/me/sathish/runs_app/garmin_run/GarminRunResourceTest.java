@@ -20,6 +20,7 @@ public class GarminRunResourceTest extends BaseIT {
     @Test
     public void getAllGarminRuns_success() {
         given()
+                .sessionId(getAdminSession())
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/garminRuns")
@@ -28,13 +29,14 @@ public class GarminRunResourceTest extends BaseIT {
                 .contentType(ContentType.JSON)
                 .body("content", hasSize(5))
                 .body("content[0].activityId", equalTo("GARMIN001"))
-                .body("totalElements", equalTo(5))
-                .body("size", equalTo(20));
+                .body("page.totalElements", equalTo(5))
+                .body("page.size", equalTo(20));
     }
 
     @Test
     public void getAllGarminRuns_withPagination() {
         given()
+                .sessionId(getAdminSession())
                 .accept(ContentType.JSON)
                 .queryParam("page", 0)
                 .queryParam("size", 2)
@@ -43,14 +45,15 @@ public class GarminRunResourceTest extends BaseIT {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("content", hasSize(2))
-                .body("totalElements", equalTo(5))
-                .body("size", equalTo(2))
-                .body("number", equalTo(0));
+                .body("page.totalElements", equalTo(5))
+                .body("page.size", equalTo(2))
+                .body("page.number", equalTo(0));
     }
 
     @Test
     public void getAllGarminRuns_withFilter() {
         given()
+                .sessionId(getAdminSession())
                 .accept(ContentType.JSON)
                 .queryParam("filter", "10007")
                 .when()
@@ -65,6 +68,7 @@ public class GarminRunResourceTest extends BaseIT {
     @Test
     public void getGarminRun_success() {
         given()
+                .sessionId(getAdminSession())
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/garminRuns/10007")
@@ -85,6 +89,7 @@ public class GarminRunResourceTest extends BaseIT {
     @Test
     public void getGarminRun_notFound() {
         given()
+                .sessionId(getAdminSession())
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/garminRuns/99999")
@@ -97,6 +102,7 @@ public class GarminRunResourceTest extends BaseIT {
         String requestBody = readResource("/requests/garminRunRequest.json");
 
         Long createdId = given()
+                .sessionId(getAdminSession())
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
                 .body(requestBody)
@@ -112,6 +118,7 @@ public class GarminRunResourceTest extends BaseIT {
 
         // Verify the created run
         given()
+                .sessionId(getAdminSession())
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/garminRuns/" + createdId)
@@ -131,6 +138,7 @@ public class GarminRunResourceTest extends BaseIT {
         String requestBody = readResource("/requests/garminRunRequest_missingField.json");
 
         given()
+                .sessionId(getAdminSession())
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
                 .body(requestBody)
@@ -145,6 +153,7 @@ public class GarminRunResourceTest extends BaseIT {
         String requestBody = readResource("/requests/garminRunRequest_invalidType.json");
 
         given()
+                .sessionId(getAdminSession())
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
                 .body(requestBody)
@@ -152,7 +161,7 @@ public class GarminRunResourceTest extends BaseIT {
                 .post("/api/garminRuns")
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("activityType", containsString("Activity type must be running, strength_training, or elliptical"));
+                .body("fieldErrors[0].message", containsString("Activity type must be running, strength_training, or elliptical"));
     }
 
     @Test
@@ -170,6 +179,7 @@ public class GarminRunResourceTest extends BaseIT {
                 """;
 
         given()
+                .sessionId(getAdminSession())
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
                 .body(requestBody)
@@ -177,7 +187,7 @@ public class GarminRunResourceTest extends BaseIT {
                 .post("/api/garminRuns")
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("elapsedTime", containsString("HH:MM:SS format"));
+                .body("fieldErrors[0].message", containsString("HH:MM:SS format"));
     }
 
     @Test
@@ -194,6 +204,7 @@ public class GarminRunResourceTest extends BaseIT {
                 """;
 
         given()
+                .sessionId(getAdminSession())
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
                 .body(requestBody)
@@ -201,7 +212,7 @@ public class GarminRunResourceTest extends BaseIT {
                 .post("/api/garminRuns")
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("distance", containsString("must be a valid number"));
+                .body("fieldErrors[0].message", containsString("must be a valid number"));
     }
 
     @Test
@@ -222,6 +233,7 @@ public class GarminRunResourceTest extends BaseIT {
                 """;
 
         given()
+                .sessionId(getAdminSession())
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
                 .body(updateBody)
@@ -233,6 +245,7 @@ public class GarminRunResourceTest extends BaseIT {
 
         // Verify the update
         given()
+                .sessionId(getAdminSession())
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/garminRuns/10007")
@@ -260,6 +273,7 @@ public class GarminRunResourceTest extends BaseIT {
                 """;
 
         given()
+                .sessionId(getAdminSession())
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
                 .body(updateBody)
@@ -273,6 +287,7 @@ public class GarminRunResourceTest extends BaseIT {
     public void deleteGarminRun_success() {
         // First verify the run exists
         given()
+                .sessionId(getAdminSession())
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/garminRuns/10011")
@@ -281,6 +296,7 @@ public class GarminRunResourceTest extends BaseIT {
 
         // Delete the run
         given()
+                .sessionId(getAdminSession())
                 .when()
                 .delete("/api/garminRuns/10011")
                 .then()
@@ -288,6 +304,7 @@ public class GarminRunResourceTest extends BaseIT {
 
         // Verify it's gone
         given()
+                .sessionId(getAdminSession())
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/garminRuns/10011")
@@ -296,17 +313,19 @@ public class GarminRunResourceTest extends BaseIT {
 
         // Verify count decreased
         given()
+                .sessionId(getAdminSession())
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/garminRuns")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body("totalElements", equalTo(4));
+                .body("page.totalElements", equalTo(4));
     }
 
     @Test
     public void deleteGarminRun_notFound() {
         given()
+                .sessionId(getAdminSession())
                 .when()
                 .delete("/api/garminRuns/99999")
                 .then()
@@ -316,6 +335,7 @@ public class GarminRunResourceTest extends BaseIT {
     @Test
     public void getCreatedByValues_success() {
         given()
+                .sessionId(getAdminSession())
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/garminRuns/createdByValues")
@@ -329,6 +349,7 @@ public class GarminRunResourceTest extends BaseIT {
     @Test
     public void getUpdateByValues_success() {
         given()
+                .sessionId(getAdminSession())
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/garminRuns/updateByValues")
@@ -353,6 +374,7 @@ public class GarminRunResourceTest extends BaseIT {
                 """;
 
         given()
+                .sessionId(getAdminSession())
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
                 .body(requestBody)
@@ -370,12 +392,13 @@ public class GarminRunResourceTest extends BaseIT {
                   "activityDate": "2026-02-20",
                   "activityType": "strength_training",
                   "activityName": "Test Strength",
-                  "distance": "0.0",
+                  "distance": "1.0",
                   "createdBy": 10004
                 }
                 """;
 
         given()
+                .sessionId(getAdminSession())
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
                 .body(requestBody)
@@ -399,6 +422,7 @@ public class GarminRunResourceTest extends BaseIT {
                 """;
 
         given()
+                .sessionId(getAdminSession())
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
                 .body(requestBody)

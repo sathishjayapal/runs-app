@@ -38,12 +38,17 @@ public class RunsAppSecurityConfig {
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
                 .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers("/", "/index.html", "/js/**", "/css/**", "/images/**", "/favicon.ico", "/manifest.json").permitAll()
-                        .requestMatchers("/user-logout", "/runAppUsers", "/runAppUsers/**", "/garminRuns", "/garminRuns/**",
+                        .requestMatchers("/login", "/user-logout", "/runAppUsers", "/runAppUsers/**", "/garminRuns", "/garminRuns/**",
                                 "/shedlocks", "/fileNameTrackers", "/fileNameTrackers/**",
                                 "/stravaRuns", "/stravaRuns/**", "/error").permitAll()
                     .requestMatchers("/api/**").authenticated()
                     .requestMatchers(EndpointRequest.toAnyEndpoint()).hasAnyAuthority(UserRoles.ROLE_ADMIN, UserRoles.ROLE_USER)
                     .anyRequest().authenticated())
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .permitAll())
                 .httpBasic(basic -> basic.realmName("runsAppSecurity realm"));
 
         return http.build();

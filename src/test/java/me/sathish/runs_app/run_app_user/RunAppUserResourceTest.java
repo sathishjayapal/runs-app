@@ -27,7 +27,7 @@ public class RunAppUserResourceTest extends BaseIT {
                 .contentType(ContentType.JSON)
                 .body("content", hasSize(3))
                 .body("content[0].email", equalTo("admin@test.com"))
-                .body("totalElements", equalTo(3));
+                .body("page.totalElements", equalTo(3));
     }
 
     @Test
@@ -42,8 +42,8 @@ public class RunAppUserResourceTest extends BaseIT {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("content", hasSize(2))
-                .body("totalElements", equalTo(3))
-                .body("size", equalTo(2));
+                .body("page.totalElements", equalTo(3))
+                .body("page.size", equalTo(2));
     }
 
     @Test

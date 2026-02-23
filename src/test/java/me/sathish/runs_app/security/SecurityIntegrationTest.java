@@ -16,23 +16,13 @@ public class SecurityIntegrationTest extends BaseIT {
 
     @Test
     public void login_validCredentials_success() {
-        // Get initial session (CSRF)
-        String session = given()
-                .accept(ContentType.HTML)
-                .when()
-                .get("/login")
-                .then()
-                .statusCode(HttpStatus.OK.value())
-                .extract()
-                .sessionId();
-
-        // Perform login
+        // Perform login directly (CSRF is disabled)
         String authenticatedSession = given()
-                .sessionId(session)
                 .accept(ContentType.HTML)
                 .contentType(ContentType.URLENC)
                 .formParam("username", AUTH_USER_ADMIN)
                 .formParam("password", PASSWORD)
+                .redirects().follow(false)
                 .when()
                 .post("/login")
                 .then()
@@ -53,18 +43,12 @@ public class SecurityIntegrationTest extends BaseIT {
 
     @Test
     public void login_invalidPassword_failure() {
-        String session = given()
-                .accept(ContentType.HTML)
-                .when()
-                .get("/login")
-                .sessionId();
-
         given()
-                .sessionId(session)
                 .accept(ContentType.HTML)
                 .contentType(ContentType.URLENC)
                 .formParam("username", AUTH_USER_ADMIN)
                 .formParam("password", "wrongpassword")
+                .redirects().follow(false)
                 .when()
                 .post("/login")
                 .then()
@@ -74,18 +58,12 @@ public class SecurityIntegrationTest extends BaseIT {
 
     @Test
     public void login_nonExistentUser_failure() {
-        String session = given()
-                .accept(ContentType.HTML)
-                .when()
-                .get("/login")
-                .sessionId();
-
         given()
-                .sessionId(session)
                 .accept(ContentType.HTML)
                 .contentType(ContentType.URLENC)
                 .formParam("username", "nonexistent@test.com")
                 .formParam("password", "password")
+                .redirects().follow(false)
                 .when()
                 .post("/login")
                 .then()
@@ -95,18 +73,12 @@ public class SecurityIntegrationTest extends BaseIT {
 
     @Test
     public void login_emptyCredentials_failure() {
-        String session = given()
-                .accept(ContentType.HTML)
-                .when()
-                .get("/login")
-                .sessionId();
-
         given()
-                .sessionId(session)
                 .accept(ContentType.HTML)
                 .contentType(ContentType.URLENC)
                 .formParam("username", "")
                 .formParam("password", "")
+                .redirects().follow(false)
                 .when()
                 .post("/login")
                 .then()
