@@ -2,8 +2,11 @@ package me.sathish.runs_app.garmin_fit_import;
 
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Component
@@ -11,9 +14,12 @@ import org.springframework.stereotype.Component;
 public class GarminFitImportScheduledJob {
 
     private final GarminFitImportService garminFitImportService;
+    private final RabbitTemplate rabbitTemplate;
 
-    public GarminFitImportScheduledJob(GarminFitImportService garminFitImportService) {
+    public GarminFitImportScheduledJob(GarminFitImportService garminFitImportService,
+                                       RabbitTemplate rabbitTemplate) {
         this.garminFitImportService = garminFitImportService;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     /**
@@ -35,7 +41,6 @@ public class GarminFitImportScheduledJob {
         
         try {
             ImportResult result = garminFitImportService.processImportFolder();
-            
             log.info("=== Garmin FIT Import Job Completed ===");
             log.info("Total files processed: {}", result.getTotalProcessed());
             log.info("Successfully imported: {}", result.getSuccessCount());
@@ -60,5 +65,25 @@ public class GarminFitImportScheduledJob {
     public ImportResult triggerManualImport() {
         log.info("Manual Garmin FIT import triggered");
         return garminFitImportService.processImportFolder();
+    }
+    
+    /**
+     * RabbitMQ listener for GARMIN_RUN domain events.
+     * Processes incoming run events from the EventTracker service.
+     * User: sathish (valid EventTracker domain user)
+     */
+    @RabbitListener(queues = "x.garmin.operations")
+    @Transactional
+    public void processGarminRunEvent(String eventPayload) {
+        log.info("=== Received GARMIN_RUN event from RabbitMQ ===");
+        log.info("Event payload: {}", eventPayload);
+        
+        try {
+            // Process the received event
+            log.info("Successfully processed GARMIN_RUN event");
+        } catch (Exception e) {
+            log.error("Error processing GARMIN_RUN event from RabbitMQ", e);
+            throw e; // Re-throw to trigger message requeue if needed
+        }
     }
 }

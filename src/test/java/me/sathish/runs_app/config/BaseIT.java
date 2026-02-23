@@ -175,24 +175,16 @@ public abstract class BaseIT {
 
     /**
      * Perform login and return session ID.
+     * CSRF is disabled in the security config so we POST directly without a pre-flight GET.
      */
     private String login(String username, String password) {
-        // Get initial session
-        String session = RestAssured.given()
-                .accept(ContentType.HTML)
-                .port(getActualPort())
-                .when()
-                .get("/login")
-                .sessionId();
-
-        // Perform login
         return RestAssured.given()
-                .sessionId(session)
                 .accept(ContentType.HTML)
                 .contentType(ContentType.URLENC)
                 .formParam("username", username)
                 .formParam("password", password)
                 .port(getActualPort())
+                .redirects().follow(false)
                 .when()
                 .post("/login")
                 .sessionId();

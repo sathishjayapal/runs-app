@@ -32,6 +32,11 @@ spring:
   docker:
     compose:
       enabled: false
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
 error:
   handling:
     http-status-in-json-response: true

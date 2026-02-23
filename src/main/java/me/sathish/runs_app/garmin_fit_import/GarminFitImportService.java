@@ -1,12 +1,14 @@
 package me.sathish.runs_app.garmin_fit_import;
 
 import lombok.extern.slf4j.Slf4j;
+import me.sathish.runs_app.config.RabbitMQConfiguration;
 import me.sathish.runs_app.file_name_tracker.FileNameTracker;
 import me.sathish.runs_app.file_name_tracker.FileNameTrackerRepository;
 import me.sathish.runs_app.garmin_run.GarminRunDTO;
 import me.sathish.runs_app.garmin_run.GarminRunService;
 import me.sathish.runs_app.run_app_user.RunAppUser;
 import me.sathish.runs_app.run_app_user.RunAppUserRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -32,6 +35,7 @@ public class GarminFitImportService {
     private final GarminRunService garminRunService;
     private final FileNameTrackerRepository fileNameTrackerRepository;
     private final RunAppUserRepository runAppUserRepository;
+    private final RabbitTemplate rabbitTemplate;
 
     @Value("${app.garmin.import.folder}")
     private String importFolder;
@@ -43,11 +47,13 @@ public class GarminFitImportService {
             GarminFitFileParser fitFileParser,
             GarminRunService garminRunService,
             FileNameTrackerRepository fileNameTrackerRepository,
-            RunAppUserRepository runAppUserRepository) {
+            RunAppUserRepository runAppUserRepository,
+            RabbitTemplate rabbitTemplate) {
         this.fitFileParser = fitFileParser;
         this.garminRunService = garminRunService;
         this.fileNameTrackerRepository = fileNameTrackerRepository;
         this.runAppUserRepository = runAppUserRepository;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @Transactional
@@ -151,6 +157,9 @@ public class GarminFitImportService {
             // Track processed file
             trackProcessedFile(fileName);
             
+            // Publish event to RabbitMQ
+            publishGarminRunEvent(dto, createdId);
+            
             result.addSuccess(fileName);
             log.info("Successfully imported activity from file: {} (ID: {})", fileName, createdId);
             
@@ -231,6 +240,29 @@ public class GarminFitImportService {
         } catch (IOException e) {
             log.warn("Failed to archive file: {}, deleting instead", file.getName(), e);
             file.delete();
+        }
+    }
+
+    private void publishGarminRunEvent(GarminRunDTO dto, Long createdId) {
+        try {
+            GarminRunEvent event = new GarminRunEvent();
+            event.setEventType("GARMIN_RUN");
+            event.setActivityId(dto.getActivityId());
+            event.setActivityName(dto.getActivityName());
+            event.setActivityDate(LocalDateTime.now());
+            event.setDistance(dto.getDistance());
+            event.setElapsedTime(dto.getElapsedTime());
+            event.setDatabaseId(createdId);
+            
+            rabbitTemplate.convertAndSend(
+                RabbitMQConfiguration.GARMIN_EXCHANGE,
+                RabbitMQConfiguration.GARMIN_ROUTING_KEY,
+                event
+            );
+            
+            log.info("Published GARMIN_RUN event to RabbitMQ for activity: {}", dto.getActivityId());
+        } catch (Exception e) {
+            log.error("Failed to publish GARMIN_RUN event to RabbitMQ", e);
         }
     }
 }

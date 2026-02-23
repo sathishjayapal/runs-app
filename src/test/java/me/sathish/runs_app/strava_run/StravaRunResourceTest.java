@@ -30,8 +30,8 @@ public class StravaRunResourceTest extends BaseIT {
                 .body("content", hasSize(3))
                 .body("content[0].runNumber", equalTo(20001))
                 .body("content[0].runName", equalTo("Morning Trail Run"))
-                .body("totalElements", equalTo(3))
-                .body("size", equalTo(20));
+                .body("page.totalElements", equalTo(3))
+                .body("page.size", equalTo(20));
     }
 
     @Test
@@ -68,9 +68,9 @@ public class StravaRunResourceTest extends BaseIT {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("content", hasSize(2))
-                .body("totalElements", equalTo(3))
-                .body("size", equalTo(2))
-                .body("number", equalTo(0));
+                .body("page.totalElements", equalTo(3))
+                .body("page.size", equalTo(2))
+                .body("page.number", equalTo(0));
     }
 
     @Test
@@ -367,7 +367,7 @@ public class StravaRunResourceTest extends BaseIT {
                 .get("/api/stravaRuns")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body("totalElements", equalTo(2));
+                .body("page.totalElements", equalTo(2));
     }
 
     @Test

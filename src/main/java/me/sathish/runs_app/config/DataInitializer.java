@@ -29,6 +29,22 @@ public class DataInitializer {
             PasswordEncoder passwordEncoder) {
         
         return args -> {
+            // Fix passwords that are missing the DelegatingPasswordEncoder prefix
+            userRepository.findAll().forEach(user -> {
+                String pwd = user.getPassword();
+                if (pwd.startsWith("$2a$") || pwd.startsWith("$2b$") || pwd.startsWith("$2y$")) {
+                    // Already a BCrypt hash but missing {bcrypt} prefix — just add it
+                    log.info("Adding {{bcrypt}} prefix to existing BCrypt hash for user: {}", user.getEmail());
+                    user.setPassword("{bcrypt}" + pwd);
+                    userRepository.save(user);
+                } else if (!pwd.startsWith("{")) {
+                    // Plain text password — encode it
+                    log.info("Encoding plain text password for user: {}", user.getEmail());
+                    user.setPassword(passwordEncoder.encode(pwd));
+                    userRepository.save(user);
+                }
+            });
+
             if (userRepository.count() > 0) {
                 log.info("Database already initialized. Skipping data initialization.");
                 return;
