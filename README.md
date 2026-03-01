@@ -9,6 +9,7 @@ A full-stack running activity tracking application built with Spring Boot 4.0 an
 
 ## Table of Contents
 
+- [Architecture](#architecture)
 - [Project Description](#project-description)
 - [Tech Stack](#tech-stack)
 - [Key Features](#key-features)
@@ -20,6 +21,87 @@ A full-stack running activity tracking application built with Spring Boot 4.0 an
 - [Testing](#testing)
 - [Database Management](#database-management)
 - [Project Structure](#project-structure)
+
+---
+
+## Architecture
+
+### System Diagram
+
+```mermaid
+graph TB
+    subgraph client["Client Layer"]
+        BROWSER["Browser\nReact 19 + TypeScript\nTailwind CSS · i18next\n:3000 dev / :8080 prod"]
+    end
+
+    subgraph backend["Backend  ·  Spring Boot 4.0.1  ·  Java 21  ·  :8080"]
+        SEC["Spring Security\nBasic Auth · RBAC\n(ROLE_USER / ROLE_ADMIN)"]
+        API["REST Controllers\n/api/garminRuns\n/api/stravaRuns\n/api/runAppUsers\n/api/fileNameTrackers"]
+        SVC["Service Layer\nGarminFitImportService\nStravaRunService  ·  MailService\nFileNameTrackerService"]
+        SCHED["ShedLock Scheduler\nGarminFitImportScheduledJob\n(single-node guarantee)"]
+        SDK["Garmin FIT SDK v21\nFIT / ZIP file parser"]
+    end
+
+    subgraph infra["Infrastructure  (Docker Compose)"]
+        DB[("PostgreSQL 18\n:5443\nFlyway V001–V003")]
+        MQ(["RabbitMQ\n:5672\nexchange: x.sathishprojects.events\nqueue:   x.garmin.operations"])
+        FS["/data/garmin-fit-files\nWatch folder  →  processed/"]
+    end
+
+    subgraph downstream["Downstream Services"]
+        EVT["eventstracker\nmicroservice\n(RabbitMQ consumer)"]
+        SMTP["Gmail SMTP\n:587 TLS"]
+    end
+
+    BROWSER -->|"HTTP + Basic Auth\nAxios client"| SEC
+    SEC --> API
+    API --> SVC
+    SVC <-->|"JPA / HikariCP"| DB
+    SCHED -->|"every N min\nShedLock distributed lock"| SVC
+    SVC --> SDK
+    SDK -->|"reads FIT / ZIP"| FS
+    SVC -->|"GarminRunEvent JSON"| MQ
+    MQ -->|"consumed by"| EVT
+    SVC -->|"transactional email"| SMTP
+```
+
+### Data Flow: Garmin FIT Import
+
+```mermaid
+sequenceDiagram
+    participant FS as File System<br/>/data/garmin-fit-files
+    participant SCHED as ShedLock Scheduler
+    participant SVC as GarminFitImportService
+    participant SDK as Garmin FIT SDK
+    participant DB as PostgreSQL
+    participant MQ as RabbitMQ
+    participant EVT as eventstracker
+
+    SCHED->>SVC: trigger (distributed lock acquired)
+    SVC->>FS: scan for new FIT/ZIP files
+    FS-->>SVC: file list
+    SVC->>SDK: parse FIT activity
+    SDK-->>SVC: FitActivityData (distance, HR, calories...)
+    SVC->>DB: save GarminRun + FileNameTracker
+    SVC->>MQ: publish GarminRunEvent (JSON)
+    MQ->>EVT: deliver event
+    SVC->>FS: move file to processed/
+```
+
+### Key Architectural Decisions
+
+| Decision | Choice | Why |
+|----------|--------|-----|
+| Framework | Spring Boot 4.0.1 + Java 21 | Latest LTS; virtual threads ready; ahead of market |
+| Frontend | React 19 embedded in JAR | Single deployable artifact; no separate frontend server |
+| Messaging | RabbitMQ (not Kafka) | Lower ops overhead for point-to-point event fan-out |
+| Scheduling | ShedLock (JDBC) | Safe for future horizontal scaling; no Quartz complexity |
+| DB Migrations | Flyway | Version-controlled, reproducible schema changes |
+| Auth | Spring Security Basic Auth | Pragmatic for internal tool; swap to OAuth2 when needed |
+
+> Full architecture decision records: [`docs/adr/`](docs/adr/)
+
+---
 - [API Endpoints](#api-endpoints)
 - [Configuration](#configuration)
 - [Troubleshooting](#troubleshooting)
