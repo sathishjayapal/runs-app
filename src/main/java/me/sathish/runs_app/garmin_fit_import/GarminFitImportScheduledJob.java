@@ -46,7 +46,28 @@ public class GarminFitImportScheduledJob {
             log.info("Successfully imported: {}", result.getSuccessCount());
             log.info("Skipped (already processed): {}", result.getSkippedCount());
             log.info("Failed: {}", result.getFailedCount());
-            
+            String summaryPayload = String.format(
+                "Total files processed: %d, Successfully imported: %d, Skipped: %d, Failed: %d",
+                result.getTotalProcessed(), result.getSuccessCount(), result.getSkippedCount(), result.getFailedCount());
+            log.info(summaryPayload);
+
+            try {
+                log.info("=== Attempting to send message to RabbitMQ ===");
+                log.info("Exchange: x.sathishprojects.events");
+                log.info("Routing Key: garmin.operations.crud");
+                log.info("Payload: {}", summaryPayload);
+                
+                rabbitTemplate.convertAndSend(
+                    "x.sathishprojects.events",
+                    "garmin.operations.crud",
+                    summaryPayload);
+                
+                log.info("=== Message sent successfully to RabbitMQ ===");
+            } catch (Exception e) {
+                log.error("=== FAILED to send message to RabbitMQ ===", e);
+            }
+
+
             if (result.getFailedCount() > 0) {
                 log.error("Failed files details:");
                 result.getFailedFiles().forEach((file, error) -> 
@@ -72,18 +93,18 @@ public class GarminFitImportScheduledJob {
      * Processes incoming run events from the EventTracker service.
      * User: sathish (valid EventTracker domain user)
      */
-    @RabbitListener(queues = "x.garmin.operations")
-    @Transactional
-    public void processGarminRunEvent(String eventPayload) {
-        log.info("=== Received GARMIN_RUN event from RabbitMQ ===");
-        log.info("Event payload: {}", eventPayload);
-        
-        try {
-            // Process the received event
-            log.info("Successfully processed GARMIN_RUN event");
-        } catch (Exception e) {
-            log.error("Error processing GARMIN_RUN event from RabbitMQ", e);
-            throw e; // Re-throw to trigger message requeue if needed
-        }
-    }
+//    @RabbitListener(queues = "x.garmin.operations")
+//    @Transactional
+//    public void processGarminRunEvent(String eventPayload) {
+//        log.info("=== Received GARMIN_RUN event from RabbitMQ ===");
+//        log.info("Event payload: {}", eventPayload);
+//
+//        try {
+//            // Process the received event
+//            log.info("Successfully processed GARMIN_RUN event from runs-app");
+//        } catch (Exception e) {
+//            log.error("Error processing GARMIN_RUN event from RabbitMQ", e);
+//            throw e; // Re-throw to trigger message requeue if needed
+//        }
+//    }
 }

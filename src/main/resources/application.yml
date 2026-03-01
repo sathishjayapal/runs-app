@@ -37,6 +37,16 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+logging:
+  level:
+    org.springframework.amqp: DEBUG
+    org.springframework.amqp.rabbit: DEBUG
+    me.sathish.runs_app.config.RabbitMQConfiguration: DEBUG
+    me.sathish.runs_app.garmin_fit_import: DEBUG
 error:
   handling:
     http-status-in-json-response: true

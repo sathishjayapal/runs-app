@@ -245,6 +245,7 @@ public class GarminFitImportService {
 
     private void publishGarminRunEvent(GarminRunDTO dto, Long createdId) {
         try {
+            log.info("=== Preparing to publish GARMIN_RUN event ===");
             GarminRunEvent event = new GarminRunEvent();
             event.setEventType("GARMIN_RUN");
             event.setActivityId(dto.getActivityId());
@@ -254,15 +255,20 @@ public class GarminFitImportService {
             event.setElapsedTime(dto.getElapsedTime());
             event.setDatabaseId(createdId);
             
+            log.info("Event details - Exchange: {}, RoutingKey: {}, ActivityId: {}", 
+                RabbitMQConfiguration.GARMIN_EXCHANGE, 
+                RabbitMQConfiguration.GARMIN_ROUTING_KEY,
+                dto.getActivityId());
+            
             rabbitTemplate.convertAndSend(
                 RabbitMQConfiguration.GARMIN_EXCHANGE,
                 RabbitMQConfiguration.GARMIN_ROUTING_KEY,
                 event
             );
             
-            log.info("Published GARMIN_RUN event to RabbitMQ for activity: {}", dto.getActivityId());
+            log.info("=== Successfully published GARMIN_RUN event to RabbitMQ for activity: {} ===", dto.getActivityId());
         } catch (Exception e) {
-            log.error("Failed to publish GARMIN_RUN event to RabbitMQ", e);
+            log.error("=== FAILED to publish GARMIN_RUN event to RabbitMQ ===", e);
         }
     }
 }
