@@ -5,6 +5,9 @@ A full-stack running activity tracking application built with Spring Boot 4.0 an
 **Author:** Sathish Jayapal
 **Last Updated:** February 2026
 
+## Documentation
+- Operational/developer guidance (admin access, CI/CD, Garmin setup, RabbitMQ debugging): `docs/adr/ADR-005-docs-consolidation.md`
+
 ---
 
 ## Table of Contents
@@ -907,3 +910,4 @@ public class SecurityConfig {
 - [Maven Documentation](https://maven.apache.org/)
 - [Webpack Documentation](https://webpack.js.org/)
 - [Spring Boot in Action](https://www.manning.com/books/spring-boot-in-action)
+
