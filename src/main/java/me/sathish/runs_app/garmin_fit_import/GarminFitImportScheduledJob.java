@@ -1,6 +1,7 @@
 package me.sathish.runs_app.garmin_fit_import;
 
 import lombok.extern.slf4j.Slf4j;
+import me.sathish.runs_app.config.RabbitMQConfiguration;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -53,13 +54,13 @@ public class GarminFitImportScheduledJob {
 
             try {
                 log.info("=== Attempting to send message to RabbitMQ ===");
-                log.info("Exchange: x.sathishprojects.events");
-                log.info("Routing Key: garmin.operations.crud");
+                log.info("Exchange: {}", RabbitMQConfiguration.GARMIN_EXCHANGE);
+                log.info("Routing Key: {}", RabbitMQConfiguration.GARMIN_ROUTING_KEY);
                 log.info("Payload: {}", summaryPayload);
                 
                 rabbitTemplate.convertAndSend(
-                    "x.sathishprojects.events",
-                    "garmin.operations.crud",
+                    RabbitMQConfiguration.GARMIN_EXCHANGE,
+                    RabbitMQConfiguration.GARMIN_ROUTING_KEY,
                     summaryPayload);
                 
                 log.info("=== Message sent successfully to RabbitMQ ===");

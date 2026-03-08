@@ -86,7 +86,7 @@ export default function Header() {
                     <ul className="hidden block absolute right-0 bg-white border border-gray-300 rounded min-w-[10rem] py-2"
                         aria-labelledby="navbarUserLink">
                       <li className="px-4 py-1 text-xs text-gray-500 border-b border-gray-200">
-                        {currentUser.roles.join(', ')}
+                        {currentUser.roles?.join(', ') || 'No roles'}
                       </li>
                       <li>
                         <button onClick={handleLogout}

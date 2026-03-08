@@ -47,7 +47,7 @@ graph TB
 
     subgraph infra["Infrastructure  (Docker Compose)"]
         DB[("PostgreSQL 18\n:5443\nFlyway V001–V003")]
-        MQ(["RabbitMQ\n:5672\nexchange: x.sathishprojects.events\nqueue:   x.garmin.operations"])
+        MQ(["RabbitMQ\n:5672\nexchange: x.sathishprojects.garmin.events.exchange\nqueue:   q.sathishprojects.garmin.api.events"])
         FS["/data/garmin-fit-files\nWatch folder  →  processed/"]
     end
 

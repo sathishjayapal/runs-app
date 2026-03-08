@@ -15,9 +15,10 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class RabbitMQConfiguration {
 
-    public static final String GARMIN_QUEUE = "x.garmin.operations";
-    public static final String GARMIN_EXCHANGE = "x.sathishprojects.events";
-    public static final String GARMIN_ROUTING_KEY = "garmin.operations.crud";
+    // Garmin events configuration - must match eventstracker's RabbitSchemaConfig
+    public static final String GARMIN_QUEUE = "q.sathishprojects.garmin.api.events";
+    public static final String GARMIN_EXCHANGE = "x.sathishprojects.garmin.events.exchange";
+    public static final String GARMIN_ROUTING_KEY = "sathishprojects.garmin.api.event";
 
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter messageConverter) {

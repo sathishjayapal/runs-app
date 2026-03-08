@@ -9,7 +9,7 @@ When a Garmin FIT file is imported, downstream services (e.g., `eventstracker`) 
 
 ## Decision
 
-Use **RabbitMQ** with a topic exchange (`x.sathishprojects.events`) and a dedicated queue (`x.garmin.operations`).
+Use **RabbitMQ** with a topic exchange (`x.sathishprojects.garmin.events.exchange`) and a dedicated queue (`q.sathishprojects.garmin.api.events`).
 
 ## Rationale
 
@@ -25,4 +25,4 @@ Use **RabbitMQ** with a topic exchange (`x.sathishprojects.events`) and a dedica
 
 ## Consequences
 
-`GarminRunEvent` is serialized as JSON via `Jackson2JsonMessageConverter`. Consumer services must declare the queue or use the same exchange/routing key convention (`garmin.operations.crud`).
+`GarminRunEvent` is serialized as JSON via `Jackson2JsonMessageConverter`. Consumer services must declare the queue or use the same exchange/routing key convention (`sathishprojects.garmin.api.event`).
