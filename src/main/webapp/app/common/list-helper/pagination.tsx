@@ -10,10 +10,14 @@ export function Pagination({ page }: PaginationParams) {
   const steps: PaginationStep[] = [];
   let range = '';
 
+  if (!page) {
+    return null;
+  }
+
   const getStepParams = (targetPage: number) => {
     const stepParams = new URLSearchParams({
       page: '' + targetPage,
-      size: '' + page!.size
+      size: '' + page.size
     });
     if (searchParams.get('sort')) {
       stepParams.append('sort', searchParams.get('sort')!);
@@ -24,35 +28,33 @@ export function Pagination({ page }: PaginationParams) {
     return stepParams;
   };
 
-  if (page) {
-    const previous = new PaginationStep();
-    previous.disabled = page.number === 0;
-    previous.label = t('pagination.previous');
-    previous.params = getStepParams(Math.max(0, page.number - 1));
-    steps.push(previous);
-    // find a range of up to 5 pages around the current active page
-    const startAt = Math.max(0, Math.min(page.number - 2, page.totalPages - 5));
-    const endAt = Math.min(startAt + 5, page.totalPages);
-    for (let i = startAt; i < endAt; i++) {
-      const step = new PaginationStep();
-      step.active = i === page.number;
-      step.label = '' + (i + 1);
-      step.params = getStepParams(i);
-      steps.push(step);
-    }
-    const next = new PaginationStep();
-    next.disabled = page.number > page.totalPages - 2;
-    next.label = t('pagination.next');
-    next.params = getStepParams(Math.min(page.totalPages - 1, page.number + 1));
-    steps.push(next);
+  const previous = new PaginationStep();
+  previous.disabled = page.number === 0;
+  previous.label = t('pagination.previous');
+  previous.params = getStepParams(Math.max(0, page.number - 1));
+  steps.push(previous);
+  // find a range of up to 5 pages around the current active page
+  const startAt = Math.max(0, Math.min(page.number - 2, page.totalPages - 5));
+  const endAt = Math.min(startAt + 5, page.totalPages);
+  for (let i = startAt; i < endAt; i++) {
+    const step = new PaginationStep();
+    step.active = i === page.number;
+    step.label = '' + (i + 1);
+    step.params = getStepParams(i);
+    steps.push(step);
+  }
+  const next = new PaginationStep();
+  next.disabled = page.number > page.totalPages - 2;
+  next.label = t('pagination.next');
+  next.params = getStepParams(Math.min(page.totalPages - 1, page.number + 1));
+  steps.push(next);
 
-    const rangeStart = page.number * page.size + 1;
-    const rangeEnd = Math.min(rangeStart + page.size - 1, page.totalElements);
-    if (rangeStart === rangeEnd) {
-      range = '' + rangeStart;
-    } else {
-      range = rangeStart + '-' + rangeEnd;
-    }
+  const rangeStart = page.number * page.size + 1;
+  const rangeEnd = Math.min(rangeStart + page.size - 1, page.totalElements);
+  if (rangeStart === rangeEnd) {
+    range = '' + rangeStart;
+  } else {
+    range = rangeStart + '-' + rangeEnd;
   }
 
   return (
@@ -68,7 +70,7 @@ export function Pagination({ page }: PaginationParams) {
         </ul>
       </nav>
       }
-      <div className={'col-span-4 sm:text-right mt-4 sm:mt-0' + (steps.length <= 3 ? ' col-start-9' : '')}>{t('pagination.elements', { range: range, total: page!.totalElements })}</div>
+      <div className={'col-span-4 sm:text-right mt-4 sm:mt-0' + (steps.length <= 3 ? ' col-start-9' : '')}>{t('pagination.elements', { range: range, total: page.totalElements })}</div>
     </div>
   );
 }

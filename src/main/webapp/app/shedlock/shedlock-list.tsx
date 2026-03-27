@@ -29,6 +29,10 @@ export default function ShedlockList() {
       const response = await axios.get('/api/shedlocks?' + listParams);
       setShedlocks(response.data);
     } catch (error: any) {
+      if (error?.response?.status === 401) {
+        window.location.href = '/login';
+        return;
+      }
       handleServerError(error, navigate);
     }
   };

@@ -3,6 +3,7 @@ package me.sathish.runs_app.shedlock;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import me.sathish.runs_app.common.PagedResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -29,10 +30,11 @@ public class ShedlockViewResource {
 
     @GetMapping
     @Operation(summary = "Get all ShedLock entries", description = "Returns a paginated list of all lock entries. This is read-only for monitoring purposes.")
-    public ResponseEntity<Page<ShedlockViewDTO>> getAllShedlocks(
+    public ResponseEntity<PagedResponse<ShedlockViewDTO>> getAllShedlocks(
             @PageableDefault(size = 20)
             @SortDefault(sort = "lockedAt", direction = Sort.Direction.DESC) final Pageable pageable) {
-        return ResponseEntity.ok(shedlockViewService.findAll(pageable));
+        Page<ShedlockViewDTO> page = shedlockViewService.findAll(pageable);
+        return ResponseEntity.ok(new PagedResponse<>(page));
     }
 
     @GetMapping("/{name}")

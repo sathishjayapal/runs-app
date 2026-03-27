@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import me.sathish.runs_app.common.PagedResponse;
 import me.sathish.runs_app.security.UserRoles;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -59,10 +60,11 @@ public class RunAppUserResource {
             }
     )
     @GetMapping
-    public ResponseEntity<Page<RunAppUserDTO>> getAllRunAppUsers(
+    public ResponseEntity<PagedResponse<RunAppUserDTO>> getAllRunAppUsers(
             @RequestParam(name = "filter", required = false) final String filter,
             @Parameter(hidden = true) @SortDefault(sort = "id") @PageableDefault(size = 20) final Pageable pageable) {
-        return ResponseEntity.ok(runAppUserService.findAll(filter, pageable));
+        Page<RunAppUserDTO> page = runAppUserService.findAll(filter, pageable);
+        return ResponseEntity.ok(new PagedResponse<>(page));
     }
 
     @GetMapping("/{id}")
