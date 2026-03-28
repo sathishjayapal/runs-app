@@ -23,12 +23,18 @@ export default function GarminRunList() {
     'activityId,ASC': t('garminRun.list.sort.activityId,ASC'), 
     'activityDate,ASC': t('garminRun.list.sort.activityDate,ASC')
   };
+  const totalElements = garminRuns?.page?.totalElements ?? 0;
+  const content = garminRuns?.content ?? [];
 
   const getAllGarminRuns = async () => {
     try {
       const response = await axios.get('/api/garminRuns?' + listParams);
       setGarminRuns(response.data);
     } catch (error: any) {
+      if (error?.response?.status === 401) {
+        window.location.href = '/login';
+        return;
+      }
       handleServerError(error, navigate);
     }
   };
@@ -61,13 +67,13 @@ export default function GarminRunList() {
         <Link to="/garminRuns/add" className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2">{t('garminRun.list.createNew')}</Link>
       </div>
     </div>
-    {((garminRuns && garminRuns.page.totalElements !== 0) || searchParams.get('filter')) && (
+    {( (totalElements !== 0 && garminRuns?.page) || searchParams.get('filter')) && (
     <div className="flex flex-wrap justify-between">
       <SearchFilter placeholder={t('garminRun.list.filter')} />
       <Sorting sortOptions={sortOptions} />
     </div>
     )}
-    {!garminRuns || garminRuns.page.totalElements === 0 ? (
+    {!garminRuns || totalElements === 0 ? (
     <div>{t('garminRun.list.empty')}</div>
     ) : (<>
     <div className="overflow-x-auto">
@@ -84,7 +90,7 @@ export default function GarminRunList() {
           </tr>
         </thead>
         <tbody className="border-t-2 border-black">
-          {garminRuns.content.map((garminRun) => (
+          {content.map((garminRun) => (
           <tr key={garminRun.id} className="odd:bg-gray-100">
             <td className="p-2">{garminRun.id}</td>
             <td className="p-2">{garminRun.activityId}</td>
@@ -104,7 +110,7 @@ export default function GarminRunList() {
         </tbody>
       </table>
     </div>
-    <Pagination page={garminRuns.page} />
+    {garminRuns?.page && <Pagination page={garminRuns.page} />}
     </>)}
   </>);
 }

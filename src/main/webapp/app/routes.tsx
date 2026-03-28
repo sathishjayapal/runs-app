@@ -16,6 +16,7 @@ import StravaRunList from './strava-run/strava-run-list';
 import StravaRunAdd from './strava-run/strava-run-add';
 import StravaRunEdit from './strava-run/strava-run-edit';
 import Error from './error/error';
+import ErrorBoundaryRoute from './error/error-boundary-route';
 import AdminRoute from './common/admin-route';
 import Logout from './logout/logout';
 
@@ -24,6 +25,7 @@ export default function AppRoutes() {
   const router = createBrowserRouter([
     {
       element: <App />,
+      errorElement: <ErrorBoundaryRoute />,
       children: [
         { path: '', element: <Home /> },
         {path: 'runAppUsers', element: <AdminRoute><RunAppUserList/></AdminRoute>},

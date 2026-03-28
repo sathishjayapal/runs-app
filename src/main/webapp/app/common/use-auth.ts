@@ -15,8 +15,12 @@ export function useAuth() {
             try {
                 const response = await axios.get('/api/current-user');
                 setCurrentUser(response.data);
-            } catch (error) {
-                console.error('Failed to fetch current user:', error);
+            } catch (error: any) {
+                if (error.response?.status === 401) {
+                    console.log('User not authenticated');
+                } else {
+                    console.error('Failed to fetch current user:', error);
+                }
                 setCurrentUser(null);
             } finally {
                 setLoading(false);

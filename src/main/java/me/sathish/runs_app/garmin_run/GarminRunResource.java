@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import java.util.Map;
+import me.sathish.runs_app.common.PagedResponse;
 import me.sathish.runs_app.run_app_user.RunAppUserService;
 import me.sathish.runs_app.security.UserRoles;
 import org.springframework.data.domain.Page;
@@ -74,10 +75,11 @@ public class GarminRunResource {
             }
     )
     @GetMapping
-    public ResponseEntity<Page<GarminRunDTO>> getAllGarminRuns(
+    public ResponseEntity<PagedResponse<GarminRunDTO>> getAllGarminRuns(
             @RequestParam(name = "filter", required = false) final String filter,
             @Parameter(hidden = true) @SortDefault(sort = "id") @PageableDefault(size = 20) final Pageable pageable) {
-        return ResponseEntity.ok(garminRunService.findAll(filter, pageable));
+        Page<GarminRunDTO> page = garminRunService.findAll(filter, pageable);
+        return ResponseEntity.ok(new PagedResponse<>(page));
     }
 
     @GetMapping("/{id}")

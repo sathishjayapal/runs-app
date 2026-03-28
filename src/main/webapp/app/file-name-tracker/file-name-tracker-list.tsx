@@ -29,6 +29,10 @@ export default function FileNameTrackerList() {
       const response = await axios.get('/api/fileNameTrackers?' + listParams);
       setFileNameTrackers(response.data);
     } catch (error: any) {
+      if (error?.response?.status === 401) {
+        window.location.href = '/login';
+        return;
+      }
       handleServerError(error, navigate);
     }
   };

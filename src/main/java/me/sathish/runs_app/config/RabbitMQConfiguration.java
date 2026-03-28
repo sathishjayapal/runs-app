@@ -1,48 +1,63 @@
 package me.sathish.runs_app.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Slf4j
 public class RabbitMQConfiguration {
 
-    public static final String GARMIN_QUEUE = "x.garmin.operations";
-    public static final String GARMIN_EXCHANGE = "x.sathishprojects.events";
-    public static final String GARMIN_ROUTING_KEY = "garmin.operations.crud";
-
-    @Bean
-    public Queue garminQueue() {
-        return new Queue(GARMIN_QUEUE, true);
-    }
-
-    @Bean
-    public TopicExchange garminExchange() {
-        return new TopicExchange(GARMIN_EXCHANGE);
-    }
-
-    @Bean
-    public Binding garminBinding(Queue garminQueue, TopicExchange garminExchange) {
-        return BindingBuilder.bind(garminQueue).to(garminExchange).with(GARMIN_ROUTING_KEY);
-    }
+    // Garmin events configuration - must match eventstracker's RabbitSchemaConfig
+    public static final String GARMIN_QUEUE = "q.sathishprojects.garmin.api.events";
+    public static final String GARMIN_EXCHANGE = "x.sathishprojects.garmin.events.exchange";
+    public static final String GARMIN_ROUTING_KEY = "sathishprojects.garmin.api.event";
 
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter messageConverter) {
+        log.info("Configuring RabbitTemplate with ConnectionFactory");
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(messageConverter);
+        
+        // Enable publisher confirms for debugging
+        rabbitTemplate.setMandatory(true);
+        
+        // Add return callback to detect unroutable messages
+        rabbitTemplate.setReturnsCallback(returned -> {
+            log.error("Message returned - NOT ROUTED! Exchange: {}, RoutingKey: {}, ReplyCode: {}, ReplyText: {}",
+                returned.getExchange(), returned.getRoutingKey(), 
+                returned.getReplyCode(), returned.getReplyText());
+            log.error("Returned message: {}", new String(returned.getMessage().getBody()));
+        });
+        
+        log.info("RabbitTemplate configured successfully");
         return rabbitTemplate;
     }
 
     @Bean
     public MessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
+    }
+
+    @Bean
+    public ApplicationRunner garminQueueValidator(AmqpAdmin amqpAdmin) {
+        return new ApplicationRunner() {
+            @Override
+            public void run(ApplicationArguments args) {
+                var props = amqpAdmin.getQueueProperties(GARMIN_QUEUE);
+                if (props == null) {
+                    throw new IllegalStateException(
+                            "Garmin queue '%s' not found. Ensure eventstracker provisions it before runs-app starts.".formatted(GARMIN_QUEUE));
+                }
+                log.info("Validated Garmin queue exists: {}", GARMIN_QUEUE);
+            }
+        };
     }
 }

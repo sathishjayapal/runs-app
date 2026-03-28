@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import java.util.Map;
+import me.sathish.runs_app.common.PagedResponse;
 import me.sathish.runs_app.run_app_user.RunAppUserService;
 import me.sathish.runs_app.security.UserRoles;
 import org.springframework.data.domain.Page;
@@ -64,10 +65,11 @@ public class StravaRunResource {
             }
     )
     @GetMapping
-    public ResponseEntity<Page<StravaRunDTO>> getAllStravaRuns(
+    public ResponseEntity<PagedResponse<StravaRunDTO>> getAllStravaRuns(
             @RequestParam(name = "filter", required = false) final String filter,
             @Parameter(hidden = true) @SortDefault(sort = "runNumber") @PageableDefault(size = 20) final Pageable pageable) {
-        return ResponseEntity.ok(stravaRunService.findAll(filter, pageable));
+        Page<StravaRunDTO> page = stravaRunService.findAll(filter, pageable);
+        return ResponseEntity.ok(new PagedResponse<>(page));
     }
 
     @GetMapping("/{runNumber}")
