@@ -22,6 +22,27 @@ i18n
   });
 
 axios.defaults.baseURL = process.env.API_PATH;
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+axios.interceptors.response.use(
+  (response) => {
+    const contentType = response.headers['content-type'] || '';
+    if (response.config.url?.startsWith('/api') && !contentType.includes('application/json')) {
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+      return Promise.reject(new Error('Session expired'));
+    }
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401 && window.location.pathname !== '/login') {
+      window.location.href = '/login';
+      return Promise.reject(error);
+    }
+    return Promise.reject(error);
+  }
+);
 
 const root = document.getElementById('root')!!;
 ReactDOM.createRoot(root).render(

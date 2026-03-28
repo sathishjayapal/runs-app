@@ -19,10 +19,11 @@ export default function StravaRunList() {
   const [searchParams, ] = useSearchParams();
   const listParams = getListParams();
   const sortOptions = {
-    'runNumber,ASC': t('stravaRun.list.sort.runNumber,ASC'), 
-    'customerId,ASC': t('stravaRun.list.sort.customerId,ASC'), 
+    'runNumber,ASC': t('stravaRun.list.sort.runNumber,ASC'),
+    'customerId,ASC': t('stravaRun.list.sort.customerId,ASC'),
     'runName,ASC': t('stravaRun.list.sort.runName,ASC')
   };
+  const totalElements = stravaRuns?.page?.totalElements ?? 0;
 
   const getAllStravaRuns = async () => {
     try {
@@ -65,13 +66,13 @@ export default function StravaRunList() {
         <Link to="/stravaRuns/add" className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2">{t('stravaRun.list.createNew')}</Link>
       </div>
     </div>
-    {((stravaRuns && stravaRuns.page.totalElements !== 0) || searchParams.get('filter')) && (
+    {((totalElements !== 0 && stravaRuns?.page) || searchParams.get('filter')) && (
     <div className="flex flex-wrap justify-between">
       <SearchFilter placeholder={t('stravaRun.list.filter')} />
       <Sorting sortOptions={sortOptions} />
     </div>
     )}
-    {!stravaRuns || stravaRuns.page.totalElements === 0 ? (
+    {!stravaRuns || totalElements === 0 ? (
     <div>{t('stravaRun.list.empty')}</div>
     ) : (<>
     <div className="overflow-x-auto">

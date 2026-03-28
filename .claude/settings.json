@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git commit:*)",
+            "command": "bash ./scripts/verify.sh --quick",
+            "timeout": 120,
+            "statusMessage": "Running golden copy verification..."
+          }
+        ]
+      }
+    ]
+  }
+}

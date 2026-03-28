@@ -19,10 +19,11 @@ export default function ShedlockList() {
   const [searchParams, ] = useSearchParams();
   const listParams = getListParams();
   const sortOptions = {
-    'name,ASC': t('shedlock.list.sort.name,ASC'), 
-    'lockUntil,ASC': t('shedlock.list.sort.lockUntil,ASC'), 
+    'name,ASC': t('shedlock.list.sort.name,ASC'),
+    'lockUntil,ASC': t('shedlock.list.sort.lockUntil,ASC'),
     'lockedAt,ASC': t('shedlock.list.sort.lockedAt,ASC')
   };
+  const totalElements = shedlocks?.page?.totalElements ?? 0;
 
   const getAllShedlocks = async () => {
     try {
@@ -49,13 +50,13 @@ export default function ShedlockList() {
           by the system.</p>
       </div>
     </div>
-    {((shedlocks && shedlocks.page.totalElements !== 0) || searchParams.get('filter')) && (
+    {((totalElements !== 0 && shedlocks?.page) || searchParams.get('filter')) && (
     <div className="flex flex-wrap justify-between">
       <SearchFilter placeholder={t('shedlock.list.filter')} />
       <Sorting sortOptions={sortOptions} />
     </div>
     )}
-    {!shedlocks || shedlocks.page.totalElements === 0 ? (
+    {!shedlocks || totalElements === 0 ? (
         <div className="bg-blue-50 border border-blue-200 rounded p-4">
           <p className="text-blue-800">{t('shedlock.list.empty')}</p>
           <p className="text-blue-600 text-sm mt-2">Locks appear here only while scheduled jobs are running. This table

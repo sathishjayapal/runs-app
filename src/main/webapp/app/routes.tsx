@@ -19,6 +19,7 @@ import Error from './error/error';
 import ErrorBoundaryRoute from './error/error-boundary-route';
 import AdminRoute from './common/admin-route';
 import Logout from './logout/logout';
+import Login from './login/login';
 
 
 export default function AppRoutes() {
@@ -36,6 +37,7 @@ export default function AppRoutes() {
         { path: 'garminRuns/edit/:id', element: <GarminRunEdit /> },
         {path: 'shedlocks', element: <AdminRoute><ShedlockList/></AdminRoute>},
         {path: 'user-logout', element: <Logout/>},
+        {path: 'login', element: <Login/>},
         { path: 'fileNameTrackers', element: <FileNameTrackerList /> },
         { path: 'fileNameTrackers/add', element: <FileNameTrackerAdd /> },
         { path: 'fileNameTrackers/edit/:id', element: <FileNameTrackerEdit /> },

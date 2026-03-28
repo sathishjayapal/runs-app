@@ -20,10 +20,11 @@ export default function RunAppUserList() {
   const [searchParams, ] = useSearchParams();
   const listParams = getListParams();
   const sortOptions = {
-    'id,ASC': t('runAppUser.list.sort.id,ASC'), 
-    'email,ASC': t('runAppUser.list.sort.email,ASC'), 
+    'id,ASC': t('runAppUser.list.sort.id,ASC'),
+    'email,ASC': t('runAppUser.list.sort.email,ASC'),
     'name,ASC': t('runAppUser.list.sort.name,ASC')
   };
+  const totalElements = runAppUsers?.page?.totalElements ?? 0;
 
   const fetchRoles = async () => {
     try {
@@ -92,13 +93,13 @@ export default function RunAppUserList() {
         <Link to="/runAppUsers/add" className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2">{t('runAppUser.list.createNew')}</Link>
       </div>
     </div>
-    {((runAppUsers && runAppUsers.page.totalElements !== 0) || searchParams.get('filter')) && (
+    {((totalElements !== 0 && runAppUsers?.page) || searchParams.get('filter')) && (
     <div className="flex flex-wrap justify-between">
       <SearchFilter placeholder={t('runAppUser.list.filter')} />
       <Sorting sortOptions={sortOptions} />
     </div>
     )}
-    {!runAppUsers || runAppUsers.page.totalElements === 0 ? (
+    {!runAppUsers || totalElements === 0 ? (
     <div>{t('runAppUser.list.empty')}</div>
     ) : (<>
     <div className="overflow-x-auto">

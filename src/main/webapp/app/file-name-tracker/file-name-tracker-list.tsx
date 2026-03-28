@@ -19,10 +19,11 @@ export default function FileNameTrackerList() {
   const [searchParams, ] = useSearchParams();
   const listParams = getListParams();
   const sortOptions = {
-    'id,ASC': t('fileNameTracker.list.sort.id,ASC'), 
-    'fileName,ASC': t('fileNameTracker.list.sort.fileName,ASC'), 
+    'id,ASC': t('fileNameTracker.list.sort.id,ASC'),
+    'fileName,ASC': t('fileNameTracker.list.sort.fileName,ASC'),
     'createdAt,ASC': t('fileNameTracker.list.sort.createdAt,ASC')
   };
+  const totalElements = fileNameTrackers?.page?.totalElements ?? 0;
 
   const getAllFileNameTrackers = async () => {
     try {
@@ -65,13 +66,13 @@ export default function FileNameTrackerList() {
         <Link to="/fileNameTrackers/add" className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2">{t('fileNameTracker.list.createNew')}</Link>
       </div>
     </div>
-    {((fileNameTrackers && fileNameTrackers.page.totalElements !== 0) || searchParams.get('filter')) && (
+    {((totalElements !== 0 && fileNameTrackers?.page) || searchParams.get('filter')) && (
     <div className="flex flex-wrap justify-between">
       <SearchFilter placeholder={t('fileNameTracker.list.filter')} />
       <Sorting sortOptions={sortOptions} />
     </div>
     )}
-    {!fileNameTrackers || fileNameTrackers.page.totalElements === 0 ? (
+    {!fileNameTrackers || totalElements === 0 ? (
     <div>{t('fileNameTracker.list.empty')}</div>
     ) : (<>
     <div className="overflow-x-auto">
