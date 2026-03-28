@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${JDBC_DATABASE_URL:jdbc:postgresql://localhost:5445/runsapp_db}
+    url: ${JDBC_DATABASE_URL:jdbc:postgresql://localhost:5443/runsapp_db}
     username: ${JDBC_DATABASE_USERNAME:postgres}
     password: ${JDBC_DATABASE_PASSWORD:P4ssword!}
     hikari:
