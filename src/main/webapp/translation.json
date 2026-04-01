@@ -54,6 +54,9 @@
     "name": {
       "label": "Name"
     },
+    "runnerUserRoles": {
+      "label": "Runner User Roles"
+    },
     "edit": {
       "headline": "Edit Run App User",
       "back": "Back to list"
@@ -77,11 +80,6 @@
       },
       "updatedBy": {
         "referenced": "This entity is still referenced by Strava Run {{id}} via field Updated By."
-      }
-    },
-    "runnerAppRole": {
-      "runnerUserRoles": {
-        "referenced": "This entity is still referenced by Runner App Role {{id}} via field Runner User Roles."
       }
     },
     "create": {

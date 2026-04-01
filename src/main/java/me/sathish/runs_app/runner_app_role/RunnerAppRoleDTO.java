@@ -17,7 +17,4 @@ public class RunnerAppRoleDTO {
     @RunnerAppRoleRoleNameUnique
     private String roleName;
 
-    @NotNull
-    private Long runnerUserRoles;
-
 }

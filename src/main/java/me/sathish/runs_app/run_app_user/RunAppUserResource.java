@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import java.util.Map;
+import me.sathish.runs_app.runner_app_role.RunnerAppRoleService;
 import me.sathish.runs_app.security.UserRoles;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,9 +36,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class RunAppUserResource {
 
     private final RunAppUserService runAppUserService;
+    private final RunnerAppRoleService runnerAppRoleService;
 
-    public RunAppUserResource(final RunAppUserService runAppUserService) {
+    public RunAppUserResource(final RunAppUserService runAppUserService,
+            final RunnerAppRoleService runnerAppRoleService) {
         this.runAppUserService = runAppUserService;
+        this.runnerAppRoleService = runnerAppRoleService;
     }
 
     @Operation(
@@ -90,6 +95,11 @@ public class RunAppUserResource {
     public ResponseEntity<Void> deleteRunAppUser(@PathVariable(name = "id") final Long id) {
         runAppUserService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/runnerUserRolesValues")
+    public ResponseEntity<Map<Long, String>> getRunnerUserRolesValues() {
+        return ResponseEntity.ok(runnerAppRoleService.getRunnerAppRoleValues());
     }
 
 }

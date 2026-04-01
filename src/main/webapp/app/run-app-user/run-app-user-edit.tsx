@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
 import { handleServerError, setYupDefaults } from 'app/common/utils';
@@ -16,7 +16,8 @@ function getSchema() {
   return yup.object({
     email: yup.string().emptyToNull().max(100).required(),
     password: yup.string().emptyToNull().max(100).required(),
-    name: yup.string().emptyToNull().max(100).required()
+    name: yup.string().emptyToNull().max(100).required(),
+    runnerUserRoles: yup.number().integer().emptyToNull().required()
   });
 }
 
@@ -25,6 +26,7 @@ export default function RunAppUserEdit() {
   useDocumentTitle(t('runAppUser.edit.headline'));
 
   const navigate = useNavigate();
+  const [runnerUserRolesValues, setRunnerUserRolesValues] = useState<Map<number,string>>(new Map());
   const params = useParams();
   const currentId = +params.id!;
 
@@ -34,6 +36,8 @@ export default function RunAppUserEdit() {
 
   const prepareForm = async () => {
     try {
+      const runnerUserRolesValuesResponse = await axios.get('/api/runAppUsers/runnerUserRolesValues');
+      setRunnerUserRolesValues(runnerUserRolesValuesResponse.data);
       const data = (await axios.get('/api/runAppUsers/' + currentId)).data;
       useFormResult.reset(data);
     } catch (error: any) {
@@ -71,6 +75,7 @@ export default function RunAppUserEdit() {
       <InputRow useFormResult={useFormResult} object="runAppUser" field="email" required={true} />
       <InputRow useFormResult={useFormResult} object="runAppUser" field="password" required={true} type="password" />
       <InputRow useFormResult={useFormResult} object="runAppUser" field="name" required={true} />
+      <InputRow useFormResult={useFormResult} object="runAppUser" field="runnerUserRoles" required={true} type="select" options={runnerUserRolesValues} />
       <input type="submit" value={t('runAppUser.edit.headline')} className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2 cursor-pointer mt-6" />
     </form>
   </>);

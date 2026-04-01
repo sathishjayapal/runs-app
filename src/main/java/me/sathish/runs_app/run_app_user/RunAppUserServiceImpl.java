@@ -2,9 +2,14 @@ package me.sathish.runs_app.run_app_user;
 
 import java.util.Map;
 import me.sathish.runs_app.events.BeforeDeleteRunAppUser;
+import me.sathish.runs_app.events.BeforeDeleteRunnerAppRole;
+import me.sathish.runs_app.runner_app_role.RunnerAppRole;
+import me.sathish.runs_app.runner_app_role.RunnerAppRoleRepository;
 import me.sathish.runs_app.util.CustomCollectors;
 import me.sathish.runs_app.util.NotFoundException;
+import me.sathish.runs_app.util.ReferencedException;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -17,12 +22,15 @@ import org.springframework.stereotype.Service;
 public class RunAppUserServiceImpl implements RunAppUserService {
 
     private final RunAppUserRepository runAppUserRepository;
+    private final RunnerAppRoleRepository runnerAppRoleRepository;
     private final ApplicationEventPublisher publisher;
     private final PasswordEncoder passwordEncoder;
 
     public RunAppUserServiceImpl(final RunAppUserRepository runAppUserRepository,
+            final RunnerAppRoleRepository runnerAppRoleRepository,
             final ApplicationEventPublisher publisher, final PasswordEncoder passwordEncoder) {
         this.runAppUserRepository = runAppUserRepository;
+        this.runnerAppRoleRepository = runnerAppRoleRepository;
         this.publisher = publisher;
         this.passwordEncoder = passwordEncoder;
     }
@@ -82,6 +90,7 @@ public class RunAppUserServiceImpl implements RunAppUserService {
         runAppUserDTO.setId(runAppUser.getId());
         runAppUserDTO.setEmail(runAppUser.getEmail());
         runAppUserDTO.setName(runAppUser.getName());
+        runAppUserDTO.setRunnerUserRoles(runAppUser.getRunnerUserRoles() == null ? null : runAppUser.getRunnerUserRoles().getId());
         return runAppUserDTO;
     }
 
@@ -89,6 +98,9 @@ public class RunAppUserServiceImpl implements RunAppUserService {
         runAppUser.setEmail(runAppUserDTO.getEmail());
         runAppUser.setPassword(passwordEncoder.encode(runAppUserDTO.getPassword()));
         runAppUser.setName(runAppUserDTO.getName());
+        final RunnerAppRole runnerUserRoles = runAppUserDTO.getRunnerUserRoles() == null ? null : runnerAppRoleRepository.findById(runAppUserDTO.getRunnerUserRoles())
+                .orElseThrow(() -> new NotFoundException("runnerUserRoles not found"));
+        runAppUser.setRunnerUserRoles(runnerUserRoles);
         return runAppUser;
     }
 
@@ -97,6 +109,17 @@ public class RunAppUserServiceImpl implements RunAppUserService {
         return runAppUserRepository.findAll(Sort.by("id"))
                 .stream()
                 .collect(CustomCollectors.toSortedMap(RunAppUser::getId, RunAppUser::getEmail));
+    }
+
+    @EventListener(BeforeDeleteRunnerAppRole.class)
+    public void on(final BeforeDeleteRunnerAppRole event) {
+        final ReferencedException referencedException = new ReferencedException();
+        final RunAppUser runnerUserRolesRunAppUser = runAppUserRepository.findFirstByRunnerUserRolesId(event.getId());
+        if (runnerUserRolesRunAppUser != null) {
+            referencedException.setKey("runnerAppRole.runAppUser.runnerUserRoles.referenced");
+            referencedException.addParam(runnerUserRolesRunAppUser.getId());
+            throw referencedException;
+        }
     }
 
 }

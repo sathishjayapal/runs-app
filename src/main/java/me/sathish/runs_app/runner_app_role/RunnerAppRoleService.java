@@ -1,5 +1,6 @@
 package me.sathish.runs_app.runner_app_role;
 
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -17,5 +18,7 @@ public interface RunnerAppRoleService {
     void delete(Long id);
 
     boolean roleNameExists(String roleName);
+
+    Map<Long, String> getRunnerAppRoleValues();
 
 }

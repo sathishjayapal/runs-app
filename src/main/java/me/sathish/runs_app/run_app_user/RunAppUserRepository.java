@@ -11,4 +11,6 @@ public interface RunAppUserRepository extends JpaRepository<RunAppUser, Long> {
 
     Page<RunAppUser> findAllById(Long id, Pageable pageable);
 
+    RunAppUser findFirstByRunnerUserRolesId(Long id);
+
 }

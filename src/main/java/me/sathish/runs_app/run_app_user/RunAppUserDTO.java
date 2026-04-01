@@ -24,4 +24,7 @@ public class RunAppUserDTO {
     @Size(max = 100)
     private String name;
 
+    @NotNull
+    private Long runnerUserRoles;
+
 }

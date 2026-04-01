@@ -5,6 +5,7 @@ CREATE TABLE run_app_user (
     email VARCHAR(100) NOT NULL,
     password VARCHAR(100) NOT NULL,
     name VARCHAR(100) NOT NULL,
+    runner_user_roles_id BIGINT NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     CONSTRAINT run_app_user_pkey PRIMARY KEY (id)
@@ -65,11 +66,12 @@ CREATE TABLE strava_run (
 CREATE TABLE runner_app_role (
     id BIGINT NOT NULL,
     role_name VARCHAR(255) NOT NULL,
-    runner_user_roles_id BIGINT NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     CONSTRAINT runner_app_role_pkey PRIMARY KEY (id)
 );
+
+ALTER TABLE run_app_user ADD CONSTRAINT fk_run_app_user_runner_user_roles_id FOREIGN KEY (runner_user_roles_id) REFERENCES runner_app_role (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 ALTER TABLE garmin_run ADD CONSTRAINT fk_garmin_run_created_by_id FOREIGN KEY (created_by_id) REFERENCES run_app_user (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
@@ -80,7 +82,5 @@ ALTER TABLE file_name_tracker ADD CONSTRAINT fk_file_name_tracker_created_by_id 
 ALTER TABLE strava_run ADD CONSTRAINT fk_strava_run_created_by_id FOREIGN KEY (created_by_id) REFERENCES run_app_user (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 ALTER TABLE strava_run ADD CONSTRAINT fk_strava_run_updated_by_id FOREIGN KEY (updated_by_id) REFERENCES run_app_user (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
-
-ALTER TABLE runner_app_role ADD CONSTRAINT fk_runner_app_role_runner_user_roles_id FOREIGN KEY (runner_user_roles_id) REFERENCES run_app_user (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 ALTER TABLE runner_app_role ADD CONSTRAINT unique_runner_app_role_role_name UNIQUE (role_name);

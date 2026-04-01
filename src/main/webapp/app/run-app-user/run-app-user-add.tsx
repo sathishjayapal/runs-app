@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import { handleServerError, setYupDefaults } from 'app/common/utils';
@@ -16,7 +16,8 @@ function getSchema() {
   return yup.object({
     email: yup.string().emptyToNull().max(100).required(),
     password: yup.string().emptyToNull().max(100).required(),
-    name: yup.string().emptyToNull().max(100).required()
+    name: yup.string().emptyToNull().max(100).required(),
+    runnerUserRoles: yup.number().integer().emptyToNull().required()
   });
 }
 
@@ -25,10 +26,24 @@ export default function RunAppUserAdd() {
   useDocumentTitle(t('runAppUser.add.headline'));
 
   const navigate = useNavigate();
+  const [runnerUserRolesValues, setRunnerUserRolesValues] = useState<Map<number,string>>(new Map());
 
   const useFormResult = useForm({
     resolver: yupResolver(getSchema()),
   });
+
+  const prepareRelations = async () => {
+    try {
+      const runnerUserRolesValuesResponse = await axios.get('/api/runAppUsers/runnerUserRolesValues');
+      setRunnerUserRolesValues(runnerUserRolesValuesResponse.data);
+    } catch (error: any) {
+      handleServerError(error, navigate);
+    }
+  };
+
+  useEffect(() => {
+    prepareRelations();
+  }, []);
 
   const createRunAppUser = async (data: RunAppUserDTO) => {
     window.scrollTo(0, 0);
@@ -55,6 +70,7 @@ export default function RunAppUserAdd() {
       <InputRow useFormResult={useFormResult} object="runAppUser" field="email" required={true} />
       <InputRow useFormResult={useFormResult} object="runAppUser" field="password" required={true} type="password" />
       <InputRow useFormResult={useFormResult} object="runAppUser" field="name" required={true} />
+      <InputRow useFormResult={useFormResult} object="runAppUser" field="runnerUserRoles" required={true} type="select" options={runnerUserRolesValues} />
       <input type="submit" value={t('runAppUser.add.headline')} className="inline-block text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300  focus:ring-4 rounded px-5 py-2 cursor-pointer mt-6" />
     </form>
   </>);
