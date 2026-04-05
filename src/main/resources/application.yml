@@ -78,4 +78,5 @@ app:
   garmin:
     import:
       folder: ${GARMIN_IMPORT_FOLDER:/data/garmin-fit-files}
+      csv-folder: ${GARMIN_CSV_FOLDER:/data/garmin-csv-files}
       systemUserId: ${GARMIN_SYSTEM_USER_ID:10000}

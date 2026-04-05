@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -21,17 +22,32 @@ import org.springframework.web.bind.annotation.RestController;
 public class GarminFitImportResource {
 
     private final GarminFitImportScheduledJob garminFitImportScheduledJob;
+    private final GarminCsvImportService garminCsvImportService;
 
-    public GarminFitImportResource(GarminFitImportScheduledJob garminFitImportScheduledJob) {
+    public GarminFitImportResource(GarminFitImportScheduledJob garminFitImportScheduledJob,
+                                    GarminCsvImportService garminCsvImportService) {
         this.garminFitImportScheduledJob = garminFitImportScheduledJob;
+        this.garminCsvImportService = garminCsvImportService;
     }
 
     @PostMapping("/trigger")
     @Operation(summary = "Manually trigger Garmin FIT file import")
     @ApiResponse(responseCode = "200", description = "Import completed")
     public ResponseEntity<ImportResult> triggerImport() {
-        log.info("Manual import triggered via REST API");
+        log.info("Manual FIT import triggered via REST API");
         ImportResult result = garminFitImportScheduledJob.triggerManualImport();
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/trigger-csv")
+    @Operation(summary = "Import Garmin activities from CSV file",
+               description = "Parses activities.csv, skips records already in DB, reconciles results. " +
+                             "Optional 'folder' param overrides the configured csv-folder.")
+    @ApiResponse(responseCode = "200", description = "CSV import completed")
+    public ResponseEntity<ImportResult> triggerCsvImport(
+            @RequestParam(required = false) String folder) {
+        log.info("Manual CSV import triggered via REST API, folder={}", folder);
+        ImportResult result = garminCsvImportService.processImportFolder(folder);
         return ResponseEntity.ok(result);
     }
 }

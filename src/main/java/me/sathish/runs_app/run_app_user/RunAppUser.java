@@ -71,7 +71,7 @@ public class RunAppUser {
     @OneToMany(mappedBy = "updatedBy")
     private Set<StravaRun> updatedByStravaRun = new HashSet<>();
 
-    @ManyToMany
+    @ManyToMany(cascade = {jakarta.persistence.CascadeType.PERSIST, jakarta.persistence.CascadeType.MERGE})
     @JoinTable(
             name = "run_app_user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
