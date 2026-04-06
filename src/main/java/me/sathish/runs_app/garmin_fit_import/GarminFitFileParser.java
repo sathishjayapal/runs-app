@@ -48,6 +48,7 @@ public class GarminFitFileParser {
                         
                         // Calories
                         if (sessionMesg.getTotalCalories() != null) {
+                            System.out.printf("Total calories from session: %d%n", sessionMesg.getTotalCalories());
                             activityData.setCalories(sessionMesg.getTotalCalories());
                         }
                         
