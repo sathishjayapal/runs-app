@@ -13,4 +13,7 @@ public class GarminRunEvent {
     private String distance;
     private String elapsedTime;
     private Long databaseId;
+    private String status; // "SUCCESS", "SKIPPED", "FAILED"
+    private String errorMessage; // Only populated for FAILED status
+    private String fileName; // Source file name
 }

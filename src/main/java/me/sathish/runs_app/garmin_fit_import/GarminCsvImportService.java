@@ -90,16 +90,22 @@ public class GarminCsvImportService {
             if (garminRunRepository.existsByActivityId(row.getActivityId())) {
                 log.debug("Activity already exists in DB, skipping: {} {}", row.getActivityDate(), row.getActivityName());
                 result.addSkipped(row.getActivityDate() + " " + row.getActivityName());
+                
+                // Publish SKIPPED event to RabbitMQ
+                publishSkippedEvent(row, csvFile.getName());
             } else {
                 try {
                     GarminRunDTO dto = mapToDto(row, csvFile.getName());
                     Long savedId = garminRunService.create(dto);
-                    publishActivityEvent(dto, savedId);
+                    publishActivityEvent(dto, savedId, csvFile.getName());
                     result.addSuccess(row.getActivityDate() + " " + row.getActivityName());
                     log.info("Imported CSV activity: {} (DB id: {})", row.getActivityId(), savedId);
                 } catch (Exception e) {
                     log.error("Failed to save CSV activity: {}", row.getActivityId(), e);
                     result.addFailed(row.getActivityId(), e.getMessage());
+                    
+                    // Publish FAILED event to RabbitMQ
+                    publishFailedEvent(row, csvFile.getName(), e.getMessage());
                 }
             }
         }
@@ -123,7 +129,7 @@ public class GarminCsvImportService {
         return dto;
     }
 
-    private void publishActivityEvent(GarminRunDTO dto, Long savedId) {
+    private void publishActivityEvent(GarminRunDTO dto, Long savedId, String fileName) {
         try {
             GarminRunEvent event = new GarminRunEvent();
             event.setEventType("GARMIN_CSV_RUN");
@@ -133,13 +139,53 @@ public class GarminCsvImportService {
             event.setDistance(dto.getDistance());
             event.setElapsedTime(dto.getElapsedTime());
             event.setDatabaseId(savedId);
+            event.setStatus("SUCCESS");
+            event.setFileName(fileName);
             rabbitTemplate.convertAndSend(
                 RabbitMQConfiguration.GARMIN_EXCHANGE,
                 RabbitMQConfiguration.GARMIN_ROUTING_KEY,
                 event);
-            log.debug("Published event for CSV activity: {}", dto.getActivityId());
+            log.debug("Published SUCCESS event for CSV activity: {}", dto.getActivityId());
         } catch (Exception e) {
             log.error("Failed to publish event for CSV activity: {}", dto.getActivityId(), e);
+        }
+    }
+    
+    private void publishSkippedEvent(FitActivityData data, String fileName) {
+        try {
+            GarminRunEvent event = new GarminRunEvent();
+            event.setEventType("GARMIN_CSV_RUN");
+            event.setActivityId(data.getActivityId());
+            event.setActivityName(data.getActivityName());
+            event.setStatus("SKIPPED");
+            event.setFileName(fileName);
+            event.setErrorMessage("Activity already exists in database");
+            rabbitTemplate.convertAndSend(
+                RabbitMQConfiguration.GARMIN_EXCHANGE,
+                RabbitMQConfiguration.GARMIN_ROUTING_KEY,
+                event);
+            log.debug("Published SKIPPED event for CSV activity: {}", data.getActivityId());
+        } catch (Exception e) {
+            log.error("Failed to publish SKIPPED event for CSV activity: {}", data.getActivityId(), e);
+        }
+    }
+    
+    private void publishFailedEvent(FitActivityData data, String fileName, String errorMessage) {
+        try {
+            GarminRunEvent event = new GarminRunEvent();
+            event.setEventType("GARMIN_CSV_RUN");
+            event.setActivityId(data.getActivityId());
+            event.setActivityName(data.getActivityName());
+            event.setStatus("FAILED");
+            event.setFileName(fileName);
+            event.setErrorMessage(errorMessage);
+            rabbitTemplate.convertAndSend(
+                RabbitMQConfiguration.GARMIN_EXCHANGE,
+                RabbitMQConfiguration.GARMIN_ROUTING_KEY,
+                event);
+            log.debug("Published FAILED event for CSV activity: {}", data.getActivityId());
+        } catch (Exception e) {
+            log.error("Failed to publish FAILED event for CSV activity: {}", data.getActivityId(), e);
         }
     }
 

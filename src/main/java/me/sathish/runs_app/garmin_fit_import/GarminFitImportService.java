@@ -141,6 +141,9 @@ public class GarminFitImportService {
         if (fileNameTrackerRepository.existsByFileName(fileName)) {
             log.debug("File already processed, skipping: {}", fileName);
             result.addSkipped(fileName);
+            
+            // Publish SKIPPED event to RabbitMQ
+            publishSkippedEvent(fileName, "FIT file already processed");
             return;
         }
 
@@ -157,8 +160,8 @@ public class GarminFitImportService {
             // Track processed file
             trackProcessedFile(fileName);
             
-            // Publish event to RabbitMQ
-            publishGarminRunEvent(dto, createdId);
+            // Publish SUCCESS event to RabbitMQ
+            publishGarminRunEvent(dto, createdId, fileName);
             
             result.addSuccess(fileName);
             log.info("Successfully imported activity from file: {} (ID: {})", fileName, createdId);
@@ -166,6 +169,9 @@ public class GarminFitImportService {
         } catch (Exception e) {
             log.error("Failed to process FIT file: {}", fileName, e);
             result.addFailed(fileName, e.getMessage());
+            
+            // Publish FAILED event to RabbitMQ
+            publishFailedEvent(fileName, e.getMessage());
         }
     }
 
@@ -243,9 +249,9 @@ public class GarminFitImportService {
         }
     }
 
-    private void publishGarminRunEvent(GarminRunDTO dto, Long createdId) {
+    private void publishGarminRunEvent(GarminRunDTO dto, Long createdId, String fileName) {
         try {
-            log.info("=== Preparing to publish GARMIN_RUN event ===");
+            log.info("=== Preparing to publish GARMIN_RUN SUCCESS event ===");
             GarminRunEvent event = new GarminRunEvent();
             event.setEventType("GARMIN_RUN");
             event.setActivityId(dto.getActivityId());
@@ -254,8 +260,10 @@ public class GarminFitImportService {
             event.setDistance(dto.getDistance());
             event.setElapsedTime(dto.getElapsedTime());
             event.setDatabaseId(createdId);
+            event.setStatus("SUCCESS");
+            event.setFileName(fileName);
             
-            log.info("Event details - Exchange: {}, RoutingKey: {}, ActivityId: {}", 
+            log.info("Event details - Exchange: {}, RoutingKey: {}, ActivityId: {}, Status: SUCCESS", 
                 RabbitMQConfiguration.GARMIN_EXCHANGE, 
                 RabbitMQConfiguration.GARMIN_ROUTING_KEY,
                 dto.getActivityId());
@@ -266,9 +274,51 @@ public class GarminFitImportService {
                 event
             );
             
-            log.info("=== Successfully published GARMIN_RUN event to RabbitMQ for activity: {} ===", dto.getActivityId());
+            log.info("=== Successfully published GARMIN_RUN SUCCESS event to RabbitMQ for activity: {} ===", dto.getActivityId());
         } catch (Exception e) {
             log.error("=== FAILED to publish GARMIN_RUN event to RabbitMQ ===", e);
+        }
+    }
+    
+    private void publishSkippedEvent(String fileName, String reason) {
+        try {
+            log.info("=== Preparing to publish GARMIN_RUN SKIPPED event ===");
+            GarminRunEvent event = new GarminRunEvent();
+            event.setEventType("GARMIN_RUN");
+            event.setFileName(fileName);
+            event.setStatus("SKIPPED");
+            event.setErrorMessage(reason);
+            
+            rabbitTemplate.convertAndSend(
+                RabbitMQConfiguration.GARMIN_EXCHANGE,
+                RabbitMQConfiguration.GARMIN_ROUTING_KEY,
+                event
+            );
+            
+            log.info("=== Successfully published GARMIN_RUN SKIPPED event for file: {} ===", fileName);
+        } catch (Exception e) {
+            log.error("=== FAILED to publish SKIPPED event to RabbitMQ ===", e);
+        }
+    }
+    
+    private void publishFailedEvent(String fileName, String errorMessage) {
+        try {
+            log.info("=== Preparing to publish GARMIN_RUN FAILED event ===");
+            GarminRunEvent event = new GarminRunEvent();
+            event.setEventType("GARMIN_RUN");
+            event.setFileName(fileName);
+            event.setStatus("FAILED");
+            event.setErrorMessage(errorMessage);
+            
+            rabbitTemplate.convertAndSend(
+                RabbitMQConfiguration.GARMIN_EXCHANGE,
+                RabbitMQConfiguration.GARMIN_ROUTING_KEY,
+                event
+            );
+            
+            log.info("=== Successfully published GARMIN_RUN FAILED event for file: {} ===", fileName);
+        } catch (Exception e) {
+            log.error("=== FAILED to publish FAILED event to RabbitMQ ===", e);
         }
     }
 }

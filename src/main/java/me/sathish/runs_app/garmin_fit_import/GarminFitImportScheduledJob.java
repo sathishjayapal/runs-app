@@ -15,16 +15,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class GarminFitImportScheduledJob {
 
     private final GarminFitImportService garminFitImportService;
+    private final UnifiedGarminImportService unifiedGarminImportService;
     private final RabbitTemplate rabbitTemplate;
 
     public GarminFitImportScheduledJob(GarminFitImportService garminFitImportService,
+                                       UnifiedGarminImportService unifiedGarminImportService,
                                        RabbitTemplate rabbitTemplate) {
         this.garminFitImportService = garminFitImportService;
+        this.unifiedGarminImportService = unifiedGarminImportService;
         this.rabbitTemplate = rabbitTemplate;
     }
 
     /**
-     * Scheduled job that runs every 5 minutes to process Garmin FIT files.
+     * Scheduled job that runs every 5 minutes to process Garmin FIT and CSV files in parallel.
      * Uses ShedLock to ensure only one instance runs at a time in distributed environments.
      * 
      * Lock configuration:
@@ -38,45 +41,60 @@ public class GarminFitImportScheduledJob {
             lockAtLeastFor = "30s"
     )
     public void processGarminFitFiles() {
-        log.info("=== Starting Garmin FIT Import Scheduled Job ===");
+        log.info("=== Starting Unified Garmin Import Scheduled Job (FIT + CSV) ===");
         
         try {
-            ImportResult result = garminFitImportService.processImportFolder();
-            log.info("=== Garmin FIT Import Job Completed ===");
-            log.info("Total files processed: {}", result.getTotalProcessed());
-            log.info("Successfully imported: {}", result.getSuccessCount());
-            log.info("Skipped (already processed): {}", result.getSkippedCount());
-            log.info("Failed: {}", result.getFailedCount());
+            UnifiedImportResult result = unifiedGarminImportService.processAllFiles();
+            
+            log.info("=== Unified Garmin Import Job Completed ===");
+            log.info("Total imported: {}", result.getTotalSuccessCount());
+            log.info("Total skipped: {}", result.getTotalSkippedCount());
+            log.info("Total failed: {}", result.getTotalFailedCount());
+            log.info("Duration: {}ms", result.getTotalDurationMs());
+            
+            // Create structured event for unified import summary
+            UnifiedImportEvent summaryEvent = new UnifiedImportEvent();
+            summaryEvent.setEventType("GARMIN_UNIFIED_IMPORT");
+            summaryEvent.setTotalImported(result.getTotalSuccessCount());
+            summaryEvent.setTotalSkipped(result.getTotalSkippedCount());
+            summaryEvent.setTotalFailed(result.getTotalFailedCount());
+            summaryEvent.setDurationMs(result.getTotalDurationMs());
+            summaryEvent.setFitSuccess(result.getFitResult() != null ? result.getFitResult().getSuccessCount() : 0);
+            summaryEvent.setFitSkipped(result.getFitResult() != null ? result.getFitResult().getSkippedCount() : 0);
+            summaryEvent.setFitFailed(result.getFitResult() != null ? result.getFitResult().getFailedCount() : 0);
+            summaryEvent.setCsvSuccess(result.getCsvResult() != null ? result.getCsvResult().getSuccessCount() : 0);
+            summaryEvent.setCsvSkipped(result.getCsvResult() != null ? result.getCsvResult().getSkippedCount() : 0);
+            summaryEvent.setCsvFailed(result.getCsvResult() != null ? result.getCsvResult().getFailedCount() : 0);
+            summaryEvent.setStatus(result.isFullySuccessful() ? "SUCCESS" : result.hasFailed() ? "PARTIAL_SUCCESS" : "NO_NEW_DATA");
+            
             String summaryPayload = String.format(
-                "Total files processed: %d, Successfully imported: %d, Skipped: %d, Failed: %d",
-                result.getTotalProcessed(), result.getSuccessCount(), result.getSkippedCount(), result.getFailedCount());
+                "Unified Import: Total imported: %d, Skipped: %d, Failed: %d, Duration: %dms | " +
+                "FIT: Success=%d, Skipped=%d, Failed=%d | CSV: Success=%d, Skipped=%d, Failed=%d",
+                result.getTotalSuccessCount(), result.getTotalSkippedCount(), result.getTotalFailedCount(),
+                result.getTotalDurationMs(),
+                summaryEvent.getFitSuccess(), summaryEvent.getFitSkipped(), summaryEvent.getFitFailed(),
+                summaryEvent.getCsvSuccess(), summaryEvent.getCsvSkipped(), summaryEvent.getCsvFailed());
+            
             log.info(summaryPayload);
 
             try {
-                log.info("=== Attempting to send message to RabbitMQ ===");
-                log.info("Exchange: {}", RabbitMQConfiguration.GARMIN_EXCHANGE);
-                log.info("Routing Key: {}", RabbitMQConfiguration.GARMIN_ROUTING_KEY);
-                log.info("Payload: {}", summaryPayload);
+                log.info("=== Attempting to send unified import summary to RabbitMQ ===");
+                log.info("Exchange: {}, RoutingKey: {}", 
+                    RabbitMQConfiguration.GARMIN_EXCHANGE,
+                    RabbitMQConfiguration.GARMIN_ROUTING_KEY);
                 
                 rabbitTemplate.convertAndSend(
                     RabbitMQConfiguration.GARMIN_EXCHANGE,
                     RabbitMQConfiguration.GARMIN_ROUTING_KEY,
-                    summaryPayload);
+                    summaryEvent);
                 
-                log.info("=== Message sent successfully to RabbitMQ ===");
+                log.info("=== Unified import summary sent successfully to RabbitMQ ===");
             } catch (Exception e) {
-                log.error("=== FAILED to send message to RabbitMQ ===", e);
-            }
-
-
-            if (result.getFailedCount() > 0) {
-                log.error("Failed files details:");
-                result.getFailedFiles().forEach((file, error) -> 
-                    log.error("  - {}: {}", file, error));
+                log.error("=== FAILED to send unified import summary to RabbitMQ ===", e);
             }
             
         } catch (Exception e) {
-            log.error("Error during Garmin FIT import job execution", e);
+            log.error("Error during Unified Garmin import job execution", e);
         }
     }
     

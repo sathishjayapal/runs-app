@@ -23,11 +23,14 @@ public class GarminFitImportResource {
 
     private final GarminFitImportScheduledJob garminFitImportScheduledJob;
     private final GarminCsvImportService garminCsvImportService;
+    private final UnifiedGarminImportService unifiedGarminImportService;
 
     public GarminFitImportResource(GarminFitImportScheduledJob garminFitImportScheduledJob,
-                                    GarminCsvImportService garminCsvImportService) {
+                                    GarminCsvImportService garminCsvImportService,
+                                    UnifiedGarminImportService unifiedGarminImportService) {
         this.garminFitImportScheduledJob = garminFitImportScheduledJob;
         this.garminCsvImportService = garminCsvImportService;
+        this.unifiedGarminImportService = unifiedGarminImportService;
     }
 
     @PostMapping("/trigger")
@@ -48,6 +51,20 @@ public class GarminFitImportResource {
             @RequestParam(required = false) String folder) {
         log.info("Manual CSV import triggered via REST API, folder={}", folder);
         ImportResult result = garminCsvImportService.processImportFolder(folder);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/trigger-unified")
+    @Operation(summary = "Import both Garmin FIT and CSV files in parallel",
+               description = "Processes FIT files and CSV files simultaneously in separate threads. " +
+                             "Provides comprehensive reconciliation report showing what was processed, " +
+                             "what was skipped, what failed, and next steps. " +
+                             "Optional 'csvFolder' param overrides the configured csv-folder.")
+    @ApiResponse(responseCode = "200", description = "Unified import completed")
+    public ResponseEntity<UnifiedImportResult> triggerUnifiedImport(
+            @RequestParam(required = false) String csvFolder) {
+        log.info("Manual unified import triggered via REST API, csvFolder={}", csvFolder);
+        UnifiedImportResult result = unifiedGarminImportService.processAllFiles(csvFolder);
         return ResponseEntity.ok(result);
     }
 }
