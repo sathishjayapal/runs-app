@@ -4,8 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -30,17 +35,29 @@ public class GarminCsvParser {
     private static final int MIN_COLUMNS       = 9;
 
     public List<FitActivityData> parse(String filePath) throws IOException {
+        try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath))) {
+            return parse(reader, filePath);
+        }
+    }
+
+    public List<FitActivityData> parse(InputStream inputStream, String sourceName) throws IOException {
+        try (Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+            return parse(reader, sourceName);
+        }
+    }
+
+    private List<FitActivityData> parse(Reader reader, String sourceName) throws IOException {
         List<FitActivityData> activities = new ArrayList<>();
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String header = reader.readLine();
+        try (BufferedReader bufferedReader = toBuffered(reader)) {
+            String header = bufferedReader.readLine();
             if (header == null) {
                 return activities;
             }
 
             String line;
             int lineNumber = 1;
-            while ((line = reader.readLine()) != null) {
+            while ((line = bufferedReader.readLine()) != null) {
                 lineNumber++;
                 try {
                     FitActivityData data = parseLine(line);
@@ -53,8 +70,12 @@ public class GarminCsvParser {
             }
         }
 
-        log.info("Parsed {} activities from {}", activities.size(), filePath);
+        log.info("Parsed {} activities from {}", activities.size(), sourceName);
         return activities;
+    }
+
+    private BufferedReader toBuffered(Reader reader) {
+        return reader instanceof BufferedReader buffered ? buffered : new BufferedReader(reader);
     }
 
     private FitActivityData parseLine(String line) {

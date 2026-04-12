@@ -81,6 +81,14 @@ public class DataInitializer {
             regularUser = userRepository.save(regularUser);
             log.info("Created regular user: {} with role: ROLE_USER", regularUser.getEmail());
 
+            RunAppUser systemUser = new RunAppUser();
+            systemUser.setEmail("system@runsapp.com");
+            systemUser.setPassword(passwordEncoder.encode("system123"));
+            systemUser.setName("System User");
+            systemUser.getRoles().add(userRole);
+            systemUser = userRepository.save(systemUser);
+            log.info("Created system user: {} with ID: {} for automated imports", systemUser.getEmail(), systemUser.getId());
+
             StravaRun stravaRun1 = new StravaRun();
             stravaRun1.setCustomerId(1001L);
             stravaRun1.setRunName("Morning Run - Central Park");
@@ -159,3 +167,4 @@ public class DataInitializer {
         };
     }
 }
+

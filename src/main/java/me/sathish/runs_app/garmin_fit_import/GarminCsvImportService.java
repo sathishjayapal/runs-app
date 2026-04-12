@@ -1,3 +1,4 @@
+
 package me.sathish.runs_app.garmin_fit_import;
 
 import lombok.extern.slf4j.Slf4j;
@@ -6,13 +7,16 @@ import me.sathish.runs_app.garmin_run.GarminRunDTO;
 import me.sathish.runs_app.garmin_run.GarminRunRepository;
 import me.sathish.runs_app.garmin_run.GarminRunService;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -22,65 +26,76 @@ public class GarminCsvImportService {
     private final GarminRunService garminRunService;
     private final GarminRunRepository garminRunRepository;
     private final RabbitTemplate rabbitTemplate;
-
-    @Value("${app.garmin.import.csv-folder}")
-    private String defaultCsvFolder;
-
-    @Value("${app.garmin.import.systemUserId}")
-    private Long systemUserId;
+    private final Map<GarminCsvImportProperties.Source, CsvFileProvider> providersBySource;
+    private final GarminCsvImportProperties properties;
 
     public GarminCsvImportService(GarminCsvParser csvParser,
-                                   GarminRunService garminRunService,
-                                   GarminRunRepository garminRunRepository,
-                                   RabbitTemplate rabbitTemplate) {
+                                  GarminRunService garminRunService,
+                                  GarminRunRepository garminRunRepository,
+                                  RabbitTemplate rabbitTemplate,
+                                  List<CsvFileProvider> csvFileProviders,
+                                  GarminCsvImportProperties properties) {
         this.csvParser = csvParser;
         this.garminRunService = garminRunService;
         this.garminRunRepository = garminRunRepository;
         this.rabbitTemplate = rabbitTemplate;
+        this.properties = properties;
+        this.providersBySource = csvFileProviders.stream()
+                .collect(Collectors.toUnmodifiableMap(CsvFileProvider::getSourceType, Function.identity()));
     }
 
     @Transactional
     public ImportResult processImportFolder(String folderOverride) {
-        String folder = (folderOverride != null && !folderOverride.isBlank()) ? folderOverride : defaultCsvFolder;
-        log.info("Starting Garmin CSV import from folder: {}", folder);
+        GarminCsvImportProperties.Source source = properties.getSource();
+        CsvFileProvider provider = providersBySource.get(source);
 
         ImportResult result = new ImportResult();
 
-        File dir = new File(folder);
-        if (!dir.exists() || !dir.isDirectory()) {
-            log.warn("CSV import folder does not exist or is not a directory: {}", folder);
+        if (provider == null) {
+            log.warn("No CSV file provider registered for source {}", source);
             publishSummary(result, 0, 0);
             return result;
         }
 
-        File[] csvFiles = dir.listFiles((d, name) -> name.toLowerCase().endsWith(".csv"));
-        if (csvFiles == null || csvFiles.length == 0) {
-            log.info("No CSV files found in folder: {}", folder);
+        log.info("Starting Garmin CSV import using source {}", source);
+
+        List<CsvFileHandle> csvFiles;
+        try {
+            csvFiles = provider.listCsvFiles(folderOverride);
+        } catch (IOException e) {
+            log.error("Failed to list CSV files for source {}", source, e);
             publishSummary(result, 0, 0);
             return result;
         }
 
-        for (File csvFile : csvFiles) {
-            processFile(csvFile, result);
+        if (csvFiles.isEmpty()) {
+            log.info("No CSV files available for source {}", source);
+            publishSummary(result, 0, 0);
+            return result;
+        }
+
+        for (CsvFileHandle handle : csvFiles) {
+            processFile(handle, result);
         }
 
         return result;
     }
 
-    private void processFile(File csvFile, ImportResult result) {
+    private void processFile(CsvFileHandle handle, ImportResult result) {
         List<FitActivityData> rows;
-        try {
-            rows = csvParser.parse(csvFile.getAbsolutePath());
+        try (InputStream stream = handle.openStream()) {
+            rows = csvParser.parse(stream, handle.getFileName());
         } catch (Exception e) {
-            log.error("Failed to parse CSV file: {}", csvFile.getName(), e);
-            result.addFailed(csvFile.getName(), e.getMessage());
+            log.error("Failed to parse CSV file: {}", handle.getFileName(), e);
+            result.addFailed(handle.getFileName(), e.getMessage());
             publishSummary(result, 0, 0);
             return;
         }
 
         if (rows.isEmpty()) {
-            log.info("No parseable rows found in: {}", csvFile.getName());
+            log.info("No parseable rows found in: {}", handle.getFileName());
             publishSummary(result, 0, 0);
+            markProcessed(handle);
             return;
         }
 
@@ -90,28 +105,27 @@ public class GarminCsvImportService {
             if (garminRunRepository.existsByActivityId(row.getActivityId())) {
                 log.debug("Activity already exists in DB, skipping: {} {}", row.getActivityDate(), row.getActivityName());
                 result.addSkipped(row.getActivityDate() + " " + row.getActivityName());
-                
-                // Publish SKIPPED event to RabbitMQ
-                publishSkippedEvent(row, csvFile.getName());
+
+                publishSkippedEvent(row, handle.getFileName());
             } else {
                 try {
-                    GarminRunDTO dto = mapToDto(row, csvFile.getName());
+                    GarminRunDTO dto = mapToDto(row, handle.getFileName());
                     Long savedId = garminRunService.create(dto);
-                    publishActivityEvent(dto, savedId, csvFile.getName());
+                    publishActivityEvent(dto, savedId, handle.getFileName());
                     result.addSuccess(row.getActivityDate() + " " + row.getActivityName());
                     log.info("Imported CSV activity: {} (DB id: {})", row.getActivityId(), savedId);
                 } catch (Exception e) {
                     log.error("Failed to save CSV activity: {}", row.getActivityId(), e);
                     result.addFailed(row.getActivityId(), e.getMessage());
-                    
-                    // Publish FAILED event to RabbitMQ
-                    publishFailedEvent(row, csvFile.getName(), e.getMessage());
+
+                    publishFailedEvent(row, handle.getFileName(), e.getMessage());
                 }
             }
         }
 
         long dbMatchCount = garminRunRepository.countByActivityIdIn(csvActivityIds);
         publishSummary(result, csvActivityIds.size(), dbMatchCount);
+        markProcessed(handle);
     }
 
     private GarminRunDTO mapToDto(FitActivityData data, String sourceFile) {
@@ -125,7 +139,7 @@ public class GarminCsvImportService {
         dto.setDistance(data.getDistanceMiles() != null ? String.format("%.2f", data.getDistanceMiles()) : "0.00");
         dto.setMaxHeartRate(data.getMaxHeartRate() != null ? String.valueOf(data.getMaxHeartRate()) : null);
         dto.setCalories(data.getCalories() != null ? String.valueOf(data.getCalories()) : null);
-        dto.setCreatedBy(systemUserId);
+        dto.setCreatedBy(properties.getSystemUserId());
         return dto;
     }
 
@@ -150,7 +164,7 @@ public class GarminCsvImportService {
             log.error("Failed to publish event for CSV activity: {}", dto.getActivityId(), e);
         }
     }
-    
+
     private void publishSkippedEvent(FitActivityData data, String fileName) {
         try {
             GarminRunEvent event = new GarminRunEvent();
@@ -169,7 +183,7 @@ public class GarminCsvImportService {
             log.error("Failed to publish SKIPPED event for CSV activity: {}", data.getActivityId(), e);
         }
     }
-    
+
     private void publishFailedEvent(FitActivityData data, String fileName, String errorMessage) {
         try {
             GarminRunEvent event = new GarminRunEvent();
@@ -216,5 +230,13 @@ public class GarminCsvImportService {
         return dbMatchCount == csvTotal
                 ? String.format("PASS (%d/%d in DB)", dbMatchCount, csvTotal)
                 : String.format("FAIL (%d/%d in DB)", dbMatchCount, csvTotal);
+    }
+
+    private void markProcessed(CsvFileHandle handle) {
+        try {
+            handle.markProcessed();
+        } catch (IOException e) {
+            log.warn("Failed to mark CSV file as processed: {}", handle.getFileName(), e);
+        }
     }
 }

@@ -77,6 +77,11 @@ app:
     displayName: Sathish Jayapal
   garmin:
     import:
-      folder: ${GARMIN_IMPORT_FOLDER:/data/garmin-fit-files}
-      csv-folder: ${GARMIN_CSV_FOLDER:/data/garmin-csv-files}
+      source: ${GARMIN_IMPORT_SOURCE:DRIVE}
+      drive:
+        folder-id: ${GARMIN_DRIVE_FOLDER_ID:}
+        processed-folder-id: ${GARMIN_DRIVE_PROCESSED_FOLDER_ID:}
+        service-account-key-path: ${GARMIN_DRIVE_SERVICE_ACCOUNT_KEY_PATH:}
+        service-account-key-base64: ${GARMIN_DRIVE_SERVICE_ACCOUNT_KEY_BASE64:}
+        application-name: ${GARMIN_DRIVE_APPLICATION_NAME:Runs App CSV Importer}
       systemUserId: ${GARMIN_SYSTEM_USER_ID:10000}

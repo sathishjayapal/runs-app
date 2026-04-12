@@ -10,10 +10,17 @@ node/
 node_modules/
 coverage/
 .env
+.env.development
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Temporary documentation files (kept in docs/ folder instead)
+BUILD_FIX_REPORT.md
+COMPILATION_READY.txt
+DEPENDENCY_FIX_GUIDE.md
+SHEDLOCK_SETUP.txt
 
 ## IntelliJ IDEA
 .idea
