@@ -30,7 +30,7 @@ public class GarminRunServiceImpl implements GarminRunService {
         if (filter != null) {
             Long longFilter = null;
             try {
-                longFilter = (Long) Long.parseLong(filter);
+                longFilter = Long.parseLong(filter);
             } catch (final NumberFormatException numberFormatException) {
                 // keep null - no parseable input
             }
@@ -86,7 +86,9 @@ public class GarminRunServiceImpl implements GarminRunService {
         garminRunDTO.setMaxHeartRate(garminRun.getMaxHeartRate());
         garminRunDTO.setCalories(garminRun.getCalories());
         garminRunDTO.setCreatedBy(garminRun.getCreatedBy() == null ? null : garminRun.getCreatedBy().getId());
+        garminRunDTO.setCreatedByName(garminRun.getCreatedBy() == null ? null : garminRun.getCreatedBy().getName());
         garminRunDTO.setUpdateBy(garminRun.getUpdateBy() == null ? null : garminRun.getUpdateBy().getId());
+        garminRunDTO.setUpdateByName(garminRun.getUpdateBy() == null ? null : garminRun.getUpdateBy().getName());
         return garminRunDTO;
     }
 

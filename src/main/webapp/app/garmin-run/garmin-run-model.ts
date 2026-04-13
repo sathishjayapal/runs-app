@@ -15,6 +15,8 @@ export class GarminRunDTO {
   maxHeartRate?: string|null;
   calories?: string|null;
   createdBy?: number|null;
+  createdByName?: string|null;
   updateBy?: number|null;
+  updateByName?: string|null;
 
 }

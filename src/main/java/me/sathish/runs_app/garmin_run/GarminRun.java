@@ -66,11 +66,11 @@ public class GarminRun {
     @Column(columnDefinition = "text")
     private String calories;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "created_by_id", nullable = false)
     private RunAppUser createdBy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "update_by_id")
     private RunAppUser updateBy;
 

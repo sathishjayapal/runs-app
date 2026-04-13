@@ -13,6 +13,7 @@ public class ImportResult {
     
     private List<String> successFiles = new ArrayList<>();
     private List<String> skippedFiles = new ArrayList<>();
+    private List<String> updatedFiles = new ArrayList<>();
     private Map<String, String> failedFiles = new HashMap<>();
     
     public void addSuccess(String fileName) {
@@ -21,6 +22,10 @@ public class ImportResult {
     
     public void addSkipped(String fileName) {
         skippedFiles.add(fileName);
+    }
+    
+    public void addUpdated(String fileName) {
+        updatedFiles.add(fileName);
     }
     
     public void addFailed(String fileName, String error) {
@@ -35,11 +40,15 @@ public class ImportResult {
         return skippedFiles.size();
     }
     
+    public int getUpdatedCount() {
+        return updatedFiles.size();
+    }
+    
     public int getFailedCount() {
         return failedFiles.size();
     }
     
     public int getTotalProcessed() {
-        return getSuccessCount() + getSkippedCount() + getFailedCount();
+        return getSuccessCount() + getSkippedCount() + getUpdatedCount() + getFailedCount();
     }
 }

@@ -84,4 +84,4 @@ app:
         service-account-key-path: ${GARMIN_DRIVE_SERVICE_ACCOUNT_KEY_PATH:}
         service-account-key-base64: ${GARMIN_DRIVE_SERVICE_ACCOUNT_KEY_BASE64:}
         application-name: ${GARMIN_DRIVE_APPLICATION_NAME:Runs App CSV Importer}
-      systemUserId: ${GARMIN_SYSTEM_USER_ID:10000}
+      systemUserId: ${GARMIN_SYSTEM_USER_ID}

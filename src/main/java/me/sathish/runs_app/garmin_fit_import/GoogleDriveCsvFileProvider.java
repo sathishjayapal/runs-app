@@ -116,7 +116,7 @@ public class GoogleDriveCsvFileProvider implements CsvFileProvider {
             if (driveProps.getServiceAccountKeyBase64() != null && !driveProps.getServiceAccountKeyBase64().isBlank()) {
                 byte[] decoded = Base64.getDecoder().decode(driveProps.getServiceAccountKeyBase64().getBytes(StandardCharsets.UTF_8));
                 return ServiceAccountCredentials.fromStream(new java.io.ByteArrayInputStream(decoded))
-                        .createScoped(Collections.singleton(DriveScopes.DRIVE_READONLY));
+                        .createScoped(Collections.singleton(DriveScopes.DRIVE));
             }
 
             if (driveProps.getServiceAccountKeyPath() != null && !driveProps.getServiceAccountKeyPath().isBlank()) {
@@ -124,7 +124,7 @@ public class GoogleDriveCsvFileProvider implements CsvFileProvider {
                 if (Files.exists(path)) {
                     try (InputStream in = new FileInputStream(path.toFile())) {
                         return ServiceAccountCredentials.fromStream(in)
-                                .createScoped(Collections.singleton(DriveScopes.DRIVE_READONLY));
+                                .createScoped(Collections.singleton(DriveScopes.DRIVE));
                     }
                 }
             }

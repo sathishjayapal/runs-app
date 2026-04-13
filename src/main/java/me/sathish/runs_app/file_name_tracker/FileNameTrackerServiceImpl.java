@@ -79,39 +79,18 @@ public class FileNameTrackerServiceImpl implements FileNameTrackerService {
 
     private FileNameTrackerDTO mapToDTO(final FileNameTracker fileNameTracker,
             final FileNameTrackerDTO fileNameTrackerDTO) {
-        Long createdBy=null;
-        String createdByName = null;
-        String updatedByName = null;
-        String createdAt = null;
-        String updatedAt = null;
-        String createdAtDate = null;
-        String updatedAtDate = null;
         fileNameTrackerDTO.setId(fileNameTracker.getId());
         fileNameTrackerDTO.setFileName(fileNameTracker.getFileName());
-        if(fileNameTracker.getCreatedBy()==null){
-            createdByName=null;
-            createdBy=null;
-            createdAtDate=null;
-            createdAt=null;
-        }else{
-            createdBy=fileNameTracker.getCreatedBy().getId();
-            createdByName=fileNameTracker.getCreatedBy().getName();
-            createdAtDate=fileNameTracker.getCreatedAt().toString();
-            createdAt=fileNameTracker.getCreatedAt().toString();
-        }
         fileNameTrackerDTO.setUpdatedBy(fileNameTracker.getUpdatedBy() == null ? null : fileNameTracker.getUpdatedBy().getName());
-        fileNameTrackerDTO.setCreatedBy(createdBy);
-        fileNameTrackerDTO.setCreatedAt(createdAt);
-        fileNameTrackerDTO.setCreatedByName(createdByName);
+        fileNameTrackerDTO.setCreatedBy(fileNameTracker.getCreatedBy() == null ? null : fileNameTracker.getCreatedBy().getId());
+        fileNameTrackerDTO.setCreatedAt(fileNameTracker.getCreatedBy() == null ? null : fileNameTracker.getCreatedAt().toString());
+        fileNameTrackerDTO.setCreatedByName(fileNameTracker.getCreatedBy() == null ? null : fileNameTracker.getCreatedBy().getName());
         return fileNameTrackerDTO;
     }
 
     private FileNameTracker mapToEntity(final FileNameTrackerDTO fileNameTrackerDTO,
             final FileNameTracker fileNameTracker) {
         fileNameTracker.setFileName(fileNameTrackerDTO.getFileName());
-        final RunAppUser updatedBy = fileNameTrackerDTO.getCreatedBy() == null ? null : runAppUserRepository.findById(fileNameTrackerDTO.getCreatedBy())
-                .orElseThrow(() -> new NotFoundException("updatedBy not found"));
-        fileNameTracker.setUpdatedBy(updatedBy);
         final RunAppUser createdBy = fileNameTrackerDTO.getCreatedBy() == null ? null : runAppUserRepository.findById(fileNameTrackerDTO.getCreatedBy())
                 .orElseThrow(() -> new NotFoundException("createdBy not found"));
         fileNameTracker.setCreatedBy(createdBy);

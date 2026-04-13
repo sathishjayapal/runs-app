@@ -1,9 +1,5 @@
 package me.sathish.runs_app.garmin_run;
 
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
@@ -47,6 +43,10 @@ public class GarminRunDTO {
     @NotNull
     private Long createdBy;
 
+    private String createdByName;
+
     private Long updateBy;
+
+    private String updateByName;
 
 }

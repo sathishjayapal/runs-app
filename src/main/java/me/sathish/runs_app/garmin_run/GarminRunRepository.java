@@ -16,6 +16,8 @@ public interface GarminRunRepository extends JpaRepository<GarminRun, Long> {
 
     boolean existsByActivityId(String activityId);
 
+    GarminRun findByActivityId(String activityId);
+
     long countByActivityIdIn(Collection<String> activityIds);
 
 }

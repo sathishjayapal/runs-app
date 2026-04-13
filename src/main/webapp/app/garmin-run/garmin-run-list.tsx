@@ -19,9 +19,10 @@ export default function GarminRunList() {
   const [searchParams, ] = useSearchParams();
   const listParams = getListParams();
   const sortOptions = {
-    'id,ASC': t('garminRun.list.sort.id,ASC'), 
-    'activityId,ASC': t('garminRun.list.sort.activityId,ASC'), 
-    'activityDate,ASC': t('garminRun.list.sort.activityDate,ASC')
+    'id,ASC': t('garminRun.list.sort.id,ASC'),
+    'activityId,ASC': t('garminRun.list.sort.activityId,ASC'),
+    'activityDate,ASC': t('garminRun.list.sort.activityDate,ASC'),
+    'activityDate,DESC': t('garminRun.list.sort.activityDate,DESC')
   };
   const totalElements = garminRuns?.page?.totalElements ?? 0;
   const content = garminRuns?.content ?? [];
@@ -84,6 +85,7 @@ export default function GarminRunList() {
             <th scope="col" className="text-left p-2">{t('garminRun.activityId.label')}</th>
             <th scope="col" className="text-left p-2">{t('garminRun.activityName.label')}</th>
             <th scope="col" className="text-left p-2">{t('garminRun.distance.label')}</th>
+            <th scope="col" className="text-left p-2">{t('garminRun.calories.label')}</th>
             <th scope="col" className="text-left p-2">{t('garminRun.createdBy.label')}</th>
             <th scope="col" className="text-left p-2">{t('garminRun.updateBy.label')}</th>
             <th></th>
@@ -96,8 +98,9 @@ export default function GarminRunList() {
             <td className="p-2">{garminRun.activityId}</td>
             <td className="p-2">{garminRun.activityName}</td>
             <td className="p-2">{garminRun.distance}</td>
-            <td className="p-2">{garminRun.createdBy}</td>
-            <td className="p-2">{garminRun.updateBy}</td>
+            <td className="p-2">{garminRun.calories || '-'}</td>
+            <td className="p-2">{garminRun.createdByName}</td>
+            <td className="p-2">{garminRun.updateByName}</td>
             <td className="p-2">
               <div className="float-right whitespace-nowrap">
                 <Link to={'/garminRuns/edit/' + garminRun.id} className="inline-block text-white bg-gray-500 hover:bg-gray-600 focus:ring-gray-200 focus:ring-3 rounded px-2.5 py-1.5 text-sm">{t('garminRun.list.edit')}</Link>

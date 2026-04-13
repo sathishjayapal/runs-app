@@ -3,6 +3,7 @@ package me.sathish.runs_app.garmin_fit_import;
 
 import lombok.extern.slf4j.Slf4j;
 import me.sathish.runs_app.config.RabbitMQConfiguration;
+import me.sathish.runs_app.garmin_run.GarminRun;
 import me.sathish.runs_app.garmin_run.GarminRunDTO;
 import me.sathish.runs_app.garmin_run.GarminRunRepository;
 import me.sathish.runs_app.garmin_run.GarminRunService;
@@ -102,12 +103,33 @@ public class GarminCsvImportService {
         List<String> csvActivityIds = rows.stream().map(FitActivityData::getActivityId).toList();
 
         for (FitActivityData row : rows) {
-            if (garminRunRepository.existsByActivityId(row.getActivityId())) {
-                log.debug("Activity already exists in DB, skipping: {} {}", row.getActivityDate(), row.getActivityName());
-                result.addSkipped(row.getActivityDate() + " " + row.getActivityName());
-
-                publishSkippedEvent(row, handle.getFileName());
+            GarminRun existingRun = garminRunRepository.findByActivityId(row.getActivityId());
+            
+            if (existingRun != null) {
+                // Activity exists - check if data has changed
+                GarminRunDTO csvDto = mapToDto(row, handle.getFileName());
+                
+                if (hasDataChanged(existingRun, csvDto)) {
+                    // Data changed - update the existing record
+                    try {
+                        garminRunService.update(existingRun.getId(), csvDto);
+                        result.addUpdated(row.getActivityDate() + " " + row.getActivityName());
+                        log.info("Updated CSV activity: {} (DB id: {})", row.getActivityId(), existingRun.getId());
+                        
+                        publishUpdatedEvent(csvDto, existingRun.getId(), handle.getFileName());
+                    } catch (Exception e) {
+                        log.error("Failed to update CSV activity: {}", row.getActivityId(), e);
+                        result.addFailed(row.getActivityId(), e.getMessage());
+                        publishFailedEvent(row, handle.getFileName(), e.getMessage());
+                    }
+                } else {
+                    // Data unchanged - skip
+                    log.debug("Activity already exists with same data, skipping: {} {}", row.getActivityDate(), row.getActivityName());
+                    result.addSkipped(row.getActivityDate() + " " + row.getActivityName());
+                    publishSkippedEvent(row, handle.getFileName());
+                }
             } else {
+                // New activity - insert
                 try {
                     GarminRunDTO dto = mapToDto(row, handle.getFileName());
                     Long savedId = garminRunService.create(dto);
@@ -117,7 +139,6 @@ public class GarminCsvImportService {
                 } catch (Exception e) {
                     log.error("Failed to save CSV activity: {}", row.getActivityId(), e);
                     result.addFailed(row.getActivityId(), e.getMessage());
-
                     publishFailedEvent(row, handle.getFileName(), e.getMessage());
                 }
             }
@@ -206,13 +227,9 @@ public class GarminCsvImportService {
     private void publishSummary(ImportResult result, long csvTotal, long dbMatchCount) {
         String reconciliation = buildReconciliationStatus(csvTotal, dbMatchCount);
 
-        String summary = result.getSuccessCount() == 0
-                ? String.format(
-                        "CSV import complete. No new records added. Skipped: %d (already in DB), Failed: %d | Reconciliation: %s",
-                        result.getSkippedCount(), result.getFailedCount(), reconciliation)
-                : String.format(
-                        "CSV import complete. Imported: %d, Skipped: %d, Failed: %d | Reconciliation: %s",
-                        result.getSuccessCount(), result.getSkippedCount(), result.getFailedCount(), reconciliation);
+        String summary = String.format(
+                "CSV import complete. Imported: %d, Updated: %d, Skipped: %d, Failed: %d | Reconciliation: %s",
+                result.getSuccessCount(), result.getUpdatedCount(), result.getSkippedCount(), result.getFailedCount(), reconciliation);
 
         log.info(summary);
         try {
@@ -237,6 +254,81 @@ public class GarminCsvImportService {
             handle.markProcessed();
         } catch (IOException e) {
             log.warn("Failed to mark CSV file as processed: {}", handle.getFileName(), e);
+        }
+    }
+
+    /**
+     * Compares existing database record with CSV data to detect changes.
+     * Compares key fields: activityName, activityType, distance, elapsedTime, calories, maxHeartRate
+     */
+    private boolean hasDataChanged(GarminRun existingRun, GarminRunDTO csvDto) {
+        // Compare activity name
+        if (!safeEquals(existingRun.getActivityName(), csvDto.getActivityName())) {
+            log.debug("Activity name changed: '{}' -> '{}'", existingRun.getActivityName(), csvDto.getActivityName());
+            return true;
+        }
+
+        // Compare activity type
+        if (!safeEquals(existingRun.getActivityType(), csvDto.getActivityType())) {
+            log.debug("Activity type changed: '{}' -> '{}'", existingRun.getActivityType(), csvDto.getActivityType());
+            return true;
+        }
+
+        // Compare distance
+        if (!safeEquals(existingRun.getDistance(), csvDto.getDistance())) {
+            log.debug("Distance changed: '{}' -> '{}'", existingRun.getDistance(), csvDto.getDistance());
+            return true;
+        }
+
+        // Compare elapsed time
+        if (!safeEquals(existingRun.getElapsedTime(), csvDto.getElapsedTime())) {
+            log.debug("Elapsed time changed: '{}' -> '{}'", existingRun.getElapsedTime(), csvDto.getElapsedTime());
+            return true;
+        }
+
+        // Compare calories
+        if (!safeEquals(existingRun.getCalories(), csvDto.getCalories())) {
+            log.debug("Calories changed: '{}' -> '{}'", existingRun.getCalories(), csvDto.getCalories());
+            return true;
+        }
+
+        // Compare max heart rate
+        if (!safeEquals(existingRun.getMaxHeartRate(), csvDto.getMaxHeartRate())) {
+            log.debug("Max heart rate changed: '{}' -> '{}'", existingRun.getMaxHeartRate(), csvDto.getMaxHeartRate());
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Null-safe string comparison
+     */
+    private boolean safeEquals(String a, String b) {
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+        return a.equals(b);
+    }
+
+    private void publishUpdatedEvent(GarminRunDTO dto, Long updatedId, String fileName) {
+        try {
+            GarminRunEvent event = new GarminRunEvent();
+            event.setEventType("GARMIN_CSV_RUN");
+            event.setActivityId(dto.getActivityId());
+            event.setActivityName(dto.getActivityName());
+            event.setActivityDate(LocalDateTime.now());
+            event.setDistance(dto.getDistance());
+            event.setElapsedTime(dto.getElapsedTime());
+            event.setDatabaseId(updatedId);
+            event.setStatus("UPDATED");
+            event.setFileName(fileName);
+            rabbitTemplate.convertAndSend(
+                RabbitMQConfiguration.GARMIN_EXCHANGE,
+                RabbitMQConfiguration.GARMIN_ROUTING_KEY,
+                event);
+            log.debug("Published UPDATED event for CSV activity: {}", dto.getActivityId());
+        } catch (Exception e) {
+            log.error("Failed to publish UPDATED event for CSV activity: {}", dto.getActivityId(), e);
         }
     }
 }

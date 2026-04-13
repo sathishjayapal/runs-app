@@ -9,8 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -33,12 +31,6 @@ public class GarminCsvParser {
     private static final int COL_AVG_HR        = 7;
     private static final int COL_MAX_HR        = 8;
     private static final int MIN_COLUMNS       = 9;
-
-    public List<FitActivityData> parse(String filePath) throws IOException {
-        try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath))) {
-            return parse(reader, filePath);
-        }
-    }
 
     public List<FitActivityData> parse(InputStream inputStream, String sourceName) throws IOException {
         try (Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
