@@ -27,8 +27,6 @@ cd "$SCRIPT_DIR"
 # Configuration
 CONTAINER_NAME="runs-app-postgres"
 DB_NAME="runsapp_db"
-DB_USER="postgres"
-DB_PASSWORD="P4ssword!"
 DB_PORT=5443
 HOST_PORT=5443
 APP_PORT=8080
@@ -138,6 +136,10 @@ fetch_infra_value() {
   echo ""
   return 1
 }
+
+DB_USER=$(fetch_infra_value "EVENTS_TRACKER_DB_USER" "postgres")
+DB_PASSWORD=$(fetch_infra_value "EVENTS_TRACKER_DB_PASSWORD" "P4ssword!")
+print_status "Using DB credentials from infra config (user: $DB_USER)"
 
 write_cloud_env() {
   local jdbc_url="$1"

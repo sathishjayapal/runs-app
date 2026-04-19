@@ -52,17 +52,23 @@ public class DataInitializer {
 
             log.info("Initializing database with sample data...");
 
-            RunnerAppRole adminRole = new RunnerAppRole();
-            adminRole.setRoleName("ROLE_ADMIN");
-            adminRole.setDescription("Administrator role with full access");
-            adminRole = roleRepository.save(adminRole);
-            log.info("Created role: {}", adminRole.getRoleName());
+            if (!roleRepository.existsByRoleNameIgnoreCase("ROLE_ADMIN")) {
+                RunnerAppRole adminRole = new RunnerAppRole();
+                adminRole.setRoleName("ROLE_ADMIN");
+                adminRole.setDescription("Administrator role with full access");
+                roleRepository.save(adminRole);
+                log.info("Created role: ROLE_ADMIN");
+            }
+            RunnerAppRole adminRole = roleRepository.findByRoleNameIgnoreCase("ROLE_ADMIN");
 
-            RunnerAppRole userRole = new RunnerAppRole();
-            userRole.setRoleName("ROLE_USER");
-            userRole.setDescription("Standard user role");
-            userRole = roleRepository.save(userRole);
-            log.info("Created role: {}", userRole.getRoleName());
+            if (!roleRepository.existsByRoleNameIgnoreCase("ROLE_USER")) {
+                RunnerAppRole userRole = new RunnerAppRole();
+                userRole.setRoleName("ROLE_USER");
+                userRole.setDescription("Standard user role");
+                roleRepository.save(userRole);
+                log.info("Created role: ROLE_USER");
+            }
+            RunnerAppRole userRole = roleRepository.findByRoleNameIgnoreCase("ROLE_USER");
 
             RunAppUser adminUser = new RunAppUser();
             adminUser.setEmail("admin@runsapp.com");
