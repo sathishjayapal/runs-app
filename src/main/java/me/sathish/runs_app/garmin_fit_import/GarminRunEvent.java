@@ -1,5 +1,7 @@
 package me.sathish.runs_app.garmin_fit_import;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -16,4 +18,15 @@ public class GarminRunEvent {
     private String status; // "SUCCESS", "SKIPPED", "FAILED"
     private String errorMessage; // Only populated for FAILED status
     private String fileName; // Source file name
+    private String activityType; // "running", "strength_training", "elliptical"
+    private String maxHeartRate;
+    private String calories;
+
+    public @NotNull @Pattern(regexp = "^(running|strength_training|elliptical)$", message = "Activity type must be running, strength_training, or elliptical") String getActivityType() {
+        return activityType;
+    }
+
+    public void setActivityType(@NotNull @Pattern(regexp = "^(running|strength_training|elliptical)$", message = "Activity type must be running, strength_training, or elliptical") String activityType) {
+        this.activityType = activityType;
+    }
 }

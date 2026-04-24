@@ -16,9 +16,11 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfiguration {
 
     // Garmin events configuration - must match eventstracker's RabbitSchemaConfig
-    public static final String GARMIN_QUEUE = "q.sathishprojects.garmin.api.events";
+    public static final String GARMIN_API_QUEUE = "q.sathishprojects.garmin.api.events";
+    public static final String GARMIN_OPS_QUEUE = "q.sathishprojects.garmin.ops.events";
     public static final String GARMIN_EXCHANGE = "x.sathishprojects.garmin.events.exchange";
-    public static final String GARMIN_ROUTING_KEY = "sathishprojects.garmin.api.event";
+    public static final String GARMIN_API_ROUTING_KEY = "sathishprojects.garmin.api.event";
+    public static final String GARMIN_OPS_ROUTING_KEY = "sathishprojects.garmin.ops.event";
 
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter messageConverter) {
@@ -51,12 +53,19 @@ public class RabbitMQConfiguration {
         return new ApplicationRunner() {
             @Override
             public void run(ApplicationArguments args) {
-                var props = amqpAdmin.getQueueProperties(GARMIN_QUEUE);
-                if (props == null) {
+                var apiProps = amqpAdmin.getQueueProperties(GARMIN_API_QUEUE);
+                if (apiProps == null) {
                     throw new IllegalStateException(
-                            "Garmin queue '%s' not found. Ensure eventstracker provisions it before runs-app starts.".formatted(GARMIN_QUEUE));
+                            "Garmin API queue '%s' not found. Ensure eventstracker provisions it before runs-app starts.".formatted(GARMIN_API_QUEUE));
                 }
-                log.info("Validated Garmin queue exists: {}", GARMIN_QUEUE);
+                log.info("Validated Garmin API queue exists: {}", GARMIN_API_QUEUE);
+                
+                var opsProps = amqpAdmin.getQueueProperties(GARMIN_OPS_QUEUE);
+                if (opsProps == null) {
+                    throw new IllegalStateException(
+                            "Garmin OPS queue '%s' not found. Ensure eventstracker provisions it before runs-app starts.".formatted(GARMIN_OPS_QUEUE));
+                }
+                log.info("Validated Garmin OPS queue exists: {}", GARMIN_OPS_QUEUE);
             }
         };
     }
