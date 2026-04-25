@@ -25,6 +25,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -114,7 +115,8 @@ public class GoogleDriveCsvFileProvider implements CsvFileProvider {
 
         try {
             if (driveProps.getServiceAccountKeyBase64() != null && !driveProps.getServiceAccountKeyBase64().isBlank()) {
-                byte[] decoded = Base64.getDecoder().decode(driveProps.getServiceAccountKeyBase64().getBytes(StandardCharsets.UTF_8));
+                byte[] decoded = Base64.getDecoder()
+                        .decode(driveProps.getServiceAccountKeyBase64().getBytes(StandardCharsets.UTF_8));
                 return ServiceAccountCredentials.fromStream(new java.io.ByteArrayInputStream(decoded))
                         .createScoped(Collections.singleton(DriveScopes.DRIVE));
             }
@@ -133,6 +135,44 @@ public class GoogleDriveCsvFileProvider implements CsvFileProvider {
         }
 
         return null;
+    }
+
+    public boolean isDriveClientInitialized() {
+        return drive != null;
+    }
+
+    /**
+     * Lists ALL files in the given folder (no mimeType filter) for diagnostic
+     * purposes.
+     * Returns file name and mimeType so we can see what Google Drive thinks the
+     * files are.
+     */
+    public List<Map<String, String>> listAllFilesInFolder(String folderId) throws IOException {
+        if (drive == null) {
+            throw new IOException("Google Drive client is not initialized");
+        }
+        if (folderId == null || folderId.isBlank()) {
+            throw new IOException("Folder ID is not configured");
+        }
+
+        String query = String.format("'%s' in parents and trashed = false", folderId);
+        FileList fileList = drive.files().list()
+                .setQ(query)
+                .setSpaces("drive")
+                .setFields("files(id,name,mimeType,modifiedTime,size)")
+                .execute();
+
+        if (fileList.getFiles() == null) {
+            return List.of();
+        }
+
+        return fileList.getFiles().stream()
+                .map(f -> Map.of(
+                        "name", String.valueOf(f.getName()),
+                        "mimeType", String.valueOf(f.getMimeType()),
+                        "id", String.valueOf(f.getId()),
+                        "modifiedTime", String.valueOf(f.getModifiedTime())))
+                .collect(Collectors.toList());
     }
 
     private static class DriveCsvFileHandle implements CsvFileHandle {
