@@ -23,7 +23,7 @@ public class GarminCsvImportScheduler {
     /**
      *
      */
-    @Scheduled(cron = "${garmin.csv-import.schedule:0 */5 * * * *}")
+    @Scheduled(cron = "${garmin.csv-import.schedule:0 */3 * * * *}")
     @SchedulerLock(
         name = "garminCsvImport",
         lockAtMostFor = "5h",      // Max 5 hours (prevents long-running imports from blocking)
