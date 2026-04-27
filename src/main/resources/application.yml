@@ -73,15 +73,24 @@ springdoc:
 app:
   baseHost: ${BASE_HOST:http://localhost:3000}
   mail:
-    from: sathishk.dot@gmail.com
-    displayName: Sathish Jayapal
+    from: ${MAIL_FROM:noreply@example.com}
+    displayName: ${MAIL_DISPLAY_NAME:Runs App}
   garmin:
     import:
       source: ${GARMIN_IMPORT_SOURCE:DRIVE}
       drive:
         folder-id: ${GARMIN_DRIVE_FOLDER_ID:}
         processed-folder-id: ${GARMIN_DRIVE_PROCESSED_FOLDER_ID:}
+        quarantine-folder-id: ${GARMIN_DRIVE_QUARANTINE_FOLDER_ID:}
+        failed-folder-id: ${GARMIN_DRIVE_FAILED_FOLDER_ID:}
+        retry-folder-id: ${GARMIN_DRIVE_RETRY_FOLDER_ID:}
         service-account-key-path: ${GARMIN_DRIVE_SERVICE_ACCOUNT_KEY_PATH:}
         service-account-key-base64: ${GARMIN_DRIVE_SERVICE_ACCOUNT_KEY_BASE64:}
         application-name: ${GARMIN_DRIVE_APPLICATION_NAME:Runs App CSV Importer}
       systemUserId: ${GARMIN_SYSTEM_USER_ID}
+      alert:
+        email:
+          enabled: ${GARMIN_ALERT_EMAIL_ENABLED:true}
+          max-failures-before-alert: ${GARMIN_ALERT_EMAIL_MAX_RETRY_ATTEMPTS:3}
+          recipients: ${GARMIN_ALERT_EMAIL_RECIPIENTS:}
+          from-address: ${GARMIN_ALERT_EMAIL_FROM:garmin-import@example.com}

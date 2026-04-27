@@ -9,12 +9,23 @@ application-local.yml
 node/
 node_modules/
 coverage/
+# Environment variables (never commit - contains credentials)
 .env
 .env.development
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env.*.local
+
+# Credentials and secrets
+*.key
+*.pem
+*.p12
+*.pfx
+service-account*.json
+credentials.json
+**/credentials/*
 
 # Temporary documentation files (kept in docs/ folder instead)
 BUILD_FIX_REPORT.md
