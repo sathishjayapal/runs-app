@@ -79,6 +79,22 @@ print_warning() {
   echo -e "${YELLOW}⚠${NC} $1"
 }
 
+run_psql_with_retry() {
+  local user="$1"
+  local db="$2"
+  local sql="$3"
+  local attempts="${4:-30}"
+  local i
+
+  for i in $(seq 1 "$attempts"); do
+    if docker exec "$CONTAINER_NAME" psql -U "$user" -d "$db" -c "$sql" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  return 1
+}
+
 # Check if Docker is running
 if ! docker ps > /dev/null 2>&1; then
   print_error "Docker is not running. Please start Docker and try again."
@@ -352,12 +368,17 @@ fi
 print_info "Waiting for PostgreSQL to be ready..."
 max_attempts=30
 attempt=0
+_superuser=""
 
 while [ $attempt -lt $max_attempts ]; do
-  if docker exec "$CONTAINER_NAME" pg_isready -U "$DB_USER" > /dev/null 2>&1; then
-    print_status "PostgreSQL is ready"
-    break
-  fi
+  for _candidate in "$DB_USER" "${EVENTS_TRACKER_DB_USER:-}" "eventsvc_local" "postgres"; do
+    [ -n "$_candidate" ] || continue
+    if run_psql_with_retry "$_candidate" "postgres" "SELECT 1;" 1; then
+      _superuser="$_candidate"
+      print_status "PostgreSQL is ready"
+      break 2
+    fi
+  done
   attempt=$((attempt + 1))
   sleep 1
 done
@@ -368,9 +389,33 @@ if [ $attempt -eq $max_attempts ]; then
   exit 1
 fi
 
+[ -n "$_superuser" ] || {
+  print_error "Could not find a working admin role in $CONTAINER_NAME"
+  print_info "If this is an old volume with stale credentials, run: ./dev-up.sh --reset"
+  exit 1
+}
+
+print_info "Container superuser: '${_superuser}', desired DB user: '${DB_USER}'"
+run_psql_with_retry "$_superuser" "postgres" \
+  "DO \$\$
+   BEGIN
+     CREATE ROLE \"${DB_USER}\" LOGIN PASSWORD '${DB_PASSWORD}';
+   EXCEPTION WHEN duplicate_object THEN NULL;
+   END \$\$;" 30 || {
+  print_error "Failed to create/sync DB role ${DB_USER}"
+  exit 1
+}
+run_psql_with_retry "$_superuser" "postgres" \
+  "ALTER ROLE \"${DB_USER}\" WITH LOGIN PASSWORD '${DB_PASSWORD}';" 30 || {
+  print_error "Failed to update password for DB role ${DB_USER}"
+  exit 1
+}
+run_psql_with_retry "$_superuser" "postgres" \
+  "GRANT ALL PRIVILEGES ON DATABASE \"${DB_NAME}\" TO \"${DB_USER}\";" 30 || true
+
 # Verify database exists
 print_info "Verifying database..."
-if docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -c "SELECT 1;" > /dev/null 2>&1; then
+if run_psql_with_retry "$DB_USER" "$DB_NAME" "SELECT 1;" 10; then
   print_status "Database verified"
 else
   print_error "Failed to verify database"
