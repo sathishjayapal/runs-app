@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
 public class GoogleDriveCsvFileProvider implements CsvFileProvider {
 
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+    private static final String MIME_TEXT_CSV = "text/csv";
+    private static final String MIME_GOOGLE_SHEET = "application/vnd.google-apps.spreadsheet";
 
     private final GarminCsvImportProperties properties;
     private final Drive drive;
@@ -67,25 +69,51 @@ public class GoogleDriveCsvFileProvider implements CsvFileProvider {
         }
 
         try {
-            String query = String.format("'%s' in parents and trashed = false and mimeType = 'text/csv'", folderId);
+            String query = String.format("'%s' in parents and trashed = false", folderId);
             FileList fileList = drive.files().list()
                     .setQ(query)
                     .setSpaces("drive")
-                    .setFields("files(id,name,modifiedTime,parents)")
+                    .setSupportsAllDrives(true)
+                    .setIncludeItemsFromAllDrives(true)
+                    .setCorpora("allDrives")
+                    .setFields("files(id,name,mimeType,fileExtension,modifiedTime,parents)")
                     .execute();
 
             if (fileList.getFiles() == null || fileList.getFiles().isEmpty()) {
                 return List.of();
             }
 
-            return fileList.getFiles().stream()
+            List<File> candidates = fileList.getFiles().stream()
+                    .filter(this::isCsvCandidate)
+                    .toList();
+
+            if (candidates.isEmpty()) {
+                log.info("No CSV candidates found in Drive folder {}. Files seen: {}", folderId,
+                        fileList.getFiles().stream()
+                                .map(f -> String.format("%s[%s]", f.getName(), f.getMimeType()))
+                                .collect(Collectors.joining(", ")));
+                return List.of();
+            }
+
+            return candidates.stream()
                     .sorted(Comparator.comparingLong(f -> f.getModifiedTime().getValue()))
-                    .map(file -> new DriveCsvFileHandle(drive, file, properties.getDrive().getProcessedFolderId()))
+                    .map(file -> new DriveCsvFileHandle(drive, file, properties.getDrive().getProcessedFolderId(), file.getMimeType()))
                     .collect(Collectors.toList());
         } catch (IOException e) {
             log.error("Failed to list CSV files from Google Drive", e);
             throw e;
         }
+    }
+
+    private boolean isCsvCandidate(File file) {
+        String name = Optional.ofNullable(file.getName()).orElse("");
+        String mimeType = Optional.ofNullable(file.getMimeType()).orElse("");
+        String extension = Optional.ofNullable(file.getFileExtension()).orElse("");
+
+        return MIME_TEXT_CSV.equalsIgnoreCase(mimeType)
+                || MIME_GOOGLE_SHEET.equalsIgnoreCase(mimeType)
+                || "csv".equalsIgnoreCase(extension)
+                || name.toLowerCase().endsWith(".csv");
     }
 
     private Drive initializeDrive(GarminCsvImportProperties properties) {
@@ -179,11 +207,13 @@ public class GoogleDriveCsvFileProvider implements CsvFileProvider {
         private final Drive drive;
         private final File file;
         private final String processedFolderId;
+        private final String mimeType;
 
-        private DriveCsvFileHandle(Drive drive, File file, String processedFolderId) {
+        private DriveCsvFileHandle(Drive drive, File file, String processedFolderId, String mimeType) {
             this.drive = drive;
             this.file = file;
             this.processedFolderId = processedFolderId;
+            this.mimeType = mimeType;
         }
 
         @Override
@@ -195,6 +225,10 @@ public class GoogleDriveCsvFileProvider implements CsvFileProvider {
         public InputStream openStream() throws IOException {
             if (drive == null) {
                 throw new IOException("Google Drive client not initialized");
+            }
+            if (MIME_GOOGLE_SHEET.equalsIgnoreCase(mimeType)) {
+                // Google Sheets files must be exported to CSV before reading.
+                return drive.files().export(file.getId(), MIME_TEXT_CSV).executeMediaAsInputStream();
             }
             return drive.files().get(file.getId()).executeMediaAsInputStream();
         }
