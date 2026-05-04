@@ -1,5 +1,6 @@
 package me.sathish.runs_app.file_import_record;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -79,11 +80,11 @@ public class FileImportRecord {
 
     @Column(name = "email_alert_sent_at")
     private LocalDateTime emailAlertSentAt;  // Timestamp when failure alert was sent
-
+    @JsonIgnore
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private OffsetDateTime processedAt;
-
+    @JsonIgnore
     @LastModifiedDate
     @Column(nullable = false)
     private OffsetDateTime completedAt;
