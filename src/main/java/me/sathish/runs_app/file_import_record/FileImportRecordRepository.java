@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface FileImportRecordRepository extends JpaRepository<FileImportRecord, Long> {
 
-    Optional<FileImportRecord> findByFileName(String fileName);
+    Optional<FileImportRecord> findTopByFileNameOrderByProcessedAtDesc(String fileName);
 
     Page<FileImportRecord> findByStatus(ProcessingStatus status, Pageable pageable);
 

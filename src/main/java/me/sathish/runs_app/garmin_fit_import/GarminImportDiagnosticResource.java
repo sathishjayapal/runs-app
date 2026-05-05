@@ -7,7 +7,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.LinkedHashMap;
@@ -22,11 +24,14 @@ public class GarminImportDiagnosticResource {
 
     private final GarminCsvImportProperties properties;
     private final GoogleDriveCsvFileProvider driveProvider;
+    private final GarminCsvImportService importService;
 
     public GarminImportDiagnosticResource(GarminCsvImportProperties properties,
-                                          GoogleDriveCsvFileProvider driveProvider) {
+                                          GoogleDriveCsvFileProvider driveProvider,
+                                          GarminCsvImportService importService) {
         this.properties = properties;
         this.driveProvider = driveProvider;
+        this.importService = importService;
     }
 
     @GetMapping
@@ -103,5 +108,24 @@ public class GarminImportDiagnosticResource {
         }
 
         return ResponseEntity.ok(report);
+    }
+
+    @PostMapping("/run")
+    @Operation(summary = "Run Garmin CSV import now",
+            description = "Triggers import immediately for troubleshooting. Optional folderOverride can target a different folder.")
+    public ResponseEntity<Map<String, Object>> runImportNow(
+            @RequestParam(name = "folderOverride", required = false) String folderOverride) {
+        ImportResult result = importService.processImportFolder(folderOverride);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", "triggered");
+        response.put("folderOverride", folderOverride);
+        response.put("success", result.getSuccessCount());
+        response.put("updated", result.getUpdatedCount());
+        response.put("skipped", result.getSkippedCount());
+        response.put("failed", result.getFailedCount());
+        response.put("failedDetails", result.getFailedFiles());
+
+        return ResponseEntity.ok(response);
     }
 }

@@ -2,12 +2,9 @@ package me.sathish.runs_app.config;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.io.IOException;
-import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import me.sathish.runs_app.file_name_tracker.FileNameTrackerRepository;
+import me.sathish.runs_app.file_import_record.FileImportRecordRepository;
 import me.sathish.runs_app.garmin_run.GarminRunRepository;
 import me.sathish.runs_app.run_app_user.RunAppUserRepository;
 import me.sathish.runs_app.runner_app_role.RunnerAppRoleRepository;
@@ -19,12 +16,15 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
 import org.springframework.util.StreamUtils;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -46,31 +46,22 @@ public abstract class BaseIT {
     public static final String AUTH_USER_REGULAR = "user@test.com";
     public static final String PASSWORD = "password";
     private static String sessionToken = null;
-
-    @Autowired
-    private Environment environment;
-
-    @Autowired
-    private ApplicationContext applicationContext;
-
-    @LocalServerPort
-    private int port;
-
     @Autowired
     public GarminRunRepository garminRunRepository;
-
     @Autowired
     public StravaRunRepository stravaRunRepository;
-
     @Autowired
     public RunAppUserRepository runAppUserRepository;
-
     @Autowired
     public RunnerAppRoleRepository runnerAppRoleRepository;
-
     @Autowired
-    public FileNameTrackerRepository fileNameTrackerRepository;
-
+    public FileImportRecordRepository fileNameTrackerRepository;
+    @Autowired
+    private Environment environment;
+    @Autowired
+    private ApplicationContext applicationContext;
+    @LocalServerPort
+    private int port;
     private volatile int actualPort = 0;
 
     @BeforeEach

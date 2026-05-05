@@ -4,14 +4,14 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 public class GarminRunEvent {
     private String eventType;
     private String activityId;
     private String activityName;
-    private LocalDateTime activityDate;
+    private Instant activityDate;
     private String distance;
     private String elapsedTime;
     private Long databaseId;

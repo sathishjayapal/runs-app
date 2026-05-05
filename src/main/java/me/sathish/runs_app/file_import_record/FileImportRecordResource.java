@@ -82,7 +82,7 @@ public class FileImportRecordResource {
     public ResponseEntity<ReconciliationReportDTO> getReconciliationReport(
         @PathVariable String fileName) {
 
-        FileImportRecord record = repository.findByFileName(fileName)
+        FileImportRecord record = repository.findTopByFileNameOrderByProcessedAtDesc(fileName)
             .orElseThrow(() -> {
                 log.warn("Import record not found for file: {}", fileName);
                 return new NotFoundException("File not found: " + fileName);

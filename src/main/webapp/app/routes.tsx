@@ -9,12 +9,11 @@ import GarminRunList from './garmin-run/garmin-run-list';
 import GarminRunAdd from './garmin-run/garmin-run-add';
 import GarminRunEdit from './garmin-run/garmin-run-edit';
 import ShedlockList from './shedlock/shedlock-list';
-import FileNameTrackerList from './file-name-tracker/file-name-tracker-list';
-import FileNameTrackerAdd from './file-name-tracker/file-name-tracker-add';
-import FileNameTrackerEdit from './file-name-tracker/file-name-tracker-edit';
 import StravaRunList from './strava-run/strava-run-list';
 import StravaRunAdd from './strava-run/strava-run-add';
 import StravaRunEdit from './strava-run/strava-run-edit';
+import FileImportRecordList from './file-import-record/file-import-record-list';
+import FileImportRecordDetail from './file-import-record/file-import-record-detail';
 import Error from './error/error';
 import ErrorBoundaryRoute from './error/error-boundary-route';
 import AdminRoute from './common/admin-route';
@@ -36,11 +35,10 @@ export default function AppRoutes() {
         { path: 'garminRuns/add', element: <GarminRunAdd /> },
         { path: 'garminRuns/edit/:id', element: <GarminRunEdit /> },
         {path: 'shedlocks', element: <AdminRoute><ShedlockList/></AdminRoute>},
+        { path: 'fileImportRecords', element: <FileImportRecordList /> },
+        { path: 'fileImportRecords/:id', element: <FileImportRecordDetail /> },
         {path: 'user-logout', element: <Logout/>},
         {path: 'login', element: <Login/>},
-        { path: 'fileNameTrackers', element: <FileNameTrackerList /> },
-        { path: 'fileNameTrackers/add', element: <FileNameTrackerAdd /> },
-        { path: 'fileNameTrackers/edit/:id', element: <FileNameTrackerEdit /> },
         { path: 'stravaRuns', element: <StravaRunList /> },
         { path: 'stravaRuns/add', element: <StravaRunAdd /> },
         { path: 'stravaRuns/edit/:runNumber', element: <StravaRunEdit /> },

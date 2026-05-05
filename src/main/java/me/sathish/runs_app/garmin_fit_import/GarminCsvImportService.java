@@ -1,16 +1,10 @@
 
 package me.sathish.runs_app.garmin_fit_import;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import me.sathish.runs_app.config.RabbitMQConfiguration;
-import me.sathish.runs_app.file_import_record.FileImportRecord;
-import me.sathish.runs_app.file_import_record.FileImportRecordService;
-import me.sathish.runs_app.file_import_record.ProcessingStatus;
-import me.sathish.runs_app.file_import_record.ReconciliationService;
-import me.sathish.runs_app.file_import_record.ReconciliationStatus;
-import me.sathish.runs_app.file_import_record.ProcessingStats;
-import me.sathish.runs_app.file_import_record.ReconciliationReport;
+import me.sathish.runs_app.file_import_record.*;
 import me.sathish.runs_app.garmin_run.GarminRun;
 import me.sathish.runs_app.garmin_run.GarminRunDTO;
 import me.sathish.runs_app.garmin_run.GarminRunRepository;
@@ -18,11 +12,10 @@ import me.sathish.runs_app.garmin_run.GarminRunService;
 import me.sathish.runs_app.mail.MailService;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -51,7 +44,8 @@ public class GarminCsvImportService {
                                   GarminCsvImportProperties properties,
                                   FileImportRecordService fileImportRecordService,
                                   ReconciliationService reconciliationService,
-                                  MailService mailService) {
+                                  MailService mailService,
+                                  ObjectMapper objectMapper) {
         this.csvParser = csvParser;
         this.garminRunService = garminRunService;
         this.garminRunRepository = garminRunRepository;
@@ -60,12 +54,11 @@ public class GarminCsvImportService {
         this.fileImportRecordService = fileImportRecordService;
         this.reconciliationService = reconciliationService;
         this.mailService = mailService;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
         this.providersBySource = csvFileProviders.stream()
                 .collect(Collectors.toUnmodifiableMap(CsvFileProvider::getSourceType, Function.identity()));
     }
 
-    @Transactional
     public ImportResult processImportFolder(String folderOverride) {
         GarminCsvImportProperties.Source source = properties.getSource();
         CsvFileProvider provider = providersBySource.get(source);
@@ -394,7 +387,7 @@ public class GarminCsvImportService {
             event.setEventType("GARMIN_CSV_RUN");
             event.setActivityId(dto.getActivityId());
             event.setActivityName(dto.getActivityName());
-            event.setActivityDate(LocalDateTime.now());
+            event.setActivityDate(Instant.now());
             event.setDistance(dto.getDistance());
             event.setElapsedTime(dto.getElapsedTime());
             event.setDatabaseId(savedId);
@@ -557,7 +550,7 @@ public class GarminCsvImportService {
             event.setEventType("GARMIN_CSV_RUN");
             event.setActivityId(dto.getActivityId());
             event.setActivityName(dto.getActivityName());
-            event.setActivityDate(LocalDateTime.now());
+            event.setActivityDate(Instant.now());
             event.setDistance(dto.getDistance());
             event.setElapsedTime(dto.getElapsedTime());
             event.setDatabaseId(updatedId);

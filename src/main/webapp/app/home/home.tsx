@@ -31,8 +31,8 @@ export default function Home() {
         <Link to="/garminRuns"
               className={`w-full border-gray-300 hover:bg-gray-100 border-b ${!isAdmin() ? 'rounded-t' : ''} px-4 py-2`}>Garmin
           Runs</Link>
-        <Link to="/fileNameTrackers" className="w-full border-gray-300 hover:bg-gray-100 border-b px-4 py-2">File
-          Tracker</Link>
+        <Link to="/fileImportRecords" className="w-full border-gray-300 hover:bg-gray-100 border-b px-4 py-2">File
+          Import Records</Link>
         <Link to="/stravaRuns" className="w-full border-gray-300 hover:bg-gray-100 rounded-b px-4 py-2">Strava
           Runs</Link>
       </div>

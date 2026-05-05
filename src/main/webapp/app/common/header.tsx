@@ -71,7 +71,7 @@ export default function Header() {
                   {isAdmin() && <li><Link to="/shedlocks"
                                           className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('shedlock.list.headline')}</Link>
                   </li>}
-                  <li><Link to="/fileNameTrackers" className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('fileNameTracker.list.headline')}</Link></li>
+                  <li><Link to="/fileImportRecords" className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('fileImportRecord.list.headline')}</Link></li>
                   <li><Link to="/stravaRuns" className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('stravaRun.list.headline')}</Link></li>
                 </ul>
               </li>

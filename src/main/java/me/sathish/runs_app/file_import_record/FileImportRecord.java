@@ -43,7 +43,7 @@ public class FileImportRecord {
     )
     private Long id;
 
-    @Column(nullable = false, unique = true, columnDefinition = "text")
+    @Column(nullable = false, columnDefinition = "text")
     private String fileName;
 
     @Column(nullable = false)
