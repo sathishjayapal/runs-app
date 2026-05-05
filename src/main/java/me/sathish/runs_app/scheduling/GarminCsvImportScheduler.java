@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.sathish.runs_app.garmin_fit_import.GarminCsvImportService;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,7 +24,7 @@ public class GarminCsvImportScheduler {
      *
      */
     // Temporarily disabled while troubleshooting import issues.
-    // @Scheduled(cron = "${garmin.csv-import.schedule:0 */3 * * * *}")
+     @Scheduled(cron = "${garmin.csv-import.schedule:0 */3 * * * *}")
     @SchedulerLock(
         name = "garminCsvImport",
         lockAtMostFor = "5h",      // Max 5 hours (prevents long-running imports from blocking)
