@@ -1,10 +1,8 @@
 package me.sathish.runs_app.database;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import jakarta.persistence.PersistenceException;
 import me.sathish.runs_app.config.BaseIT;
-import me.sathish.runs_app.file_name_tracker.FileNameTracker;
+import me.sathish.runs_app.file_import_record.FileImportRecord;
 import me.sathish.runs_app.garmin_run.GarminRun;
 import me.sathish.runs_app.run_app_user.RunAppUser;
 import me.sathish.runs_app.runner_app_role.RunnerAppRole;
@@ -15,8 +13,9 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.HashSet;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration tests for database referential integrity constraints.
@@ -284,11 +283,11 @@ public class ReferentialIntegrityTest extends BaseIT {
     public void fileTracker_foreignKey_validUser_success() {
         RunAppUser user = runAppUserRepository.findById(10004L).orElseThrow();
 
-        FileNameTracker tracker = new FileNameTracker();
+        FileImportRecord tracker = new FileImportRecord();
         tracker.setFileName("valid-foreign-key.fit");
         tracker.setCreatedBy(user);
 
-        FileNameTracker saved = fileNameTrackerRepository.saveAndFlush(tracker);
+        FileImportRecord saved = fileNameTrackerRepository.saveAndFlush(tracker);
 
         assertNotNull(saved.getId());
         assertEquals(user.getId(), saved.getCreatedBy().getId());
@@ -297,7 +296,7 @@ public class ReferentialIntegrityTest extends BaseIT {
     @Test
     @Transactional
     public void fileTracker_foreignKey_invalidUser_throwsException() {
-        FileNameTracker tracker = new FileNameTracker();
+        FileImportRecord tracker = new FileImportRecord();
         tracker.setFileName("invalid-foreign-key.fit");
 
         RunAppUser invalidUser = new RunAppUser();
