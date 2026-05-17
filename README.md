@@ -101,8 +101,31 @@ sequenceDiagram
 | Scheduling | ShedLock (JDBC) | Safe for future horizontal scaling; no Quartz complexity |
 | DB Migrations | Flyway | Version-controlled, reproducible schema changes |
 | Auth | Spring Security Basic Auth | Pragmatic for internal tool; swap to OAuth2 when needed |
+| Exactly-Once Semantics | RIFL (Park, Stanford) | Guarantee linearizability for critical mutations |
+| Cache GC | Lease-based (heartbeat) | Bounded memory, automatic cleanup |
 
 > Full architecture decision records: [`docs/adr/`](docs/adr/)
+
+### RIFL: Exactly-Once Semantics for POST /api/garminRuns
+
+To prevent duplicate activities on client retry (network timeout, browser back-button), we implement **RIFL** (Reusable Infrastructure for Linearizability) from Seo Jin Park's Stanford dissertation.
+
+**How it works:**
+1. Client opens a lease: `POST /api/rifl/lease/open` → returns `clientId`
+2. Client sends request with RIFL headers: `X-Client-Id`, `X-Sequence-Number`, `X-First-Incomplete`
+3. Server caches completion record keyed by `(clientId, sequenceNumber)`
+4. Retry with identical headers → cache hit → identical response replayed (no re-execution)
+5. Expired leases (60s without renewal) → automatic GC of cached records
+
+**Components:**
+- `LeaseManager`: Tracks client heartbeats, detects expiry
+- `ResultTracker`: In-memory cache of completion records + per-client watermark
+- `RiflFilter`: Intercepts mutations, caches responses
+- `RiflGcScheduler`: Periodic cleanup every 30 seconds
+
+**Design choice:** Simplified design (Ch. 3) — cache is in-memory only, relying on PostgreSQL WAL for mutation durability. On JVM crash, cache is lost but mutations are durable; retries are safe due to `UNIQUE(activity_id)` constraint.
+
+See [`ADR-001`](docs/adr/ADR-001-rifl-exactly-once-semantics.md), [`ADR-003`](docs/adr/ADR-003-lease-based-gc.md), [`ADR-004`](docs/adr/ADR-004-simplified-rifl-design.md) for details.
 
 ---
 - [API Endpoints](#api-endpoints)
