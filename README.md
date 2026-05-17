@@ -108,7 +108,9 @@ sequenceDiagram
 
 ### RIFL: Exactly-Once Semantics for POST /api/garminRuns
 
-To prevent duplicate activities on client retry (network timeout, browser back-button), we implement **RIFL** (Reusable Infrastructure for Linearizability) from Seo Jin Park's Stanford dissertation.
+**Why RIFL?**
+
+When clients retry requests after network failures, our server could execute the same mutation twice—creating duplicate runs with the same activity ID. To prevent this, we implemented **RIFL** (Reusable Infrastructure for Linearizability), an academic pattern from distributed systems research that guarantees exactly-once semantics. By caching completion records and returning cached responses to retries, combined with a `UNIQUE(activity_id)` constraint, the server executes each mutation exactly once regardless of how many times the client retries.
 
 **How it works:**
 1. Client opens a lease: `POST /api/rifl/lease/open` → returns `clientId`

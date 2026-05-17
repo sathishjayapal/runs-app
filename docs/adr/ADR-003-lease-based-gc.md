@@ -54,5 +54,5 @@ Client lifecycle:
 
 - Clients must renew leases every 30 seconds (half the expiry time)
 - Network partitions will cause false expiry of disconnected clients
-- Horizontal scaling: each server tracks its own clients (no shared state)
+- Horizontal scaling: each server tracks its own clients independently. This is safe because each client maintains a single lease with a designated server; no cross-server cache coherence needed
 - Monitored metric: cache size, GC frequency, false expiry rate

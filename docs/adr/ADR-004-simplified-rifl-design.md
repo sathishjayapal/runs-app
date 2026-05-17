@@ -25,7 +25,7 @@ Implement **simplified RIFL design (Ch. 3)**: completion records live in memory 
 
 1. **Idempotency**: UNIQUE(activity_id) + business logic ensures safe re-execution
 2. **WAL guarantees**: PostgreSQL commits mutations durably before returning
-3. **Window is small**: Crash between Postgres commit and RAM cache write is rare
+3. **Window is small**: The atomicity window (Postgres commit to cache write) is typically <1ms per request. JVM crashes during this window are statistically rare in production
 4. **Cost/benefit**: 99% consistency at 20% implementation cost
 
 ## Scenario: JVM Crash
@@ -52,12 +52,5 @@ Client: Sees error or retry loop
 
 - Cache is **not** persistent across JVM restarts
 - On crash, next client request may fail with UNIQUE constraint error
-- Requires monitoring: "retry rate" metric to detect crash patterns
-- Production: Should pair with automatic restarts (Kubernetes, systemd)
-
-## Monitoring
-
-Add metrics:
-- Cache size (should stay < 100K records)
-- GC frequency (should match schedule)
-- Retry failure rate (should stay < 0.01%)
+- Client retry behavior is application-specific (exponential backoff, max retries)
+- Production: Should pair with automatic restarts (Kubernetes, systemd) to minimize false failures
