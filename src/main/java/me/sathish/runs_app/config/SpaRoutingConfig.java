@@ -16,7 +16,7 @@ public class SpaRoutingConfig {
 
     @GetMapping(value = {"/user-logout", "/runAppUsers", "/runAppUsers/**", "/garminRuns", "/garminRuns/**",
             "/shedlocks", "/fileNameTrackers", "/fileNameTrackers/**",
-            "/stravaRuns", "/stravaRuns/**", "/error"}, produces = "text/html")
+            "/stravaRuns", "/stravaRuns/**", "/journalEntries", "/journalEntries/**", "/error"}, produces = "text/html")
     @ResponseBody
     public String forwardToIndex(final HttpServletRequest request) throws IOException {
         final Resource resource = new ClassPathResource("static/index.html");

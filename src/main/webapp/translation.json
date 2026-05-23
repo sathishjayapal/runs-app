@@ -285,6 +285,63 @@
       "success": "Strava Run was removed successfully."
     }
   },
+  "journalEntry": {
+    "list": {
+      "headline": "Run Journal",
+      "createNew": "Add Journal Entry",
+      "empty": "No journal entries found.",
+      "edit": "Edit",
+      "delete": "Delete",
+      "actions": "Actions",
+      "aiStatus": "AI Status",
+      "indexed": "Indexed",
+      "pending": "Pending"
+    },
+    "add": {
+      "headline": "Add Journal Entry",
+      "back": "Back to list"
+    },
+    "edit": {
+      "headline": "Edit Journal Entry",
+      "back": "Back to list"
+    },
+    "id": {
+      "label": "Id"
+    },
+    "activityId": {
+      "label": "Activity Id"
+    },
+    "entryDate": {
+      "label": "Entry Date"
+    },
+    "perceivedEffort": {
+      "label": "Perceived Effort (1-10)"
+    },
+    "feel": {
+      "label": "How Did You Feel?"
+    },
+    "bodyNotes": {
+      "label": "Body Notes"
+    },
+    "contextNotes": {
+      "label": "Context Notes"
+    },
+    "narrative": {
+      "label": "Narrative"
+    },
+    "embedded": {
+      "label": "AI Indexed"
+    },
+    "create": {
+      "success": "Journal entry was created successfully."
+    },
+    "update": {
+      "success": "Journal entry was updated successfully."
+    },
+    "delete": {
+      "success": "Journal entry was removed successfully."
+    }
+  },
   "select": {
     "empty": {
       "label": "Please select"

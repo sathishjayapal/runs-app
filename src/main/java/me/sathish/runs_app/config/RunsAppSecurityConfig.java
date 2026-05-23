@@ -40,7 +40,7 @@ public class RunsAppSecurityConfig {
                     .requestMatchers("/", "/index.html", "/js/**", "/css/**", "/images/**", "/favicon.ico", "/manifest.json").permitAll()
                         .requestMatchers("/login", "/user-logout", "/runAppUsers", "/runAppUsers/**", "/garminRuns", "/garminRuns/**",
                                 "/shedlocks", "/fileNameTrackers", "/fileNameTrackers/**",
-                                "/stravaRuns", "/stravaRuns/**", "/error").permitAll()
+                                "/stravaRuns", "/stravaRuns/**", "/journalEntries", "/journalEntries/**", "/error").permitAll()
                     .requestMatchers("/api/**").authenticated()
                     .requestMatchers(EndpointRequest.toAnyEndpoint()).hasAnyAuthority(UserRoles.ROLE_ADMIN, UserRoles.ROLE_USER)
                     .anyRequest().authenticated())

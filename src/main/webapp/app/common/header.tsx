@@ -73,6 +73,9 @@ export default function Header() {
                   </li>}
                   <li><Link to="/fileImportRecords" className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('fileImportRecord.list.headline')}</Link></li>
                   <li><Link to="/stravaRuns" className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('stravaRun.list.headline')}</Link></li>
+                    <li><Link to="/journalEntries"
+                              className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('journalEntry.list.headline')}</Link>
+                    </li>
                 </ul>
               </li>
               {currentUser && (

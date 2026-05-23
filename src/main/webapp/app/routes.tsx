@@ -14,6 +14,9 @@ import StravaRunAdd from './strava-run/strava-run-add';
 import StravaRunEdit from './strava-run/strava-run-edit';
 import FileImportRecordList from './file-import-record/file-import-record-list';
 import FileImportRecordDetail from './file-import-record/file-import-record-detail';
+import JournalEntryList from './journal-entry/journal-entry-list';
+import JournalEntryAdd from './journal-entry/journal-entry-add';
+import JournalEntryEdit from './journal-entry/journal-entry-edit';
 import Error from './error/error';
 import ErrorBoundaryRoute from './error/error-boundary-route';
 import AdminRoute from './common/admin-route';
@@ -42,6 +45,9 @@ export default function AppRoutes() {
         { path: 'stravaRuns', element: <StravaRunList /> },
         { path: 'stravaRuns/add', element: <StravaRunAdd /> },
         { path: 'stravaRuns/edit/:runNumber', element: <StravaRunEdit /> },
+        {path: 'journalEntries', element: <JournalEntryList/>},
+        {path: 'journalEntries/add', element: <JournalEntryAdd/>},
+        {path: 'journalEntries/edit/:id', element: <JournalEntryEdit/>},
         { path: 'error', element: <Error /> },
         { path: '*', element: <Error /> }
       ]

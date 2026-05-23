@@ -70,6 +70,9 @@ management:
       access: unrestricted
 springdoc:
   pathsToMatch: /api/**
+runs-ai-analyzer:
+  base-url: ${RUNS_AI_ANALYZER_URL:http://localhost:8081}
+
 app:
   baseHost: ${BASE_HOST:http://localhost:3000}
   mail:
