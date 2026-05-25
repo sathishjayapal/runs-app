@@ -2,6 +2,7 @@ package me.sathish.runs_app.scheduling;
 
 import lombok.extern.slf4j.Slf4j;
 import me.sathish.runs_app.garmin_fit_import.GarminCsvImportService;
+import me.sathish.runs_app.run_app_user.RunAppUserRepository;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -12,19 +13,20 @@ import org.springframework.stereotype.Component;
 public class GarminCsvImportScheduler {
 
     private final GarminCsvImportService garminCsvImportService;
-
-    @Value("${garmin.csv-import.enabled:true}")
+    private final RunAppUserRepository runAppUserRepository;
+    @Value("${app.garmin.csv-import-enabled}")
     private boolean csvImportEnabled;
 
-    public GarminCsvImportScheduler(GarminCsvImportService garminCsvImportService) {
+    public GarminCsvImportScheduler(GarminCsvImportService garminCsvImportService, RunAppUserRepository runAppUserRepository) {
         this.garminCsvImportService = garminCsvImportService;
+        this.runAppUserRepository = runAppUserRepository;
     }
 
     /**
-     *
+     * TODO Make this this value goes back to one previous
      */
     // Temporarily disabled while troubleshooting import issues.
-     @Scheduled(cron = "${garmin.csv-import.schedule:0 */3 * * * *}")
+    @Scheduled(cron = "${app.garmin.csv-import-schedule}")
     @SchedulerLock(
         name = "garminCsvImport",
         lockAtMostFor = "5h",      // Max 5 hours (prevents long-running imports from blocking)
@@ -43,6 +45,7 @@ public class GarminCsvImportScheduler {
                 result.getSuccessCount(), result.getSkippedCount(), result.getFailedCount());
         } catch (Exception e) {
             log.error("Scheduled Garmin CSV import failed", e);
+            e.printStackTrace();
         }
     }
 }

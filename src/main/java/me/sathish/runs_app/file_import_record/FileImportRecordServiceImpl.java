@@ -5,6 +5,7 @@ import me.sathish.runs_app.run_app_user.RunAppUser;
 import me.sathish.runs_app.run_app_user.RunAppUserRepository;
 import me.sathish.runs_app.security.RunsAppSecurityUserDetails;
 import me.sathish.runs_app.util.NotFoundException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -23,6 +24,9 @@ public class FileImportRecordServiceImpl implements FileImportRecordService {
     private final FileImportRecordRepository repository;
     private final RunAppUserRepository runAppUserRepository;
 
+    @Value("${app.garmin.csv-import-user-id}")
+    private String systemUserId;
+
     public FileImportRecordServiceImpl(FileImportRecordRepository repository,
                                        RunAppUserRepository runAppUserRepository) {
         this.repository = repository;
@@ -40,7 +44,9 @@ public class FileImportRecordServiceImpl implements FileImportRecordService {
         record.setSuccessCount(0);
         record.setFailedCount(0);
         record.setSkippedCount(0);
-        resolveCurrentUser().ifPresent(record::setCreatedBy);
+        resolveCurrentUser()
+                .or(() -> resolveUserById(systemUserId))
+                .ifPresent(record::setCreatedBy);
 
         FileImportRecord saved = repository.save(record);
         log.info("Created import record for: {} with {} expected rows", fileName, expectedRowCount);
@@ -59,6 +65,16 @@ public class FileImportRecordServiceImpl implements FileImportRecordService {
         }
 
         return Optional.empty();
+    }
+
+    private Optional<RunAppUser> resolveUserById(String userId) {
+        if (userId == null || userId.isBlank()) return Optional.empty();
+        try {
+            return runAppUserRepository.findById(Long.parseLong(userId));
+        } catch (NumberFormatException e) {
+            log.warn("Invalid user ID for import record: {}", userId);
+            return Optional.empty();
+        }
     }
 
     @Override

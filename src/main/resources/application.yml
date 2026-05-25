@@ -79,6 +79,9 @@ app:
     from: ${MAIL_FROM:noreply@example.com}
     displayName: ${MAIL_DISPLAY_NAME:Runs App}
   garmin:
+    csv-import-enabled: ${GARMIN_CSV_IMPORT_ENABLED:true}
+    csv-import-user-id: ${GARMIN_SYSTEM_USER_ID}
+    csv-import-schedule: ${GARMIN_CSV_IMPORT_SCHEDULE}
     import:
       source: ${GARMIN_IMPORT_SOURCE:DRIVE}
       drive:
