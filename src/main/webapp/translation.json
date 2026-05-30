@@ -342,6 +342,23 @@
       "success": "Journal entry was removed successfully."
     }
   },
+  "aiInsights": {
+    "headline": "AI Training Insights",
+    "subtitle": "Ask your running coach anything about your training, recovery, and performance.",
+    "queryLabel": "Your question",
+    "queryPlaceholder": "e.g. What patterns do you see in my recovery? Am I overtraining?",
+    "queryHint": "Tip: press Cmd+Enter to submit",
+    "askAi": "Ask AI",
+    "searching": "Thinking…",
+    "aiResponse": "AI Response",
+    "suggestedQueries": "Try asking",
+    "sources": "Sources used",
+    "queryWas": "Your question",
+    "recentAnalyses": "Recent AI Analyses",
+    "loadingRecent": "Loading recent analyses…",
+    "noRecentAnalyses": "No AI analyses yet. Import a CSV or add journal entries and they will appear here once processed.",
+    "nav": "AI Insights"
+  },
   "select": {
     "empty": {
       "label": "Please select"

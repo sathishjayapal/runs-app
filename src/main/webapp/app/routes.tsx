@@ -17,6 +17,7 @@ import FileImportRecordDetail from './file-import-record/file-import-record-deta
 import JournalEntryList from './journal-entry/journal-entry-list';
 import JournalEntryAdd from './journal-entry/journal-entry-add';
 import JournalEntryEdit from './journal-entry/journal-entry-edit';
+import AiInsights from './ai-insights/ai-insights';
 import Error from './error/error';
 import ErrorBoundaryRoute from './error/error-boundary-route';
 import AdminRoute from './common/admin-route';
@@ -48,6 +49,7 @@ export default function AppRoutes() {
         {path: 'journalEntries', element: <JournalEntryList/>},
         {path: 'journalEntries/add', element: <JournalEntryAdd/>},
         {path: 'journalEntries/edit/:id', element: <JournalEntryEdit/>},
+          {path: 'aiInsights', element: <AiInsights/>},
         { path: 'error', element: <Error /> },
         { path: '*', element: <Error /> }
       ]

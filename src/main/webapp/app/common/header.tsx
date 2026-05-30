@@ -76,6 +76,9 @@ export default function Header() {
                     <li><Link to="/journalEntries"
                               className="inline-block w-full hover:bg-gray-200 px-4 py-1">{t('journalEntry.list.headline')}</Link>
                     </li>
+                    <li><Link to="/aiInsights"
+                              className="inline-block w-full hover:bg-gray-200 px-4 py-1 font-medium text-blue-700">{t('aiInsights.nav')}</Link>
+                    </li>
                 </ul>
               </li>
               {currentUser && (
