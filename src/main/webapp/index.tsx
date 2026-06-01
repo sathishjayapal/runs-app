@@ -26,7 +26,7 @@ axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 axios.interceptors.response.use(
   (response) => {
-    const contentType = response.headers['content-type'] || '';
+    const contentType = String(response.headers['content-type'] ?? '');
     if (response.config.url?.startsWith('/api') && !contentType.includes('application/json')) {
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
