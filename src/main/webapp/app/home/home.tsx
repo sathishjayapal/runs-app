@@ -12,7 +12,7 @@ export default function Home() {
   useDocumentTitle(t('home.index.headline'));
 
   return (<>
-    <h1 className="grow text-3xl md:text-4xl font-medium mb-8">Welcome to Runs App!</h1>
+    <h1 className="grow text-3xl md:text-4xl font-medium mb-8">{t('home.index.headline')}</h1>
     <p className="mb-4">
       <strong>Runs App</strong> is a comprehensive running activity tracker that seamlessly integrates with <strong>Garmin
       devices</strong> and <strong>Strava</strong>.
