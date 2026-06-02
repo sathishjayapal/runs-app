@@ -20,12 +20,39 @@ interface RecentAnalysis {
     createdAt?: string;
 }
 
+interface AnalysisJob {
+    jobId: string;
+    status: 'PENDING' | 'PROCESSING' | 'DONE' | 'FAILED';
+    createdAt?: string;
+    completedAt?: string;
+    errorMessage?: string;
+}
+
+interface AnalysisResult {
+    summary?: string;
+    insights?: { category: string; observation: string; recommendation: string }[];
+    recommendations?: string[];
+    riskFlags?: string[];
+    confidenceScore?: number;
+    metrics?: {
+        totalRuns: number;
+        totalDistanceKm: number;
+        totalDuration: string;
+        averagePaceMinPerKm?: number;
+        averageHeartRate?: number;
+        totalCalories?: number;
+    };
+    cachedResult?: boolean;
+}
+
 const SUGGESTED_QUERIES = [
     'Based on my recent runs and journal entries, what should I focus on next week? Any injury risks I should watch?',
     'What patterns do you see in my recovery and fatigue? When do I perform best?',
     'How is my training load trending? Am I overtraining or undertraining?',
     'What does my heart rate data suggest about my aerobic fitness?',
 ];
+
+const POLL_INTERVAL_MS = 5000;
 
 export default function AiInsights() {
     const {t} = useTranslation();
@@ -38,6 +65,12 @@ export default function AiInsights() {
     const [loadingRecent, setLoadingRecent] = useState(true);
     const navigate = useNavigate();
     const answerRef = useRef<HTMLDivElement>(null);
+
+    const [analysisJob, setAnalysisJob] = useState<AnalysisJob | null>(null);
+    const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+    const [submittingAnalysis, setSubmittingAnalysis] = useState(false);
+    const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const resultRef = useRef<HTMLDivElement>(null);
 
     const loadRecentAnalyses = async () => {
         setLoadingRecent(true);
@@ -83,6 +116,68 @@ export default function AiInsights() {
 
     const handleSuggestedQuery = (suggested: string) => {
         setQuery(suggested);
+    };
+
+    const stopPolling = () => {
+        if (pollTimerRef.current) {
+            clearTimeout(pollTimerRef.current);
+            pollTimerRef.current = null;
+        }
+    };
+
+    useEffect(() => () => stopPolling(), []);
+
+    const pollJobStatus = (jobId: string) => {
+        pollTimerRef.current = setTimeout(async () => {
+            try {
+                const statusRes = await axios.get(`/api/rag/analyze/status/${jobId}`);
+                const job: AnalysisJob = statusRes.data;
+                setAnalysisJob(job);
+
+                if (job.status === 'DONE') {
+                    const resultRes = await axios.get(`/api/rag/analyze/result/${jobId}`);
+                    setAnalysisResult(resultRes.data);
+                    setSubmittingAnalysis(false);
+                    loadRecentAnalyses();
+                    setTimeout(() => resultRef.current?.scrollIntoView({behavior: 'smooth', block: 'start'}), 100);
+                } else if (job.status === 'FAILED') {
+                    setSubmittingAnalysis(false);
+                } else {
+                    pollJobStatus(jobId);
+                }
+            } catch (error: any) {
+                setSubmittingAnalysis(false);
+                if (error?.response?.status === 401) {
+                    window.location.href = '/login';
+                }
+            }
+        }, POLL_INTERVAL_MS);
+    };
+
+    const handleAnalyzeRuns = async () => {
+        setSubmittingAnalysis(true);
+        setAnalysisJob(null);
+        setAnalysisResult(null);
+        stopPolling();
+        try {
+            const runsRes = await axios.get('/api/garminRuns?size=20&sort=activityDate,desc');
+            const runs = (runsRes.data?.content ?? runsRes.data ?? []).slice(0, 10);
+            if (runs.length === 0) {
+                setSubmittingAnalysis(false);
+                return;
+            }
+            const jobRes = await axios.post('/api/rag/analyze', {runs, forceRefresh: false});
+            const job: AnalysisJob = jobRes.data;
+            setAnalysisJob(job);
+            pollJobStatus(job.jobId);
+        } catch (error: any) {
+            setSubmittingAnalysis(false);
+            if (error?.response?.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            handleServerError(error, navigate);
+        }
     };
 
     const renderAnswer = (text: string) => {
@@ -220,6 +315,151 @@ export default function AiInsights() {
                     </div>
                 </div>
             )}
+
+            {/* Analyze My Runs */}
+            <div className="mb-8">
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-xl font-semibold">Analyze My Runs</h2>
+                    <button
+                        type="button"
+                        onClick={handleAnalyzeRuns}
+                        disabled={submittingAnalysis}
+                        className="inline-flex items-center gap-2 text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-4 focus:ring-green-300 rounded px-5 py-2 text-sm font-medium transition-colors"
+                    >
+                        {submittingAnalysis ? (
+                            <>
+                                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                            strokeWidth="4"/>
+                                    <path className="opacity-75" fill="currentColor"
+                                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                </svg>
+                                {analysisJob?.status === 'PROCESSING' ? 'AI is analyzing…' : 'Starting…'}
+                            </>
+                        ) : (
+                            <>
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                          d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                                Analyze My Recent Runs
+                            </>
+                        )}
+                    </button>
+                </div>
+                <p className="text-sm text-gray-500 mb-4">Fetches your 10 most recent Garmin runs and generates an AI
+                    coaching analysis. Results appear below when ready (may take 1-3 minutes).</p>
+
+                {/* Job status banner */}
+                {analysisJob && submittingAnalysis && (
+                    <div
+                        className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-800">
+                        <svg className="animate-spin h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    strokeWidth="4"/>
+                            <path className="opacity-75" fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        <span>Status: <strong>{analysisJob.status}</strong> — checking every 5 seconds…</span>
+                    </div>
+                )}
+
+                {analysisJob?.status === 'FAILED' && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
+                        Analysis failed: {analysisJob.errorMessage ?? 'Unknown error'}
+                    </div>
+                )}
+
+                {/* Analysis result */}
+                {analysisResult && (
+                    <div ref={resultRef}
+                         className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6 shadow-sm mt-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-semibold text-green-900 flex items-center gap-2">
+                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                AI Analysis Complete
+                            </h3>
+                            {analysisResult.cachedResult && (
+                                <span
+                                    className="text-xs bg-yellow-100 text-yellow-700 border border-yellow-200 rounded-full px-2 py-0.5">Cached</span>
+                            )}
+                        </div>
+
+                        {analysisResult.metrics && (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                                {[
+                                    {label: 'Runs', value: analysisResult.metrics.totalRuns},
+                                    {label: 'Distance', value: `${analysisResult.metrics.totalDistanceKm} km`},
+                                    {label: 'Duration', value: analysisResult.metrics.totalDuration},
+                                    analysisResult.metrics.averagePaceMinPerKm ? {
+                                        label: 'Avg Pace',
+                                        value: `${analysisResult.metrics.averagePaceMinPerKm} min/km`
+                                    } : null,
+                                    analysisResult.metrics.averageHeartRate ? {
+                                        label: 'Avg HR',
+                                        value: `${analysisResult.metrics.averageHeartRate} bpm`
+                                    } : null,
+                                    analysisResult.metrics.totalCalories ? {
+                                        label: 'Calories',
+                                        value: analysisResult.metrics.totalCalories
+                                    } : null,
+                                ].filter(Boolean).map((m, i) => (
+                                    <div key={i} className="bg-white/70 rounded-lg px-3 py-2 text-center">
+                                        <p className="text-xs text-gray-500">{m!.label}</p>
+                                        <p className="font-semibold text-gray-800 text-sm">{m!.value}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {analysisResult.summary && (
+                            <p className="text-gray-800 text-sm mb-4 leading-relaxed">{analysisResult.summary}</p>
+                        )}
+
+                        {analysisResult.insights && analysisResult.insights.length > 0 && (
+                            <div className="mb-4">
+                                <h4 className="text-sm font-semibold text-green-800 mb-2">Insights</h4>
+                                <div className="space-y-2">
+                                    {analysisResult.insights.map((insight, i) => (
+                                        <div key={i} className="bg-white/60 rounded-lg px-3 py-2 text-sm">
+                                            <span className="font-medium text-green-700">{insight.category}: </span>
+                                            <span className="text-gray-700">{insight.observation}</span>
+                                            {insight.recommendation && (
+                                                <p className="text-gray-500 text-xs mt-1 italic">→ {insight.recommendation}</p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {analysisResult.recommendations && analysisResult.recommendations.length > 0 && (
+                            <div className="mb-4">
+                                <h4 className="text-sm font-semibold text-green-800 mb-2">Recommendations</h4>
+                                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                                    {analysisResult.recommendations.map((r, i) => <li key={i}>{r}</li>)}
+                                </ul>
+                            </div>
+                        )}
+
+                        {analysisResult.riskFlags && analysisResult.riskFlags.length > 0 && (
+                            <div>
+                                <h4 className="text-sm font-semibold text-red-700 mb-2">Risk Flags</h4>
+                                <ul className="list-disc list-inside text-sm text-red-600 space-y-1">
+                                    {analysisResult.riskFlags.map((r, i) => <li key={i}>{r}</li>)}
+                                </ul>
+                            </div>
+                        )}
+
+                        {analysisResult.confidenceScore != null && (
+                            <p className="text-xs text-gray-400 mt-4 text-right">Confidence: {analysisResult.confidenceScore}%</p>
+                        )}
+                    </div>
+                )}
+            </div>
 
             {/* Recent Analyses */}
             <div>

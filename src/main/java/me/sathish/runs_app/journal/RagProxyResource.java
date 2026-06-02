@@ -46,6 +46,35 @@ public class RagProxyResource {
         return forward(HttpMethod.GET, "/api/v1/rag/recent", null);
     }
 
+    /**
+     * POST /api/rag/analyze
+     * Body: { "runs": [...], "forceRefresh": false }
+     * Proxies to runs-ai-analyzer POST /api/v1/analysis/analyze/async
+     * Returns immediately with { jobId, status, message }
+     */
+    @PostMapping(value = "/analyze", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> submitAnalysis(@RequestBody final Object body) {
+        return forward(HttpMethod.POST, "/api/v1/analysis/analyze/async", body);
+    }
+
+    /**
+     * GET /api/rag/analyze/status/{jobId}
+     * Proxies to runs-ai-analyzer GET /api/v1/analysis/analyze/status/{jobId}
+     */
+    @GetMapping("/analyze/status/{jobId}")
+    public ResponseEntity<Object> analysisStatus(@PathVariable final String jobId) {
+        return forward(HttpMethod.GET, "/api/v1/analysis/analyze/status/" + jobId, null);
+    }
+
+    /**
+     * GET /api/rag/analyze/result/{jobId}
+     * Proxies to runs-ai-analyzer GET /api/v1/analysis/analyze/result/{jobId}
+     */
+    @GetMapping("/analyze/result/{jobId}")
+    public ResponseEntity<Object> analysisResult(@PathVariable final String jobId) {
+        return forward(HttpMethod.GET, "/api/v1/analysis/analyze/result/" + jobId, null);
+    }
+
     private ResponseEntity<Object> forward(final HttpMethod method, final String path, final Object body) {
         try {
             final RestClient.RequestBodySpec spec = restClient.method(method)
