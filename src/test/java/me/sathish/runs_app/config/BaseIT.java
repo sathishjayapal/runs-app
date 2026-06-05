@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
@@ -21,6 +22,9 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
 import org.springframework.util.StreamUtils;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -33,14 +37,21 @@ import java.nio.charset.StandardCharsets;
     "spring.mail.host=localhost",
     "spring.mail.port=2525",
     "spring.docker.compose.enabled=false",
-    "spring.datasource.url=jdbc:postgresql://localhost:5445/runsapp_db",
-    "spring.datasource.username=postgres",
-    "spring.datasource.password=P4ssword!"
+    "app.garmin.csv-import-user-id=1",
+    "app.garmin.csv-import-schedule=0 0 0 * * *",
+    "app.garmin.import.systemUserId=1"
 })
 @Sql({"/data/clearAll.sql", "/data/userData.sql"})
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 @Slf4j
+@Testcontainers
 public abstract class BaseIT {
+    @Container
+    @ServiceConnection
+    private static final PostgreSQLContainer<?> POSTGRESQL = new PostgreSQLContainer<>("postgres:18.1")
+            .withDatabaseName("runsapp_db")
+            .withUsername("postgres")
+            .withPassword("P4ssword!");
 
     public static final String AUTH_USER_ADMIN = "admin@test.com";
     public static final String AUTH_USER_REGULAR = "user@test.com";
