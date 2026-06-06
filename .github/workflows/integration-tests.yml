@@ -6,6 +6,19 @@ on:
   pull_request:
     branches: [ main, master, develop ]
   workflow_dispatch:
+    inputs:
+      docker_host:
+        description: 'Remote Docker host (e.g., tcp://host:2376). Leave empty for local Docker.'
+        required: false
+        default: ''
+      skip_integration_tests:
+        description: 'Skip integration tests (use when Docker is unavailable)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 jobs:
   test:
@@ -52,9 +65,12 @@ jobs:
         run: npm test -- --passWithNoTests
 
       - name: Run integration tests
-        run: ./mvnw clean test
+        if: github.event.inputs.skip_integration_tests != 'true'
+        run: ./mvnw clean test -Pci
         env:
           # TestContainers will automatically use Docker available in GitHub Actions
+          # Or connect to remote Docker if DOCKER_HOST is set
+          DOCKER_HOST: ${{ github.event.inputs.docker_host }}
           TESTCONTAINERS_RYUK_DISABLED: false
 
       - name: Generate test report
@@ -125,14 +141,12 @@ jobs:
           echo "**Status**: ${{ needs.test.result }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Test Classes" >> $GITHUB_STEP_SUMMARY
-          echo "- GarminRunResourceTest (23 tests)" >> $GITHUB_STEP_SUMMARY
-          echo "- StravaRunResourceTest (26 tests)" >> $GITHUB_STEP_SUMMARY
-          echo "- SecurityIntegrationTest (20 tests)" >> $GITHUB_STEP_SUMMARY
-          echo "- RunAppUserResourceTest (22 tests)" >> $GITHUB_STEP_SUMMARY
-          echo "- FileNameTrackerServiceTest (16 tests)" >> $GITHUB_STEP_SUMMARY
-          echo "- ReferentialIntegrityTest (20 tests)" >> $GITHUB_STEP_SUMMARY
-          echo "- GarminFitImportServiceTest (14 tests)" >> $GITHUB_STEP_SUMMARY
+          echo "- GarminRunResourceTest (integration tests for Garmin run operations)" >> $GITHUB_STEP_SUMMARY
+          echo "- StravaRunResourceTest (integration tests for Strava run operations)" >> $GITHUB_STEP_SUMMARY
+          echo "- SecurityIntegrationTest (authentication and authorization tests)" >> $GITHUB_STEP_SUMMARY
+          echo "- RunAppUserResourceTest (user management integration tests)" >> $GITHUB_STEP_SUMMARY
+          echo "- ReferentialIntegrityTest (database referential integrity tests)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Total**: 141 comprehensive integration tests" >> $GITHUB_STEP_SUMMARY
+          echo "**Note**: TestContainers PostgreSQL is used for all integration tests" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ TestContainers working properly in CI/CD environment!" >> $GITHUB_STEP_SUMMARY
