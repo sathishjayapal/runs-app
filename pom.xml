@@ -16,6 +16,8 @@
     <properties>
         <java.version>21</java.version>
         <testcontainers.version>1.17.6</testcontainers.version>
+        <!-- Skip integration tests by default (require Docker). Override with -DskipITs=false -->
+        <skipITs>true</skipITs>
     </properties>
 
     <dependencyManagement>
@@ -253,37 +255,21 @@
                         --add-opens java.base/java.io=ALL-UNNAMED
                         -XX:+EnableDynamicAgentLoading
                     </argLine>
+                    <!-- Skip tests when skipITs is true (default). Integration tests require Docker. -->
+                    <skipTests>${skipITs}</skipTests>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
     <profiles>
-        <!-- Skip integration tests - useful when Docker is unavailable -->
+        <!-- CI profile: Enable integration tests (Docker is available in GitHub Actions) -->
         <profile>
-            <id>skip-integration-tests</id>
-            <activation>
-                <property>
-                    <name>skipITs</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <excludes>
-                                <exclude>**/*IT.java</exclude>
-                                <exclude>**/BaseIT.java</exclude>
-                                <exclude>**/*ResourceTest.java</exclude>
-                                <exclude>**/*IntegrationTest.java</exclude>
-                            </excludes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
+            <id>ci</id>
+            <properties>
+                <!-- Enable tests in CI environment where Docker is available -->
+                <skipITs>false</skipITs>
+            </properties>
         </profile>
 
         <!-- Profile for running with remote Docker via DOCKER_HOST -->
@@ -294,6 +280,10 @@
                     <name>docker.host</name>
                 </property>
             </activation>
+            <properties>
+                <!-- Enable tests when using remote Docker -->
+                <skipITs>false</skipITs>
+            </properties>
             <build>
                 <plugins>
                     <plugin>

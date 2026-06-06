@@ -66,14 +66,12 @@ jobs:
 
       - name: Run integration tests
         if: github.event.inputs.skip_integration_tests != 'true'
-        run: ./mvnw clean test
+        run: ./mvnw clean test -Pci
         env:
           # TestContainers will automatically use Docker available in GitHub Actions
           # Or connect to remote Docker if DOCKER_HOST is set
           DOCKER_HOST: ${{ github.event.inputs.docker_host }}
           TESTCONTAINERS_RYUK_DISABLED: false
-          # Skip TLS verification for remote Docker (optional, based on your setup)
-          TESTCONTAINERS_DOCKER_CLIENT_STRATEGY: ${{ github.event.inputs.docker_host != '' && 'org.testcontainers.dockerclient.EnvironmentAndSystemPropertyClientProviderStrategy' || '' }}
 
       - name: Generate test report
         if: always()
