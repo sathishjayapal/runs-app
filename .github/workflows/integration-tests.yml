@@ -6,6 +6,19 @@ on:
   pull_request:
     branches: [ main, master, develop ]
   workflow_dispatch:
+    inputs:
+      docker_host:
+        description: 'Remote Docker host (e.g., tcp://host:2376). Leave empty for local Docker.'
+        required: false
+        default: ''
+      skip_integration_tests:
+        description: 'Skip integration tests (use when Docker is unavailable)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 jobs:
   test:
@@ -52,10 +65,15 @@ jobs:
         run: npm test -- --passWithNoTests
 
       - name: Run integration tests
+        if: github.event.inputs.skip_integration_tests != 'true'
         run: ./mvnw clean test
         env:
           # TestContainers will automatically use Docker available in GitHub Actions
+          # Or connect to remote Docker if DOCKER_HOST is set
+          DOCKER_HOST: ${{ github.event.inputs.docker_host }}
           TESTCONTAINERS_RYUK_DISABLED: false
+          # Skip TLS verification for remote Docker (optional, based on your setup)
+          TESTCONTAINERS_DOCKER_CLIENT_STRATEGY: ${{ github.event.inputs.docker_host != '' && 'org.testcontainers.dockerclient.EnvironmentAndSystemPropertyClientProviderStrategy' || '' }}
 
       - name: Generate test report
         if: always()
