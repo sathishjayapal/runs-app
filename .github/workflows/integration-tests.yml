@@ -125,14 +125,12 @@ jobs:
           echo "**Status**: ${{ needs.test.result }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Test Classes" >> $GITHUB_STEP_SUMMARY
-          echo "- GarminRunResourceTest (23 tests)" >> $GITHUB_STEP_SUMMARY
-          echo "- StravaRunResourceTest (26 tests)" >> $GITHUB_STEP_SUMMARY
-          echo "- SecurityIntegrationTest (20 tests)" >> $GITHUB_STEP_SUMMARY
-          echo "- RunAppUserResourceTest (22 tests)" >> $GITHUB_STEP_SUMMARY
-          echo "- FileNameTrackerServiceTest (16 tests)" >> $GITHUB_STEP_SUMMARY
-          echo "- ReferentialIntegrityTest (20 tests)" >> $GITHUB_STEP_SUMMARY
-          echo "- GarminFitImportServiceTest (14 tests)" >> $GITHUB_STEP_SUMMARY
+          echo "- GarminRunResourceTest (integration tests for Garmin run operations)" >> $GITHUB_STEP_SUMMARY
+          echo "- StravaRunResourceTest (integration tests for Strava run operations)" >> $GITHUB_STEP_SUMMARY
+          echo "- SecurityIntegrationTest (authentication and authorization tests)" >> $GITHUB_STEP_SUMMARY
+          echo "- RunAppUserResourceTest (user management integration tests)" >> $GITHUB_STEP_SUMMARY
+          echo "- ReferentialIntegrityTest (database referential integrity tests)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Total**: 141 comprehensive integration tests" >> $GITHUB_STEP_SUMMARY
+          echo "**Note**: TestContainers PostgreSQL is used for all integration tests" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ TestContainers working properly in CI/CD environment!" >> $GITHUB_STEP_SUMMARY
