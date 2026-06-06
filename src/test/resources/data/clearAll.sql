@@ -5,6 +5,7 @@ DELETE FROM garmin_run;
 DELETE FROM strava_run;
 
 -- Clear file tracking
+DELETE FROM file_import_record;
 DELETE FROM file_name_tracker;
 
 -- Clear user-role relationships
