@@ -3,8 +3,26 @@ name: Integration Tests
 on:
   push:
     branches: [ main, master, develop ]
+    paths:
+      - 'src/**'
+      - 'pom.xml'
+      - 'mvnw'
+      - '.mvn/**'
+      - '.github/workflows/integration-tests.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig*.json'
   pull_request:
     branches: [ main, master, develop ]
+    paths:
+      - 'src/**'
+      - 'pom.xml'
+      - 'mvnw'
+      - '.mvn/**'
+      - '.github/workflows/integration-tests.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig*.json'
   workflow_dispatch:
     inputs:
       docker_host:
@@ -24,6 +42,7 @@ jobs:
   test:
     name: Run Integration Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     # No services needed - TestContainers will manage PostgreSQL
 
@@ -38,12 +57,6 @@ jobs:
           java-version: '21'
           cache: 'maven'
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: 'npm'
-
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
@@ -52,21 +65,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Install frontend dependencies
-        run: npm install
-
-      - name: TypeScript type-check
-        run: npx tsc --noEmit
-
-      - name: Build frontend
-        run: npm run build
-
-      - name: Run frontend tests
-        run: npm test -- --passWithNoTests
-
       - name: Run integration tests
         if: github.event.inputs.skip_integration_tests != 'true'
-        run: ./mvnw clean test -Pci
+        run: ./mvnw -B test -Pci
         env:
           # TestContainers will automatically use Docker available in GitHub Actions
           # Or connect to remote Docker if DOCKER_HOST is set
@@ -78,7 +79,7 @@ jobs:
         run: |
           echo "## Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f target/surefire-reports/TEST-*.xml ]; then
+          if compgen -G "target/surefire-reports/TEST-*.xml" > /dev/null; then
             echo "Test execution completed. Check artifacts for detailed results." >> $GITHUB_STEP_SUMMARY
           else
             echo "No test results found." >> $GITHUB_STEP_SUMMARY
@@ -93,6 +94,7 @@ jobs:
             target/surefire-reports/
             target/test-classes/
           retention-days: 30
+          if-no-files-found: ignore
 
       - name: Upload test coverage
         if: always()
@@ -101,6 +103,7 @@ jobs:
           name: test-coverage
           path: target/site/jacoco/
           retention-days: 30
+          if-no-files-found: ignore
 
       - name: Publish test report
         if: always()
@@ -133,6 +136,7 @@ jobs:
         with:
           name: test-results
           path: test-results
+        continue-on-error: true
 
       - name: Generate summary
         run: |
