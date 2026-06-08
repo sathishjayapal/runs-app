@@ -60,3 +60,4 @@ SHEDLOCK_SETUP.txt
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
+/.mvn/wrapper/maven-wrapper.jar
