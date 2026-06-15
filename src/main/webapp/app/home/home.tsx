@@ -24,16 +24,18 @@ export default function Home() {
     </p>
     <div className="md:w-2/5 mb-12">
       <h4 className="text-2xl font-medium mb-4">Explore Features</h4>
-      <div className="flex flex-col border border-gray-300 rounded">
+      <div className="flex flex-col overflow-hidden rounded-lg border border-blue-200 bg-blue-50/40 shadow-sm">
         {isAdmin() &&
-            <Link to="/runAppUsers" className="w-full border-gray-300 hover:bg-gray-100 border-b rounded-t px-4 py-2">User
+            <Link to="/runAppUsers"
+                  className="w-full border-b border-blue-100 px-4 py-2 transition-colors hover:bg-blue-100">User
               Management</Link>}
         <Link to="/garminRuns"
-              className={`w-full border-gray-300 hover:bg-gray-100 border-b ${!isAdmin() ? 'rounded-t' : ''} px-4 py-2`}>Garmin
+              className={`w-full border-b border-blue-100 px-4 py-2 transition-colors hover:bg-blue-100 ${!isAdmin() ? 'rounded-t-lg' : ''}`}>Garmin
           Runs</Link>
-        <Link to="/fileImportRecords" className="w-full border-gray-300 hover:bg-gray-100 border-b px-4 py-2">File
+        <Link to="/fileImportRecords"
+              className="w-full border-b border-blue-100 px-4 py-2 transition-colors hover:bg-blue-100">File
           Import Records</Link>
-        <Link to="/stravaRuns" className="w-full border-gray-300 hover:bg-gray-100 rounded-b px-4 py-2">Strava
+        <Link to="/stravaRuns" className="w-full px-4 py-2 transition-colors hover:bg-blue-100 rounded-b-lg">Strava
           Runs</Link>
       </div>
     </div>
