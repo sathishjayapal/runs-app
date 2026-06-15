@@ -1,7 +1,7 @@
 spring:
   datasource:
-    url: ${JDBC_DATABASE_URL:jdbc:postgresql://localhost:5443/runsapp_db}
-    username: ${JDBC_DATABASE_USERNAME:postgres}
+    url: ${JDBC_DATABASE_URL}
+    username: ${JDBC_DATABASE_USERNAME}
     password: ${JDBC_DATABASE_PASSWORD}
     hikari:
       connection-timeout: 30000
@@ -33,8 +33,8 @@ spring:
     compose:
       enabled: false
   rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
-    port: ${RABBITMQ_PORT:5672}
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
     username: ${RABBITMQ_USERNAME}
     password: ${RABBITMQ_PASSWORD}
     publisher-confirm-type: correlated
@@ -71,10 +71,10 @@ management:
 springdoc:
   pathsToMatch: /api/**
 runs-ai-analyzer:
-  base-url: ${RUNS_AI_ANALYZER_URL:http://localhost:8081}
+  base-url: ${RUNS_AI_ANALYZER_URL}
 
 app:
-  baseHost: ${BASE_HOST:http://localhost:3000}
+  baseHost: ${BASE_HOST}
   mail:
     from: ${MAIL_FROM:noreply@example.com}
     displayName: ${MAIL_DISPLAY_NAME:Runs App}
