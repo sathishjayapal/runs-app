@@ -1,7 +1,6 @@
 
 package me.sathish.runs_app.garmin_fit_import;
 
-import tools.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import me.sathish.runs_app.config.RabbitMQConfiguration;
 import me.sathish.runs_app.file_import_record.*;
@@ -12,6 +11,7 @@ import me.sathish.runs_app.garmin_run.GarminRunService;
 import me.sathish.runs_app.mail.MailService;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -396,15 +396,15 @@ public class GarminCsvImportService {
             event.setActivityType(dto.getActivityType());
             event.setMaxHeartRate(dto.getMaxHeartRate());
             event.setCalories(dto.getCalories());
-            
-            // Publish to API queue (eventstracker for audit) - as JSON string to avoid type conflicts
+
+            // Publish to API queue (eventstracker for audit) as a JSON object so the broker serializes it once
             rabbitTemplate.convertAndSend(
                 RabbitMQConfiguration.GARMIN_EXCHANGE,
                 RabbitMQConfiguration.GARMIN_API_ROUTING_KEY,
-                objectMapper.writeValueAsString(event));
+                    event);
             log.debug("Published SUCCESS event to API queue for CSV activity: {}", dto.getActivityId());
-            
-            // Publish to OPS queue (runs-ai-analyzer for analysis) - as JSON string
+
+            // Publish to OPS queue (runs-ai-analyzer for analysis) as JSON text for the existing String-based listener
             rabbitTemplate.convertAndSend(
                 RabbitMQConfiguration.GARMIN_EXCHANGE,
                 RabbitMQConfiguration.GARMIN_OPS_ROUTING_KEY,
@@ -560,14 +560,14 @@ public class GarminCsvImportService {
             event.setMaxHeartRate(dto.getMaxHeartRate());
             event.setCalories(dto.getCalories());
 
-            // Publish to API queue (eventstracker for audit) - as JSON string to avoid type conflicts
+            // Publish to API queue (eventstracker for audit) as a JSON object so the broker serializes it once
             rabbitTemplate.convertAndSend(
                 RabbitMQConfiguration.GARMIN_EXCHANGE,
                 RabbitMQConfiguration.GARMIN_API_ROUTING_KEY,
-                objectMapper.writeValueAsString(event));
+                    event);
             log.debug("Published UPDATED event to API queue for CSV activity: {}", dto.getActivityId());
 
-            // Publish to OPS queue (runs-ai-analyzer for analysis) - as JSON string
+            // Publish to OPS queue (runs-ai-analyzer for analysis) as JSON text for the existing String-based listener
             rabbitTemplate.convertAndSend(
                 RabbitMQConfiguration.GARMIN_EXCHANGE,
                 RabbitMQConfiguration.GARMIN_OPS_ROUTING_KEY,

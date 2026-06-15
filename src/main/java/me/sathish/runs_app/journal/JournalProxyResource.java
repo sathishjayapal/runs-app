@@ -22,7 +22,7 @@ public class JournalProxyResource {
     private final RestClient restClient;
 
     public JournalProxyResource(
-            @Value("${runs-ai-analyzer.base-url:http://localhost:8081}") final String analyzerBaseUrl) {
+            @Value("${runs-ai-analyzer.base-url}") final String analyzerBaseUrl) {
         this.restClient = RestClient.builder().baseUrl(analyzerBaseUrl).build();
     }
 

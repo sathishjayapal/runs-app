@@ -22,7 +22,7 @@ public class RagProxyResource {
     private final RestClient restClient;
 
     public RagProxyResource(
-            @Value("${runs-ai-analyzer.base-url:http://localhost:8081}") final String analyzerBaseUrl) {
+            @Value("${runs-ai-analyzer.base-url}") final String analyzerBaseUrl) {
         this.restClient = RestClient.builder().baseUrl(analyzerBaseUrl).build();
     }
 
