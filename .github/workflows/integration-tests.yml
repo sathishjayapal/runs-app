@@ -1,28 +1,6 @@
 name: Integration Tests
 
 on:
-  push:
-    branches: [ main, master, develop ]
-    paths:
-      - 'src/**'
-      - 'pom.xml'
-      - 'mvnw'
-      - '.mvn/**'
-      - '.github/workflows/integration-tests.yml'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'tsconfig*.json'
-  pull_request:
-    branches: [ main, master, develop ]
-    paths:
-      - 'src/**'
-      - 'pom.xml'
-      - 'mvnw'
-      - '.mvn/**'
-      - '.github/workflows/integration-tests.yml'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'tsconfig*.json'
   workflow_dispatch:
     inputs:
       docker_host:
