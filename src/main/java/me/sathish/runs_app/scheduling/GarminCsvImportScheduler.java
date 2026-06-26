@@ -45,7 +45,6 @@ public class GarminCsvImportScheduler {
                 result.getSuccessCount(), result.getSkippedCount(), result.getFailedCount());
         } catch (Exception e) {
             log.error("Scheduled Garmin CSV import failed", e);
-            e.printStackTrace();
         }
     }
 }
