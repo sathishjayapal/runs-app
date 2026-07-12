@@ -4,7 +4,7 @@ services:
     image: postgres:18.1
     environment:
       POSTGRES_DB: ${JDBC_DATABASE_NAME:-runsapp_db}
-      POSTGRES_USER: ${JDBC_DATABASE_USERNAME:-postgres}
+      POSTGRES_USER: ${JDBC_DATABASE_USERNAME:?Set JDBC_DATABASE_USERNAME in .env}
       POSTGRES_PASSWORD: ${JDBC_DATABASE_PASSWORD:?Set JDBC_DATABASE_PASSWORD in .env}
     ports:
       - "5443:5432"
