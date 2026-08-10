@@ -466,11 +466,16 @@ public class GarminCsvImportService {
 
         log.info(summary);
         try {
-            // Publish summary to API queue only (eventstracker for audit)
+            GarminRunEvent event = new GarminRunEvent();
+            event.setEventType("GARMIN_CSV_SUMMARY");
+            event.setStatus(result.getFailedCount() > 0 ? "PARTIAL" : "SUCCESS");
+            event.setErrorMessage(summary);
+            event.setActivityDate(Instant.now());
+
             rabbitTemplate.convertAndSend(
                 RabbitMQConfiguration.GARMIN_EXCHANGE,
                 RabbitMQConfiguration.GARMIN_API_ROUTING_KEY,
-                summary);
+                event);
         } catch (Exception e) {
             log.error("Failed to publish CSV import summary to RabbitMQ", e);
         }

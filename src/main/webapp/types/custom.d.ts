@@ -1,4 +1,11 @@
 import * as yup from 'yup';
+import 'axios';
+
+declare module 'axios' {
+  interface InternalAxiosRequestConfig {
+    riflSeq?: number;
+  }
+}
 
 declare module 'yup' {
   interface StringSchema<TType extends yup.Maybe<string> = string | undefined, TContext = yup.AnyObject, TDefault = undefined, TFlags extends yup.Flags = ''>
