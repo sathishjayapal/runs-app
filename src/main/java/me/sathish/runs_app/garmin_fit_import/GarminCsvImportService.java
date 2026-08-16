@@ -18,8 +18,10 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.springframework.amqp.core.MessagePostProcessor;
 
 @Service
 @Slf4j
@@ -67,7 +69,7 @@ public class GarminCsvImportService {
 
         if (provider == null) {
             log.warn("No CSV file provider registered for source {}", source);
-            publishSummary(result, 0, 0);
+            publishSummary(result, 0, 0, UUID.randomUUID().toString());
             return result;
         }
 
@@ -78,13 +80,13 @@ public class GarminCsvImportService {
             csvFiles = provider.listCsvFiles(folderOverride);
         } catch (IOException e) {
             log.error("Failed to list CSV files for source {}", source, e);
-            publishSummary(result, 0, 0);
+            publishSummary(result, 0, 0, UUID.randomUUID().toString());
             return result;
         }
 
         if (csvFiles.isEmpty()) {
             log.info("No CSV files available for source {}", source);
-            publishSummary(result, 0, 0);
+            publishSummary(result, 0, 0, UUID.randomUUID().toString());
             return result;
         }
 
@@ -104,6 +106,10 @@ public class GarminCsvImportService {
      */
     private void processFileWithReconciliation(CsvFileHandle handle, ImportResult result) {
         String fileName = handle.getFileName();
+        // One correlation ID per file so its full journey (publish -> eventstracker consume ->
+        // persist) can be traced as a single thread in sathishlogger.
+        String correlationId = UUID.randomUUID().toString();
+        log.info("Starting import for file={} correlationId={}", fileName, correlationId);
 
         // PHASE 1: INITIALIZE - Parse CSV and create tracking record
         List<FitActivityData> rows;
@@ -112,13 +118,13 @@ public class GarminCsvImportService {
         } catch (Exception e) {
             log.error("Failed to parse CSV file: {}", fileName, e);
             result.addFailed(fileName, e.getMessage());
-            publishSummary(result, 0, 0);
+            publishSummary(result, 0, 0, correlationId);
             return;
         }
 
         if (rows.isEmpty()) {
             log.info("No parseable rows found in: {}", fileName);
-            publishSummary(result, 0, 0);
+            publishSummary(result, 0, 0, correlationId);
             markProcessed(handle);
             return;
         }
@@ -128,10 +134,10 @@ public class GarminCsvImportService {
         log.info("Created import record for {} with {} expected rows", fileName, rows.size());
 
         // PHASE 2: PROCESS - Process all rows without throwing exceptions
-        ProcessingStats stats = processAllRows(rows, handle, importRecord, result);
+        ProcessingStats stats = processAllRows(rows, handle, importRecord, result, correlationId);
 
         // PHASE 3: RECONCILE & ROUTE - Verify counts and route file to appropriate folder
-        reconcileAndRoute(fileName, importRecord, stats, handle, result);
+        reconcileAndRoute(fileName, importRecord, stats, handle, result, correlationId);
     }
 
     /**
@@ -139,7 +145,7 @@ public class GarminCsvImportService {
      * Returns ProcessingStats with counts and failure details.
      */
     private ProcessingStats processAllRows(List<FitActivityData> rows, CsvFileHandle handle,
-                                          FileImportRecord importRecord, ImportResult result) {
+                                          FileImportRecord importRecord, ImportResult result, String correlationId) {
         ProcessingStats stats = new ProcessingStats();
         List<String> csvActivityIds = rows.stream().map(FitActivityData::getActivityId).toList();
 
@@ -155,13 +161,13 @@ public class GarminCsvImportService {
                         garminRunService.update(existingRun.getId(), csvDto);
                         stats.recordSuccess();
                         result.addUpdated(row.getActivityDate() + " " + row.getActivityName());
-                        publishUpdatedEvent(csvDto, existingRun.getId(), handle.getFileName());
+                        publishUpdatedEvent(csvDto, existingRun.getId(), handle.getFileName(), correlationId);
                         log.debug("Updated CSV activity: {}", row.getActivityId());
                     } else {
                         // Skip unchanged record
                         stats.recordSkip();
                         result.addSkipped(row.getActivityDate() + " " + row.getActivityName());
-                        publishSkippedEvent(row, handle.getFileName());
+                        publishSkippedEvent(row, handle.getFileName(), correlationId);
                         log.debug("Skipped unchanged activity: {}", row.getActivityId());
                     }
                 } else {
@@ -170,14 +176,14 @@ public class GarminCsvImportService {
                     Long savedId = garminRunService.create(dto);
                     stats.recordSuccess();
                     result.addSuccess(row.getActivityDate() + " " + row.getActivityName());
-                    publishActivityEvent(dto, savedId, handle.getFileName());
+                    publishActivityEvent(dto, savedId, handle.getFileName(), correlationId);
                     log.debug("Imported CSV activity: {}", row.getActivityId());
                 }
             } catch (Exception e) {
                 // Record failure WITHOUT rethrowing (continues processing remaining rows)
                 stats.recordFailure(row.getActivityId(), e.getMessage());
                 result.addFailed(row.getActivityId(), e.getMessage());
-                publishFailedEvent(row, handle.getFileName(), e.getMessage());
+                publishFailedEvent(row, handle.getFileName(), e.getMessage(), correlationId);
                 log.warn("Failed to process activity {}: {}", row.getActivityId(), e.getMessage());
             }
         }
@@ -200,7 +206,7 @@ public class GarminCsvImportService {
      * FAIL: expected != processed → move to /failed folder
      */
     private void reconcileAndRoute(String fileName, FileImportRecord importRecord, ProcessingStats stats,
-                                   CsvFileHandle handle, ImportResult result) {
+                                   CsvFileHandle handle, ImportResult result, String correlationId) {
         // Verify reconciliation
         ReconciliationReport reconcReport = reconciliationService.verify(importRecord, stats);
         ReconciliationStatus reconcStatus = reconcReport.getStatus();
@@ -213,7 +219,7 @@ public class GarminCsvImportService {
                     stats.skippedCount, ProcessingStatus.COMPLETE_SUCCESS, ReconciliationStatus.PASS,
                     "All rows processed successfully");
             markProcessed(handle);
-            publishSummary(result, stats.getTotalProcessed(), stats.dbMatchCount);
+            publishSummary(result, stats.getTotalProcessed(), stats.dbMatchCount, correlationId);
             log.info("File PASSED reconciliation and moved to processed folder: {}", fileName);
 
         } else if (reconcStatus == ReconciliationStatus.PARTIAL_PASS) {
@@ -225,7 +231,7 @@ public class GarminCsvImportService {
             moveToQuarantine(handle);
             createRetryManifest(fileName, stats);
             checkAndSendFailureAlert(fileName);
-            publishSummary(result, stats.getTotalProcessed(), stats.dbMatchCount);
+            publishSummary(result, stats.getTotalProcessed(), stats.dbMatchCount, correlationId);
             log.warn("File FAILED reconciliation (partial pass) and moved to quarantine: {} ({} failures)",
                     fileName, stats.failedCount);
 
@@ -236,7 +242,7 @@ public class GarminCsvImportService {
                             stats.getTotalProcessed() + " rows");
 
             moveToFailedFolder(handle);
-            publishSummary(result, stats.getTotalProcessed(), stats.dbMatchCount);
+            publishSummary(result, stats.getTotalProcessed(), stats.dbMatchCount, correlationId);
             log.error("File FAILED reconciliation (lost rows) and moved to failed folder: {} (Expected: {}, Got: {})",
                     fileName, importRecord.getExpectedRowCount(), stats.getTotalProcessed());
         }
@@ -381,7 +387,14 @@ public class GarminCsvImportService {
         return dto;
     }
 
-    private void publishActivityEvent(GarminRunDTO dto, Long savedId, String fileName) {
+    private MessagePostProcessor withCorrelationId(String correlationId) {
+        return message -> {
+            message.getMessageProperties().setCorrelationId(correlationId);
+            return message;
+        };
+    }
+
+    private void publishActivityEvent(GarminRunDTO dto, Long savedId, String fileName, String correlationId) {
         try {
             GarminRunEvent event = new GarminRunEvent();
             event.setEventType("GARMIN_CSV_RUN");
@@ -401,21 +414,23 @@ public class GarminCsvImportService {
             rabbitTemplate.convertAndSend(
                 RabbitMQConfiguration.GARMIN_EXCHANGE,
                 RabbitMQConfiguration.GARMIN_API_ROUTING_KEY,
-                    event);
+                    event,
+                    withCorrelationId(correlationId));
             log.debug("Published SUCCESS event to API queue for CSV activity: {}", dto.getActivityId());
 
             // Publish to OPS queue (runs-ai-analyzer for analysis) as JSON text for the existing String-based listener
             rabbitTemplate.convertAndSend(
                 RabbitMQConfiguration.GARMIN_EXCHANGE,
                 RabbitMQConfiguration.GARMIN_OPS_ROUTING_KEY,
-                objectMapper.writeValueAsString(event));
+                objectMapper.writeValueAsString(event),
+                withCorrelationId(correlationId));
             log.debug("Published SUCCESS event to OPS queue for CSV activity: {}", dto.getActivityId());
         } catch (Exception e) {
             log.error("Failed to publish event for CSV activity: {}", dto.getActivityId(), e);
         }
     }
 
-    private void publishSkippedEvent(FitActivityData data, String fileName) {
+    private void publishSkippedEvent(FitActivityData data, String fileName, String correlationId) {
         try {
             GarminRunEvent event = new GarminRunEvent();
             event.setEventType("GARMIN_CSV_RUN");
@@ -424,19 +439,20 @@ public class GarminCsvImportService {
             event.setStatus("SKIPPED");
             event.setFileName(fileName);
             event.setErrorMessage("Activity already exists in database");
-            
+
             // Publish to API queue only (eventstracker for audit)
             rabbitTemplate.convertAndSend(
                 RabbitMQConfiguration.GARMIN_EXCHANGE,
                 RabbitMQConfiguration.GARMIN_API_ROUTING_KEY,
-                event);
+                event,
+                withCorrelationId(correlationId));
             log.debug("Published SKIPPED event to API queue for CSV activity: {}", data.getActivityId());
         } catch (Exception e) {
             log.error("Failed to publish SKIPPED event for CSV activity: {}", data.getActivityId(), e);
         }
     }
 
-    private void publishFailedEvent(FitActivityData data, String fileName, String errorMessage) {
+    private void publishFailedEvent(FitActivityData data, String fileName, String errorMessage, String correlationId) {
         try {
             GarminRunEvent event = new GarminRunEvent();
             event.setEventType("GARMIN_CSV_RUN");
@@ -445,19 +461,20 @@ public class GarminCsvImportService {
             event.setStatus("FAILED");
             event.setFileName(fileName);
             event.setErrorMessage(errorMessage);
-            
+
             // Publish to API queue only (eventstracker for audit)
             rabbitTemplate.convertAndSend(
                 RabbitMQConfiguration.GARMIN_EXCHANGE,
                 RabbitMQConfiguration.GARMIN_API_ROUTING_KEY,
-                event);
+                event,
+                withCorrelationId(correlationId));
             log.debug("Published FAILED event to API queue for CSV activity: {}", data.getActivityId());
         } catch (Exception e) {
             log.error("Failed to publish FAILED event for CSV activity: {}", data.getActivityId(), e);
         }
     }
 
-    private void publishSummary(ImportResult result, long csvTotal, long dbMatchCount) {
+    private void publishSummary(ImportResult result, long csvTotal, long dbMatchCount, String correlationId) {
         String reconciliation = buildReconciliationStatus(csvTotal, dbMatchCount);
 
         String summary = String.format(
@@ -475,7 +492,8 @@ public class GarminCsvImportService {
             rabbitTemplate.convertAndSend(
                 RabbitMQConfiguration.GARMIN_EXCHANGE,
                 RabbitMQConfiguration.GARMIN_API_ROUTING_KEY,
-                event);
+                event,
+                withCorrelationId(correlationId));
         } catch (Exception e) {
             log.error("Failed to publish CSV import summary to RabbitMQ", e);
         }
@@ -549,7 +567,7 @@ public class GarminCsvImportService {
         return a.equals(b);
     }
 
-    private void publishUpdatedEvent(GarminRunDTO dto, Long updatedId, String fileName) {
+    private void publishUpdatedEvent(GarminRunDTO dto, Long updatedId, String fileName, String correlationId) {
         try {
             GarminRunEvent event = new GarminRunEvent();
             event.setEventType("GARMIN_CSV_RUN");
@@ -569,14 +587,16 @@ public class GarminCsvImportService {
             rabbitTemplate.convertAndSend(
                 RabbitMQConfiguration.GARMIN_EXCHANGE,
                 RabbitMQConfiguration.GARMIN_API_ROUTING_KEY,
-                    event);
+                    event,
+                    withCorrelationId(correlationId));
             log.debug("Published UPDATED event to API queue for CSV activity: {}", dto.getActivityId());
 
             // Publish to OPS queue (runs-ai-analyzer for analysis) as JSON text for the existing String-based listener
             rabbitTemplate.convertAndSend(
                 RabbitMQConfiguration.GARMIN_EXCHANGE,
                 RabbitMQConfiguration.GARMIN_OPS_ROUTING_KEY,
-                objectMapper.writeValueAsString(event));
+                objectMapper.writeValueAsString(event),
+                withCorrelationId(correlationId));
             log.debug("Published UPDATED event to OPS queue for CSV activity: {}", dto.getActivityId());
         } catch (Exception e) {
             log.error("Failed to publish UPDATED event for CSV activity: {}", dto.getActivityId(), e);

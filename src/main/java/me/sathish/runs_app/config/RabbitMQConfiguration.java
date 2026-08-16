@@ -58,7 +58,7 @@ public class RabbitMQConfiguration {
                 var apiProps = amqpAdmin.getQueueProperties(GARMIN_API_QUEUE);
                 if (apiProps == null) {
                     throw new IllegalStateException(
-                            "Garmin API queue '%s' not found. Ensure eventstracker provisions it before runs-app starts.".formatted(GARMIN_API_QUEUE));
+                               "Garmin API queue '%s' not found. Ensure eventstracker provisions it before runs-app starts.".formatted(GARMIN_API_QUEUE));
                 }
                 log.info("Validated Garmin API queue exists: {}", GARMIN_API_QUEUE);
                 
