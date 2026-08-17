@@ -15,12 +15,15 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessagePostProcessor;
 
 @Service
@@ -387,27 +390,63 @@ public class GarminCsvImportService {
         return dto;
     }
 
+    /**
+     * Publishes a GarminRunEvent as raw JSON bytes to the given routing key on the Garmin exchange,
+     * via rabbitTemplate.send (NOT convertAndSend) with a hand-built Message.
+     *
+     * The two routing keys need DIFFERENT encoding strategies here, and that's not an oversight —
+     * do not "simplify" them to be the same:
+     *
+     * API queue (eventstracker, raw AMQP Message listener that manually does
+     * `new String(message.getBody(), UTF_8)`, bypassing Spring's inbound conversion): must bypass
+     * RabbitTemplate's converter on the way OUT too, via send() with a hand-built Message. Two
+     * distinct bugs were confirmed live against eventstracker on 2026-08-16/17 from NOT doing this:
+     *   1. convertAndSend(exchange, key, event, ...) with the raw object lets
+     *      JacksonJsonMessageConverter stamp a __TypeId__ header with this class's FQN, which a
+     *      different-JAR consumer can't resolve — ClassNotFoundException, message rejected before
+     *      the listener body runs.
+     *   2. convertAndSend(exchange, key, objectMapper.writeValueAsString(event), ...) does NOT
+     *      avoid the converter — it's still JacksonJsonMessageConverter, which re-serializes
+     *      WHATEVER object it's given, including a String, double-encoding the JSON. A raw-Message
+     *      consumer that skips Spring's inbound conversion receives the literal quoted/escaped
+     *      wrapper text and fails deserializing it.
+     * send() with a manually-built Message avoids both: no __TypeId__ header (nothing to resolve),
+     * and the wire bytes are the exact single-encoded JSON (verified live, confirmed landing
+     * correctly in eventstracker's domain_event table with zero header).
+     *
+     * OPS queue (runs-ai-analyzer, `@Payload String message` listener that then does its own
+     * `objectMapper.readValue(message, GarminRunEvent.class)`): keeps the pre-existing
+     * convertAndSend(..., objectMapper.writeValueAsString(event), ...) pattern, unchanged and not
+     * part of this incident — this one was never reported broken, and Spring's Jackson2 converter
+     * has a documented target-type special case for `String` parameters that un-escapes the
+     * double-encoded wire text back to the original clean JSON on the way in. Do not switch this
+     * to the send()-bypass approach without first confirming live against a running
+     * runs-ai-analyzer consumer (its debugger was suspended when this was last investigated —
+     * unverified changes to a currently-working flow are not worth the risk).
+     */
+    void publishGarminEvent(String routingKey, GarminRunEvent event, String correlationId) throws Exception {
+        if (RabbitMQConfiguration.GARMIN_API_ROUTING_KEY.equals(routingKey)) {
+            byte[] body = objectMapper.writeValueAsString(event).getBytes(StandardCharsets.UTF_8);
+            Message message = MessageBuilder.withBody(body)
+                    .setContentType("application/json")
+                    .setContentEncoding(StandardCharsets.UTF_8.name())
+                    .setCorrelationId(correlationId)
+                    .build();
+            rabbitTemplate.send(RabbitMQConfiguration.GARMIN_EXCHANGE, routingKey, message);
+        } else {
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfiguration.GARMIN_EXCHANGE,
+                    routingKey,
+                    objectMapper.writeValueAsString(event),
+                    withCorrelationId(correlationId));
+        }
+    }
+
     private MessagePostProcessor withCorrelationId(String correlationId) {
         return message -> {
             message.getMessageProperties().setCorrelationId(correlationId);
             return message;
         };
-    }
-
-    /**
-     * Publishes a GarminRunEvent as a JSON string to the given routing key on the Garmin exchange.
-     * Always use this instead of calling rabbitTemplate.convertAndSend directly with the raw event
-     * object — a raw object triggers JacksonJsonMessageConverter to stamp a __TypeId__ header with
-     * this class's FQN. Cross-service consumers (eventstracker, runs-ai-analyzer) don't have this
-     * class on their classpath, so a raw-object publish is silently rejected on the consumer side
-     * with no error visible here. See GarminCsvImportService tests for a regression check.
-     */
-    void publishGarminEvent(String routingKey, GarminRunEvent event, String correlationId) throws Exception {
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfiguration.GARMIN_EXCHANGE,
-                routingKey,
-                objectMapper.writeValueAsString(event),
-                withCorrelationId(correlationId));
     }
 
     private void publishActivityEvent(GarminRunDTO dto, Long savedId, String fileName, String correlationId) {
