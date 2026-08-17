@@ -394,6 +394,22 @@ public class GarminCsvImportService {
         };
     }
 
+    /**
+     * Publishes a GarminRunEvent as a JSON string to the given routing key on the Garmin exchange.
+     * Always use this instead of calling rabbitTemplate.convertAndSend directly with the raw event
+     * object — a raw object triggers JacksonJsonMessageConverter to stamp a __TypeId__ header with
+     * this class's FQN. Cross-service consumers (eventstracker, runs-ai-analyzer) don't have this
+     * class on their classpath, so a raw-object publish is silently rejected on the consumer side
+     * with no error visible here. See GarminCsvImportService tests for a regression check.
+     */
+    void publishGarminEvent(String routingKey, GarminRunEvent event, String correlationId) throws Exception {
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfiguration.GARMIN_EXCHANGE,
+                routingKey,
+                objectMapper.writeValueAsString(event),
+                withCorrelationId(correlationId));
+    }
+
     private void publishActivityEvent(GarminRunDTO dto, Long savedId, String fileName, String correlationId) {
         try {
             GarminRunEvent event = new GarminRunEvent();
@@ -410,20 +426,10 @@ public class GarminCsvImportService {
             event.setMaxHeartRate(dto.getMaxHeartRate());
             event.setCalories(dto.getCalories());
 
-            // Publish to API queue (eventstracker for audit) as a JSON object so the broker serializes it once
-            rabbitTemplate.convertAndSend(
-                RabbitMQConfiguration.GARMIN_EXCHANGE,
-                RabbitMQConfiguration.GARMIN_API_ROUTING_KEY,
-                    event,
-                    withCorrelationId(correlationId));
+            publishGarminEvent(RabbitMQConfiguration.GARMIN_API_ROUTING_KEY, event, correlationId);
             log.debug("Published SUCCESS event to API queue for CSV activity: {}", dto.getActivityId());
 
-            // Publish to OPS queue (runs-ai-analyzer for analysis) as JSON text for the existing String-based listener
-            rabbitTemplate.convertAndSend(
-                RabbitMQConfiguration.GARMIN_EXCHANGE,
-                RabbitMQConfiguration.GARMIN_OPS_ROUTING_KEY,
-                objectMapper.writeValueAsString(event),
-                withCorrelationId(correlationId));
+            publishGarminEvent(RabbitMQConfiguration.GARMIN_OPS_ROUTING_KEY, event, correlationId);
             log.debug("Published SUCCESS event to OPS queue for CSV activity: {}", dto.getActivityId());
         } catch (Exception e) {
             log.error("Failed to publish event for CSV activity: {}", dto.getActivityId(), e);
@@ -440,12 +446,7 @@ public class GarminCsvImportService {
             event.setFileName(fileName);
             event.setErrorMessage("Activity already exists in database");
 
-            // Publish to API queue only (eventstracker for audit)
-            rabbitTemplate.convertAndSend(
-                RabbitMQConfiguration.GARMIN_EXCHANGE,
-                RabbitMQConfiguration.GARMIN_API_ROUTING_KEY,
-                event,
-                withCorrelationId(correlationId));
+            publishGarminEvent(RabbitMQConfiguration.GARMIN_API_ROUTING_KEY, event, correlationId);
             log.debug("Published SKIPPED event to API queue for CSV activity: {}", data.getActivityId());
         } catch (Exception e) {
             log.error("Failed to publish SKIPPED event for CSV activity: {}", data.getActivityId(), e);
@@ -462,12 +463,7 @@ public class GarminCsvImportService {
             event.setFileName(fileName);
             event.setErrorMessage(errorMessage);
 
-            // Publish to API queue only (eventstracker for audit)
-            rabbitTemplate.convertAndSend(
-                RabbitMQConfiguration.GARMIN_EXCHANGE,
-                RabbitMQConfiguration.GARMIN_API_ROUTING_KEY,
-                event,
-                withCorrelationId(correlationId));
+            publishGarminEvent(RabbitMQConfiguration.GARMIN_API_ROUTING_KEY, event, correlationId);
             log.debug("Published FAILED event to API queue for CSV activity: {}", data.getActivityId());
         } catch (Exception e) {
             log.error("Failed to publish FAILED event for CSV activity: {}", data.getActivityId(), e);
@@ -489,11 +485,7 @@ public class GarminCsvImportService {
             event.setErrorMessage(summary);
             event.setActivityDate(Instant.now());
 
-            rabbitTemplate.convertAndSend(
-                RabbitMQConfiguration.GARMIN_EXCHANGE,
-                RabbitMQConfiguration.GARMIN_API_ROUTING_KEY,
-                event,
-                withCorrelationId(correlationId));
+            publishGarminEvent(RabbitMQConfiguration.GARMIN_API_ROUTING_KEY, event, correlationId);
         } catch (Exception e) {
             log.error("Failed to publish CSV import summary to RabbitMQ", e);
         }
@@ -583,20 +575,10 @@ public class GarminCsvImportService {
             event.setMaxHeartRate(dto.getMaxHeartRate());
             event.setCalories(dto.getCalories());
 
-            // Publish to API queue (eventstracker for audit) as a JSON object so the broker serializes it once
-            rabbitTemplate.convertAndSend(
-                RabbitMQConfiguration.GARMIN_EXCHANGE,
-                RabbitMQConfiguration.GARMIN_API_ROUTING_KEY,
-                    event,
-                    withCorrelationId(correlationId));
+            publishGarminEvent(RabbitMQConfiguration.GARMIN_API_ROUTING_KEY, event, correlationId);
             log.debug("Published UPDATED event to API queue for CSV activity: {}", dto.getActivityId());
 
-            // Publish to OPS queue (runs-ai-analyzer for analysis) as JSON text for the existing String-based listener
-            rabbitTemplate.convertAndSend(
-                RabbitMQConfiguration.GARMIN_EXCHANGE,
-                RabbitMQConfiguration.GARMIN_OPS_ROUTING_KEY,
-                objectMapper.writeValueAsString(event),
-                withCorrelationId(correlationId));
+            publishGarminEvent(RabbitMQConfiguration.GARMIN_OPS_ROUTING_KEY, event, correlationId);
             log.debug("Published UPDATED event to OPS queue for CSV activity: {}", dto.getActivityId());
         } catch (Exception e) {
             log.error("Failed to publish UPDATED event for CSV activity: {}", dto.getActivityId(), e);
