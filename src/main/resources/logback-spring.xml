@@ -1,0 +1,28 @@
+<configuration>
+
+    <!-- Inherit Spring Boot's default console/file appenders -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <!-- Forward WARN+ logs to sathishlogger service -->
+    <appender name="SATHISHLOGGER" class="me.sathish.runs_app.logging.SathishLoggerAppender">
+        <!-- Override via env var SATHISHLOGGER_URL if the service runs elsewhere -->
+        <serviceUrl>${SATHISHLOGGER_URL}</serviceUrl>
+        <applicationName>runs-app</applicationName>
+        <!-- Minimum level forwarded to the remote service (TRACE/DEBUG/INFO/WARN/ERROR/FATAL) -->
+        <minimumLevel>WARN</minimumLevel>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="SATHISHLOGGER"/>
+    </root>
+
+    <!-- Keep Spring framework noise at WARN -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.hibernate" level="WARN"/>
+
+    <!-- runs-app application code at INFO -->
+    <logger name="me.sathish.runs_app" level="INFO"/>
+
+</configuration>
