@@ -5,6 +5,7 @@ import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.core.AppenderBase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -35,8 +36,9 @@ import java.util.concurrent.Executors;
  * </pre>
  */
 public class SathishLoggerAppender extends AppenderBase<ILoggingEvent> {
+    @Value("${SATHISHLOGGER_URL}")
+    private String serviceUrl;
 
-    private String serviceUrl = "http://localhost:8080";
     private String applicationName = "unknown-app";
     private String minimumLevel = "WARN";
 

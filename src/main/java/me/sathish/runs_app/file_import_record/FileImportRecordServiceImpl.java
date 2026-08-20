@@ -100,7 +100,7 @@ public class FileImportRecordServiceImpl implements FileImportRecordService {
         record.setReconciliationReport(reconcReport);
 
         repository.save(record);
-        log.info("Import record completed: {} | Status: {} | Reconciliation: {} | (Success: {}, Failed: {}, Skipped: {})",
+        log.error("Import record completed: {} | Status: {} | Reconciliation: {} | (Success: {}, Failed: {}, Skipped: {})",
             fileName, status, reconcStatus, success, failed, skipped);
     }
 
