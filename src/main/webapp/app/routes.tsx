@@ -7,6 +7,7 @@ import RunAppUserAdd from './run-app-user/run-app-user-add';
 import RunAppUserEdit from './run-app-user/run-app-user-edit';
 import GarminRunList from './garmin-run/garmin-run-list';
 import GarminRunAdd from './garmin-run/garmin-run-add';
+import GarminRunDetail from './garmin-run/garmin-run-detail';
 import GarminRunEdit from './garmin-run/garmin-run-edit';
 import ShedlockList from './shedlock/shedlock-list';
 import StravaRunList from './strava-run/strava-run-list';
@@ -37,6 +38,7 @@ export default function AppRoutes() {
         {path: 'runAppUsers/edit/:id', element: <AdminRoute><RunAppUserEdit/></AdminRoute>},
         { path: 'garminRuns', element: <GarminRunList /> },
         { path: 'garminRuns/add', element: <GarminRunAdd /> },
+        { path: 'garminRuns/:id', element: <GarminRunDetail /> },
         { path: 'garminRuns/edit/:id', element: <GarminRunEdit /> },
         {path: 'shedlocks', element: <AdminRoute><ShedlockList/></AdminRoute>},
         { path: 'fileImportRecords', element: <FileImportRecordList /> },

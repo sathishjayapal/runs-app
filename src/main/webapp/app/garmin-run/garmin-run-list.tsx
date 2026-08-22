@@ -95,7 +95,7 @@ export default function GarminRunList() {
           <tr key={garminRun.id} className="hover:bg-gray-50">
             <td className="border border-gray-300 px-4 py-2 font-mono text-sm">{garminRun.activityId}</td>
             <td className="border border-gray-300 px-4 py-2">
-              <Link to={'/garminRuns/edit/' + garminRun.id} className="text-blue-600 hover:underline font-medium">
+              <Link to={'/garminRuns/' + garminRun.id} className="text-blue-600 hover:underline font-medium">
                 {garminRun.activityName}
               </Link>
             </td>

@@ -148,6 +148,20 @@
     "updateBy": {
       "label": "Update By"
     },
+    "detail": {
+      "headline": "Run Details",
+      "backToList": "Back to Runs",
+      "edit": "Edit Run",
+      "runInfo": "Run Information",
+      "linkedJournalEntries": "Journal Entries",
+      "addJournalEntry": "Add Journal Entry",
+      "noJournalEntries": "No journal entries linked to this activity.",
+      "aiIndexed": "AI Indexed",
+      "pending": "Pending",
+      "viewEntry": "View",
+      "error": "Could not load run details.",
+      "notFound": "Run not found."
+    },
     "edit": {
       "headline": "Edit Garmin Run",
       "back": "Back to list"
@@ -392,5 +406,8 @@
     "hours": "Hours",
     "minutes": "Minutes",
     "seconds": "Seconds"
+  },
+  "common": {
+    "loading": "Loading..."
   }
 }

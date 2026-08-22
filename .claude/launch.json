@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "runs-app-frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "devserver"],
+      "port": 3000
+    }
+  ]
+}
