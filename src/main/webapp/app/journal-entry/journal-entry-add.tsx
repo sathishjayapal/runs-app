@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {useTranslation} from 'react-i18next';
-import {Link, useNavigate} from 'react-router';
+import {Link, useNavigate, useSearchParams} from 'react-router';
 import {handleServerError, setYupDefaults} from 'app/common/utils';
 import {useForm} from 'react-hook-form';
 import {yupResolver} from '@hookform/resolvers/yup';
@@ -8,6 +8,7 @@ import {JournalEntryDTO} from 'app/journal-entry/journal-entry-model';
 import axios from 'axios';
 import InputRow from 'app/common/input-row/input-row';
 import useDocumentTitle from 'app/common/use-document-title';
+import ActivityLookup from 'app/journal-entry/activity-lookup';
 import * as yup from 'yup';
 
 
@@ -39,10 +40,18 @@ export default function JournalEntryAdd() {
     useDocumentTitle(t('journalEntry.add.headline'));
 
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     const useFormResult = useForm({
         resolver: yupResolver(getSchema()),
     });
+
+    useEffect(() => {
+        const activityId = searchParams.get('activityId');
+        if (activityId) {
+            useFormResult.setValue('activityId', activityId);
+        }
+    }, [searchParams, useFormResult]);
 
     const createJournalEntry = async (data: JournalEntryDTO) => {
         window.scrollTo(0, 0);
@@ -73,7 +82,11 @@ export default function JournalEntryAdd() {
                       options={feelOptions}/>
             <InputRow useFormResult={useFormResult} object="journalEntry" field="perceivedEffort" type="number"
                       inputClass="w-full xl:w-1/4"/>
-            <InputRow useFormResult={useFormResult} object="journalEntry" field="activityId"/>
+            <ActivityLookup
+                value={useFormResult.watch('activityId')}
+                onChange={(activityId) => useFormResult.setValue('activityId', activityId)}
+                error={useFormResult.formState.errors.activityId?.message as string}
+            />
             <InputRow useFormResult={useFormResult} object="journalEntry" field="bodyNotes" type="textarea"/>
             <InputRow useFormResult={useFormResult} object="journalEntry" field="contextNotes" type="textarea"/>
             <InputRow useFormResult={useFormResult} object="journalEntry" field="narrative" type="textarea"/>

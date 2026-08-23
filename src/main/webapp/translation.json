@@ -343,6 +343,11 @@
     "narrative": {
       "label": "Narrative"
     },
+    "activityLookup": {
+      "searchPlaceholder": "Search by activity name, date, or ID...",
+      "noActivities": "No activities found. Import runs first.",
+      "noMatches": "No matching activities found."
+    },
     "embedded": {
       "label": "AI Indexed"
     },
