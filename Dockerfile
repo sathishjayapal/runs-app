@@ -8,6 +8,12 @@ COPY pom.xml .
 # Download dependencies (cached layer)
 RUN mvn dependency:go-offline -B
 
+# Copy frontend configuration files
+COPY package.json .
+COPY package-lock.json .
+COPY webpack.config.js .
+COPY tsconfig.json .
+
 # Copy source code
 COPY src src
 COPY mvnw .
