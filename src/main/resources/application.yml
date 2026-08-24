@@ -75,6 +75,8 @@ runs-ai-analyzer:
 
 app:
   baseHost: ${BASE_HOST}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://127.0.0.1:3000,http://localhost:9080,http://127.0.0.1:9080}
   mail:
     from: ${MAIL_FROM:noreply@example.com}
     displayName: ${MAIL_DISPLAY_NAME:Runs App}
