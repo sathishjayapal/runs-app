@@ -1,6 +1,6 @@
 {
   "name": "runs-app-frontend",
-  "author": "Bootify.io",
+  "author": "sathishjayapal.me",
   "scripts": {
     "devserver": "webpack serve --open --mode development",
     "build": "webpack --mode production",

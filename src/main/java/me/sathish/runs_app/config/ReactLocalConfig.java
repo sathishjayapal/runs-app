@@ -1,5 +1,6 @@
 package me.sathish.runs_app.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -10,17 +11,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Profile("local")
 public class ReactLocalConfig {
 
+    @Value("${app.cors.allowed-origins}")
+    private String[] allowedOrigins;
+
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
 
             @Override
             public void addCorsMappings(final CorsRegistry registry) {
-                registry.addMapping("/**").allowedMethods("*").allowedOrigins(
-                        "http://localhost:3000",
-                        "http://127.0.0.1:3000",
-                        "http://localhost:8080",
-                        "http://127.0.0.1:8080");
+                registry.addMapping("/**").allowedMethods("*").allowedOrigins(allowedOrigins);
             }
 
         };

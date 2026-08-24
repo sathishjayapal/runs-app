@@ -1,4 +1,4 @@
-<configuration>
+<configuration scan="true" scanPeriod="30 seconds">
 
     <!-- Inherit Spring Boot's default console/file appenders -->
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
