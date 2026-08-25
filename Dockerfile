@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 # Build stage
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
@@ -5,8 +7,9 @@ WORKDIR /app
 # Copy pom.xml first for dependency caching
 COPY pom.xml .
 
-# Download dependencies (cached layer)
-RUN mvn dependency:go-offline -B
+# Download dependencies (cache mount persists across builds, even --no-cache image rebuilds)
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn dependency:go-offline -B
 
 # Copy frontend configuration files
 COPY package.json .
@@ -20,7 +23,11 @@ COPY mvnw .
 COPY .mvn .mvn
 
 # Build the application, skipping tests
-RUN mvn package -DskipTests -B
+# (npm ci/install happens inside this goal via frontend-maven-plugin, so npm's cache
+#  also benefits from mounting node's download cache)
+RUN --mount=type=cache,target=/root/.m2 \
+    --mount=type=cache,target=/root/.npm \
+    mvn package -DskipTests -B
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
@@ -45,4 +52,3 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
-

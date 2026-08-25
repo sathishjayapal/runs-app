@@ -32,6 +32,11 @@
   "exclude": [
     "node_modules/**/*",
     "**/build/**/*",
-    "**/out/**/*"
+    "**/out/**/*",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "jest.setup.tsx"
   ]
 }
