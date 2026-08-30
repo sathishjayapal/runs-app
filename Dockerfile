@@ -1,6 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM eclipse-temurin:21-jre-alpine
-RUN apk update && apk upgrade --no-cache
+
 # Build stage
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
@@ -33,6 +32,10 @@ RUN --mount=type=cache,target=/root/.m2 \
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
+
+# Patch OS-level packages (OpenSSL etc.) — this is the stage that actually ships,
+# so this is where the Trivy-flagged CVEs get resolved.
+RUN apk update && apk upgrade --no-cache
 
 # Create non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
