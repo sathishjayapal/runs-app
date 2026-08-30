@@ -1,5 +1,6 @@
 # syntax=docker/dockerfile:1
-
+FROM eclipse-temurin:21-jre-alpine
+RUN apk update && apk upgrade --no-cache
 # Build stage
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
