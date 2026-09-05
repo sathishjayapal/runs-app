@@ -1,0 +1,14 @@
+spring:
+  docker:
+    compose:
+      enabled: true
+
+app:
+  initialization:
+    enable-sample-data: true
+    admin-email: admin@runsapp.com
+    admin-password: ${APP_INITIALIZATION_ADMIN_PASSWORD:dev-admin-password}
+    user-email: runner@runsapp.com
+    user-password: ${APP_INITIALIZATION_USER_PASSWORD:dev-runner-password}
+    system-email: system@runsapp.com
+    system-password: ${APP_INITIALIZATION_SYSTEM_PASSWORD:dev-system-password}

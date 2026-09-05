@@ -34,15 +34,17 @@ public class RunsAppSecurityConfig {
     @Bean
     public SecurityFilterChain runsAppSecurityFilterChain(final HttpSecurity http) throws Exception {
         http.cors(withDefaults())
-                .csrf(csrf -> csrf.disable())
+                .csrf(withDefaults())
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
                 .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers("/", "/index.html", "/js/**", "/css/**", "/images/**", "/favicon.ico", "/manifest.json").permitAll()
-                        .requestMatchers("/login", "/user-logout", "/runAppUsers", "/runAppUsers/**", "/garminRuns", "/garminRuns/**",
-                                "/shedlocks", "/fileNameTrackers", "/fileNameTrackers/**",
-                                "/stravaRuns", "/stravaRuns/**", "/journalEntries", "/journalEntries/**", "/error").permitAll()
-                    .requestMatchers("/api/**").authenticated()
+                    .requestMatchers("/login", "/user-logout", "/runAppUsers", "/runAppUsers/**", "/garminRuns", "/garminRuns/**",
+                            "/shedlocks", "/fileNameTrackers", "/fileNameTrackers/**",
+                            "/stravaRuns", "/stravaRuns/**", "/journalEntries", "/journalEntries/**", "/error").permitAll()
+                    .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                    .requestMatchers(EndpointRequest.to("shutdown")).hasAuthority(UserRoles.ROLE_ADMIN)
                     .requestMatchers(EndpointRequest.toAnyEndpoint()).hasAnyAuthority(UserRoles.ROLE_ADMIN, UserRoles.ROLE_USER)
+                    .requestMatchers("/api/**").authenticated()
                     .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")

@@ -28,19 +28,18 @@ public class DataInitializer {
             RunnerAppRoleRepository roleRepository,
             StravaRunRepository stravaRunRepository,
             GarminRunRepository garminRunRepository,
-            PasswordEncoder passwordEncoder) {
-        
+            PasswordEncoder passwordEncoder,
+            InitializationConfig initConfig) {
+
         return args -> {
             // Fix passwords that are missing the DelegatingPasswordEncoder prefix
             userRepository.findAll().forEach(user -> {
                 String pwd = user.getPassword();
                 if (pwd.startsWith("$2a$") || pwd.startsWith("$2b$") || pwd.startsWith("$2y$")) {
-                    // Already a BCrypt hash but missing {bcrypt} prefix — just add it
                     log.info("Adding {{bcrypt}} prefix to existing BCrypt hash for user: {}", user.getEmail());
                     user.setPassword("{bcrypt}" + pwd);
                     userRepository.save(user);
                 } else if (!pwd.startsWith("{")) {
-                    // Plain text password — encode it
                     log.info("Encoding plain text password for user: {}", user.getEmail());
                     user.setPassword(passwordEncoder.encode(pwd));
                     userRepository.save(user);
@@ -49,6 +48,11 @@ public class DataInitializer {
 
             if (userRepository.count() > 0) {
                 log.info("Database already initialized. Skipping data initialization.");
+                return;
+            }
+
+            if (!initConfig.isEnableSampleData()) {
+                log.info("Sample data initialization is disabled. Set app.initialization.enable-sample-data=true to enable.");
                 return;
             }
 
@@ -73,8 +77,8 @@ public class DataInitializer {
             RunnerAppRole userRole = roleRepository.findByRoleNameIgnoreCase("ROLE_USER");
 
             RunAppUser adminUser = new RunAppUser();
-            adminUser.setEmail("admin@runsapp.com");
-            adminUser.setPassword(passwordEncoder.encode("admin123"));
+            adminUser.setEmail(initConfig.getAdminEmail());
+            adminUser.setPassword(passwordEncoder.encode(initConfig.getAdminPassword()));
             adminUser.setName("Admin User");
             adminUser.getRoles().add(adminRole);
             adminUser.getRoles().add(userRole);
@@ -82,16 +86,16 @@ public class DataInitializer {
             log.info("Created admin user: {} with roles: ROLE_ADMIN, ROLE_USER", adminUser.getEmail());
 
             RunAppUser regularUser = new RunAppUser();
-            regularUser.setEmail("runner@runsapp.com");
-            regularUser.setPassword(passwordEncoder.encode("runner123"));
+            regularUser.setEmail(initConfig.getUserEmail());
+            regularUser.setPassword(passwordEncoder.encode(initConfig.getUserPassword()));
             regularUser.setName("Regular Runner");
             regularUser.getRoles().add(userRole);
             regularUser = userRepository.save(regularUser);
             log.info("Created regular user: {} with role: ROLE_USER", regularUser.getEmail());
 
             RunAppUser systemUser = new RunAppUser();
-            systemUser.setEmail("system@runsapp.com");
-            systemUser.setPassword(passwordEncoder.encode("system123"));
+            systemUser.setEmail(initConfig.getSystemEmail());
+            systemUser.setPassword(passwordEncoder.encode(initConfig.getSystemPassword()));
             systemUser.setName("System User");
             systemUser.getRoles().add(userRole);
             systemUser = userRepository.save(systemUser);
@@ -170,8 +174,6 @@ public class DataInitializer {
             log.info("Created Garmin run: {}", garminRun3.getActivityName());
 
             log.info("Database initialization completed successfully!");
-            log.info("Sample credentials - Admin: admin@runsapp.com / admin123");
-            log.info("Sample credentials - User: runner@runsapp.com / runner123");
         };
     }
 }

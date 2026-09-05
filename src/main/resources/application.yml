@@ -62,12 +62,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,loggers,integrationgraph,shutdown
+        include: health,loggers,integrationgraph
   endpoint:
     health:
       show-details: always
-    shutdown:
-      access: unrestricted
 springdoc:
   pathsToMatch: /api/**
 runs-ai-analyzer:
@@ -80,6 +78,14 @@ app:
   mail:
     from: ${MAIL_FROM:noreply@example.com}
     displayName: ${MAIL_DISPLAY_NAME:Runs App}
+  initialization:
+    enable-sample-data: ${APP_INITIALIZATION_ENABLE_SAMPLE_DATA:false}
+    admin-email: ${APP_INITIALIZATION_ADMIN_EMAIL:}
+    admin-password: ${APP_INITIALIZATION_ADMIN_PASSWORD:}
+    user-email: ${APP_INITIALIZATION_USER_EMAIL:}
+    user-password: ${APP_INITIALIZATION_USER_PASSWORD:}
+    system-email: ${APP_INITIALIZATION_SYSTEM_EMAIL:}
+    system-password: ${APP_INITIALIZATION_SYSTEM_PASSWORD:}
   garmin:
     csv-import-enabled: ${GARMIN_CSV_IMPORT_ENABLED:true}
     csv-import-user-id: ${GARMIN_SYSTEM_USER_ID}

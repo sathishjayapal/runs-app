@@ -320,6 +320,17 @@ GARMIN_DRIVE_QUARANTINE_FOLDER_ID=your-quarantine-folder-id
 GARMIN_DRIVE_FAILED_FOLDER_ID=your-failed-folder-id
 GARMIN_DRIVE_RETRY_FOLDER_ID=your-retry-folder-id
 
+# Sample Data Initialization (Dev Only)
+# Enable sample data for local development with: ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+# See SECURITY_CONFIGURATION.md for more details
+APP_INITIALIZATION_ENABLE_SAMPLE_DATA=false
+APP_INITIALIZATION_ADMIN_EMAIL=admin@runsapp.com
+APP_INITIALIZATION_ADMIN_PASSWORD=dev-admin-password
+APP_INITIALIZATION_USER_EMAIL=runner@runsapp.com
+APP_INITIALIZATION_USER_PASSWORD=dev-runner-password
+APP_INITIALIZATION_SYSTEM_EMAIL=system@runsapp.com
+APP_INITIALIZATION_SYSTEM_PASSWORD=dev-system-password
+
 # Production flag
 PRODUCTION=false
 API_PATH=
@@ -367,6 +378,17 @@ GARMIN_ALERT_EMAIL_FROM=garmin-import@example.com
 GARMIN_DRIVE_QUARANTINE_FOLDER_ID=your-quarantine-folder-id
 GARMIN_DRIVE_FAILED_FOLDER_ID=your-failed-folder-id
 GARMIN_DRIVE_RETRY_FOLDER_ID=your-retry-folder-id
+
+# Sample Data Initialization (Dev Only)
+# Enable sample data for local development with: ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+# See SECURITY_CONFIGURATION.md for more details
+APP_INITIALIZATION_ENABLE_SAMPLE_DATA=false
+APP_INITIALIZATION_ADMIN_EMAIL=admin@runsapp.com
+APP_INITIALIZATION_ADMIN_PASSWORD=dev-admin-password
+APP_INITIALIZATION_USER_EMAIL=runner@runsapp.com
+APP_INITIALIZATION_USER_PASSWORD=dev-runner-password
+APP_INITIALIZATION_SYSTEM_EMAIL=system@runsapp.com
+APP_INITIALIZATION_SYSTEM_PASSWORD=dev-system-password
 
 # Production flag
 PRODUCTION=false
@@ -480,7 +502,10 @@ echo "  User:     $DB_USER"
 echo "  Password: $DB_PASSWORD"
 echo ""
 echo "Next Steps:"
-echo "  1. Run the application:"
+echo "  1. Run the application WITH DEV PROFILE (for sample data initialization):"
+echo "     mvn spring-boot:run -Dspring-boot.run.profiles=dev"
+echo ""
+echo "     Or run without dev profile (no sample data):"
 echo "     mvn spring-boot:run"
 echo ""
 echo "  2. Or start React dev server (in separate terminal):"
@@ -492,6 +517,9 @@ echo "  4. Access the application:"
 echo "     Frontend (dev): http://localhost:3000"
 echo "     Backend API:    http://localhost:$APP_PORT"
 echo "     Health Check:   http://localhost:$APP_PORT/actuator/health"
+echo ""
+echo "  5. Review security configuration:"
+echo "     See SECURITY_CONFIGURATION.md for environment variables and profiles"
 echo ""
 echo "Useful Commands:"
 echo "  Stop database:    docker stop $CONTAINER_NAME"
