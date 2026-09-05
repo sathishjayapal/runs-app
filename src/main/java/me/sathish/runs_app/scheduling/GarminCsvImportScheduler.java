@@ -5,12 +5,13 @@ import me.sathish.runs_app.garmin_fit_import.GarminCsvImportService;
 import me.sathish.runs_app.run_app_user.RunAppUserRepository;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class GarminCsvImportScheduler {
+public class GarminCsvImportScheduler implements CommandLineRunner {
 
     private final GarminCsvImportService garminCsvImportService;
     private final RunAppUserRepository runAppUserRepository;
@@ -22,6 +23,19 @@ public class GarminCsvImportScheduler {
         this.runAppUserRepository = runAppUserRepository;
     }
 
+    @Value("${app.garmin.csv-import-schedule}")
+    private String csvImportSchedule;
+
+    @Override
+    public void run(String... args) {
+        log.warn("GARMIN_SCHEDULE_CHECK enabled={} schedule='{}'", csvImportEnabled, csvImportSchedule);
+    }
+
+    @Scheduled(fixedDelay = 50000)
+    public void heartbeat() {
+        log.warn("SCHEDULER_HEARTBEAT tick");
+    }
+
     /**
      * TODO Make this this value goes back to one previous
      */
@@ -29,8 +43,8 @@ public class GarminCsvImportScheduler {
     @Scheduled(cron = "${app.garmin.csv-import-schedule}")
     @SchedulerLock(
         name = "garminCsvImport",
-        lockAtMostFor = "5h",      // Max 5 hours (prevents long-running imports from blocking)
-        lockAtLeastFor = "10m"     // Min 10 minutes between runs
+        lockAtMostFor = "20m",     // Crash-safety ceiling; not a re-trigger gate
+        lockAtLeastFor = "1m"      // Must stay below the cron interval or ShedLock silently skips ticks
     )
     public void importGarminCsvFiles() {
         if (!csvImportEnabled) {

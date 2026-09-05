@@ -38,9 +38,18 @@ export function useAuth() {
         return hasRole('ROLE_ADMIN');
     };
 
-    const logout = (): void => {
-        // Navigate to logout page which handles the logout process
-        window.location.href = '/user-logout';
+    const logout = async (): Promise<void> => {
+        try {
+            // Call Spring Security logout endpoint to properly clear session
+            await axios.post('/logout');
+        } catch (error) {
+            // Logout may fail if session already expired, but we still proceed
+            console.log('Logout request completed');
+        } finally {
+            // Force a complete page reload to clear all cached state and fetch fresh data
+            // This ensures the useAuth hook runs again and detects the cleared session
+            window.location.href = '/login?t=' + Date.now();
+        }
     };
 
     return {

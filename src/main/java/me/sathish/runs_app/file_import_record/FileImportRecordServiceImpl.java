@@ -35,8 +35,7 @@ public class FileImportRecordServiceImpl implements FileImportRecordService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public FileImportRecord createImportRecord(String fileName, int expectedRowCount) {
-        FileImportRecord record = new FileImportRecord();
+    public FileImportRecord createImportRecord(String fileName, int expectedRowCount) {FileImportRecord record = new FileImportRecord();
         record.setFileName(fileName);
         record.setExpectedRowCount(expectedRowCount);
         record.setStatus(ProcessingStatus.PROCESSING);

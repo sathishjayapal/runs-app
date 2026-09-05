@@ -25,7 +25,7 @@ public class RunsAppSecurityUserDetailsService implements UserDetailsService {
     public RunsAppSecurityUserDetails loadUserByUsername(final String username) {
         final RunAppUser runAppUser = runAppUserRepository.findByEmailIgnoreCaseWithRoles(username);
         if (runAppUser == null) {
-            log.warn("user not found: {}", username);
+            log.warn("user not found: {}",                                               username);
             throw new UsernameNotFoundException("User " + username + " not found");
         }
         final List<SimpleGrantedAuthority> authorities = runAppUser.getRoles().stream()

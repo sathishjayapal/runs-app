@@ -11,13 +11,22 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 import static org.springframework.security.config.Customizer.withDefaults;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
 public class RunsAppSecurityConfig {
+
+    @Autowired
+    private LoginFailureHandler loginFailureHandler;
+
+    @Autowired
+    private LoginSuccessHandler loginSuccessHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -34,7 +43,10 @@ public class RunsAppSecurityConfig {
     @Bean
     public SecurityFilterChain runsAppSecurityFilterChain(final HttpSecurity http) throws Exception {
         http.cors(withDefaults())
-                .csrf(withDefaults())
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                        .ignoringRequestMatchers("/login", "/logout"))
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
                 .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers("/", "/index.html", "/js/**", "/css/**", "/images/**", "/favicon.ico", "/manifest.json").permitAll()
@@ -50,6 +62,14 @@ public class RunsAppSecurityConfig {
                         .loginPage("/login")
                         .usernameParameter("username")
                         .passwordParameter("password")
+                        .successHandler(loginSuccessHandler)
+                        .failureHandler(loginFailureHandler)
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login")
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
                         .permitAll())
                 .httpBasic(basic -> basic.realmName("runsAppSecurity realm"));
 
