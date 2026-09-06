@@ -36,15 +36,11 @@ public class GarminCsvImportScheduler implements CommandLineRunner {
         log.warn("SCHEDULER_HEARTBEAT tick");
     }
 
-    /**
-     * TODO Make this this value goes back to one previous
-     */
-    // Temporarily disabled while troubleshooting import issues.
     @Scheduled(cron = "${app.garmin.csv-import-schedule}")
     @SchedulerLock(
         name = "garminCsvImport",
         lockAtMostFor = "20m",     // Crash-safety ceiling; not a re-trigger gate
-        lockAtLeastFor = "1m"      // Must stay below the cron interval or ShedLock silently skips ticks
+        lockAtLeastFor = "2m"      // Must stay below the cron interval or ShedLock silently skips ticks
     )
     public void importGarminCsvFiles() {
         if (!csvImportEnabled) {
