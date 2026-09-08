@@ -13,6 +13,7 @@ import me.sathish.runs_app.run_app_user.RunAppUserService;
 import me.sathish.runs_app.security.UserRoles;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
@@ -77,7 +78,7 @@ public class GarminRunResource {
     @GetMapping
     public ResponseEntity<PagedResponse<GarminRunDTO>> getAllGarminRuns(
             @RequestParam(name = "filter", required = false) final String filter,
-            @Parameter(hidden = true) @SortDefault(sort = "id") @PageableDefault(size = 20) final Pageable pageable) {
+            @Parameter(hidden = true) @SortDefault(sort = "activityDate", direction = Sort.Direction.DESC) @PageableDefault(size = 20) final Pageable pageable) {
         Page<GarminRunDTO> page = garminRunService.findAll(filter, pageable);
         return ResponseEntity.ok(new PagedResponse<>(page));
     }

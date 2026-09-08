@@ -19,10 +19,10 @@ export default function GarminRunList() {
   const [searchParams, ] = useSearchParams();
   const listParams = getListParams();
   const sortOptions = {
-    'id,ASC': t('garminRun.list.sort.id,ASC'),
-    'activityId,ASC': t('garminRun.list.sort.activityId,ASC'),
+    'activityDate,DESC': t('garminRun.list.sort.activityDate,DESC'),
     'activityDate,ASC': t('garminRun.list.sort.activityDate,ASC'),
-    'activityDate,DESC': t('garminRun.list.sort.activityDate,DESC')
+    'activityId,ASC': t('garminRun.list.sort.activityId,ASC'),
+    'id,ASC': t('garminRun.list.sort.id,ASC'),
   };
   const totalElements = garminRuns?.page?.totalElements ?? 0;
   const content = garminRuns?.content ?? [];

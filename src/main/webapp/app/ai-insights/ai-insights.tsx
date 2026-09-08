@@ -36,9 +36,9 @@ interface AnalysisResult {
     confidenceScore?: number;
     metrics?: {
         totalRuns: number;
-        totalDistanceKm: number;
+        totalDistanceMiles: number;
         totalDuration: string;
-        averagePaceMinPerKm?: number;
+        averagePaceMinPerMile?: number;
         averageHeartRate?: number;
         totalCalories?: number;
     };
@@ -392,11 +392,11 @@ export default function AiInsights() {
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
                                 {[
                                     {label: 'Runs', value: analysisResult.metrics.totalRuns},
-                                    {label: 'Distance', value: `${analysisResult.metrics.totalDistanceKm} km`},
+                                    {label: 'Distance', value: `${analysisResult.metrics.totalDistanceMiles} mi`},
                                     {label: 'Duration', value: analysisResult.metrics.totalDuration},
-                                    analysisResult.metrics.averagePaceMinPerKm ? {
+                                    analysisResult.metrics.averagePaceMinPerMile ? {
                                         label: 'Avg Pace',
-                                        value: `${analysisResult.metrics.averagePaceMinPerKm} min/km`
+                                        value: `${analysisResult.metrics.averagePaceMinPerMile} min/mi`
                                     } : null,
                                     analysisResult.metrics.averageHeartRate ? {
                                         label: 'Avg HR',

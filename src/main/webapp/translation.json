@@ -98,7 +98,7 @@
       "createNew": "Create new Garmin Run",
       "empty": "No Garmin Runs could be found.",
       "sort": {
-        "id,ASC": "Sort by Id (Ascendi  ng)",
+        "id,ASC": "Sort by Id (Ascending)",
         "activityId,ASC": "Sort by Activity Id (Ascending)",
         "activityDate,ASC": "Sort by Activity Date (Ascending)",
         "activityDate,DESC": "Sort by Activity Date (Descending)"
