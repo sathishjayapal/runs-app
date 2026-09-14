@@ -18,6 +18,7 @@
         <!-- Override Spring Boot's pinned Tomcat (11.0.24) - fixes CVE-2026-65182, CVE-2026-65905, CVE-2026-68525 -->
         <tomcat.version>11.0.25</tomcat.version>
         <testcontainers.version>1.20.4</testcontainers.version>
+        <tomcat.version>11.0.25</tomcat.version>
         <!-- Skip integration tests by default (require Docker). Override with -DskipITs=false -->
         <skipITs>true</skipITs>
     </properties>
