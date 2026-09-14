@@ -1,0 +1,50 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "serialNumber": "urn:uuid:runs-app-vex",
+  "metadata": {
+    "timestamp": "2026-09-13T00:00:00Z",
+    "component": {
+      "bom-ref": "runs-app",
+      "type": "application",
+      "name": "runs-app",
+      "version": "latest",
+      "description": "Running tracker with Garmin FIT import and Strava integration"
+    }
+  },
+  "vulnerabilities": [
+    {
+      "bom-ref": "CVE-2026-76956",
+      "ref": "CVE-2026-76956",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-76956"
+      },
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "impactStatement": "runs-app does not parse untrusted or user-supplied XML. libexpat (the vulnerable component) is an Alpine base image transitive dependency with no execution path in the runs-app attack surface. The application processes Garmin FIT binary files and JSON from REST APIs, not XML.",
+      "component": {
+        "type": "library",
+        "name": "libexpat",
+        "version": "2.8.3-r0"
+      }
+    },
+    {
+      "bom-ref": "CVE-2026-76957",
+      "ref": "CVE-2026-76957",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-76957"
+      },
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "impactStatement": "runs-app does not parse untrusted or user-supplied XML. libexpat (the vulnerable component) is an Alpine base image transitive dependency with no execution path in the runs-app attack surface. The application processes Garmin FIT binary files and JSON from REST APIs, not XML.",
+      "component": {
+        "type": "library",
+        "name": "libexpat",
+        "version": "2.8.3-r0"
+      }
+    }
+  ]
+}
