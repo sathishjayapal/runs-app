@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Configuration
 @Profile("!test")
@@ -108,8 +109,6 @@ public class DataInitializer {
             stravaRun1.setMiles(5);
             stravaRun1.setStartLocation(12345L);
             stravaRun1.setCreatedBy(regularUser);
-            stravaRunRepository.save(stravaRun1);
-            log.info("Created Strava run: {}", stravaRun1.getRunName());
 
             StravaRun stravaRun2 = new StravaRun();
             stravaRun2.setCustomerId(1001L);
@@ -118,8 +117,6 @@ public class DataInitializer {
             stravaRun2.setMiles(8);
             stravaRun2.setStartLocation(12346L);
             stravaRun2.setCreatedBy(regularUser);
-            stravaRunRepository.save(stravaRun2);
-            log.info("Created Strava run: {}", stravaRun2.getRunName());
 
             StravaRun stravaRun3 = new StravaRun();
             stravaRun3.setCustomerId(1002L);
@@ -128,8 +125,6 @@ public class DataInitializer {
             stravaRun3.setMiles(13);
             stravaRun3.setStartLocation(12347L);
             stravaRun3.setCreatedBy(adminUser);
-            stravaRunRepository.save(stravaRun3);
-            log.info("Created Strava run: {}", stravaRun3.getRunName());
 
             GarminRun garminRun1 = new GarminRun();
             garminRun1.setActivityId("12345678");
@@ -142,8 +137,6 @@ public class DataInitializer {
             garminRun1.setMaxHeartRate("185");
             garminRun1.setCalories("450");
             garminRun1.setCreatedBy(regularUser);
-            garminRunRepository.save(garminRun1);
-            log.info("Created Garmin run: {}", garminRun1.getActivityName());
 
             GarminRun garminRun2 = new GarminRun();
             garminRun2.setActivityId("12345679");
@@ -156,8 +149,6 @@ public class DataInitializer {
             garminRun2.setMaxHeartRate("155");
             garminRun2.setCalories("320");
             garminRun2.setCreatedBy(regularUser);
-            garminRunRepository.save(garminRun2);
-            log.info("Created Garmin run: {}", garminRun2.getActivityName());
 
             GarminRun garminRun3 = new GarminRun();
             garminRun3.setActivityId("12345680");
@@ -170,8 +161,32 @@ public class DataInitializer {
             garminRun3.setMaxHeartRate("192");
             garminRun3.setCalories("580");
             garminRun3.setCreatedBy(adminUser);
-            garminRunRepository.save(garminRun3);
-            log.info("Created Garmin run: {}", garminRun3.getActivityName());
+
+            try {
+                List<StravaRun> stravaRuns = List.of(stravaRun1, stravaRun2, stravaRun3);
+                List<GarminRun> garminRuns = List.of(garminRun1, garminRun2, garminRun3);
+
+                List<StravaRun> savedStrava = stravaRuns.stream()
+                        .map(stravaRunRepository::saveAndFlush)
+                        .toList();
+                List<GarminRun> savedGarmin = garminRuns.stream()
+                        .map(garminRunRepository::saveAndFlush)
+                        .toList();
+
+                long stravaCount = stravaRunRepository.count();
+                long garminCount = garminRunRepository.count();
+
+                if (stravaCount < savedStrava.size() || garminCount < savedGarmin.size()) {
+                    throw new IllegalStateException("Database probe failed: sample runs were not persisted");
+                }
+
+                stravaRunRepository.deleteAllInBatch(savedStrava);
+                garminRunRepository.deleteAllInBatch(savedGarmin);
+
+                log.info("Database insert/delete probe succeeded");
+            } catch (Exception e) {
+                throw new RuntimeException("Database is not working or tables are missing; sample run records could not be inserted or deleted", e);
+            }
 
             log.info("Database initialization completed successfully!");
         };
