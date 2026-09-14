@@ -117,21 +117,23 @@ jobs:
       - name: Load image
         run: docker load -i /tmp/image.tar
 
-      - name: Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          image-ref: ${{ needs.build.outputs.image-tag }}
-          severity: 'CRITICAL'
-          exit-code: '1'
-          ignore-unfixed: true
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+      - name: Trivy vulnerability scan (CRITICAL severity only)
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy image \
+            --severity CRITICAL \
+            --exit-code 1 \
+            --ignore-unfixed \
+            ${{ needs.build.outputs.image-tag }}
 
-      - name: Upload Trivy scan results
+      - name: Trivy vulnerability report (all severities for transparency)
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy image \
+            --format table \
+            --ignore-unfixed \
+            ${{ needs.build.outputs.image-tag }} || true
 
   publish:
     needs: [ build, scan ]
