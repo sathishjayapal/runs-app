@@ -3,6 +3,7 @@ package me.sathish.runs_app.journal;
 import lombok.extern.slf4j.Slf4j;
 import me.sathish.runs_app.security.UserRoles;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -11,7 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
-
+import org.springframework.web.util.UriBuilder;
 
 @RestController
 @RequestMapping(value = "/api/rag", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -73,6 +74,44 @@ public class RagProxyResource {
     @GetMapping("/analyze/result/{jobId}")
     public ResponseEntity<Object> analysisResult(@PathVariable final String jobId) {
         return forward(HttpMethod.GET, "/api/v1/analysis/analyze/result/" + jobId, null);
+    }
+
+    @PostMapping(value = "/analysis/{documentId}/diagram", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> generateDiagram(
+            @PathVariable final String documentId,
+            @RequestBody final Object body) {
+        return forward(HttpMethod.POST, "/api/v1/analysis/" + documentId + "/diagram", body);
+    }
+
+    @GetMapping(value = "/diagrams/{fileName}", produces = {
+            MediaType.IMAGE_PNG_VALUE,
+            MediaType.IMAGE_JPEG_VALUE,
+            "image/svg+xml"
+    })
+    public ResponseEntity<?> downloadDiagram(@PathVariable final String fileName) {
+        try {
+            final ResponseEntity<byte[]> upstream = restClient.get()
+                    .uri(uriBuilder -> uriBuilder.path("/api/v1/analysis/diagrams/{fileName}").build(fileName))
+                    .accept(MediaType.IMAGE_PNG, MediaType.IMAGE_JPEG, MediaType.valueOf("image/svg+xml"))
+                    .retrieve()
+                    .toEntity(byte[].class);
+            final HttpHeaders headers = new HttpHeaders();
+            if (upstream.getHeaders().getContentType() != null) {
+                headers.setContentType(upstream.getHeaders().getContentType());
+            }
+            if (upstream.getHeaders().getContentDisposition() != null) {
+                headers.setContentDisposition(upstream.getHeaders().getContentDisposition());
+            }
+            if (upstream.getBody() != null) {
+                headers.setContentLength(upstream.getBody().length);
+            }
+            return new ResponseEntity<>(upstream.getBody(), headers, upstream.getStatusCode());
+        } catch (final HttpStatusCodeException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
+        } catch (final Exception e) {
+            log.error("Diagram download proxy failed for {}: {}", fileName, e.getMessage());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+        }
     }
 
     private ResponseEntity<Object> forward(final HttpMethod method, final String path, final Object body) {

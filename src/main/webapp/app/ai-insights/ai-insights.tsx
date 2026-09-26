@@ -5,7 +5,6 @@ import {handleServerError} from 'app/common/utils';
 import axios from 'axios';
 import useDocumentTitle from 'app/common/use-document-title';
 
-
 interface RagAnswer {
     answer?: string;
     query?: string;
@@ -29,6 +28,7 @@ interface AnalysisJob {
 }
 
 interface AnalysisResult {
+    documentId?: string;
     summary?: string;
     insights?: { category: string; observation: string; recommendation: string }[];
     recommendations?: string[];
@@ -43,6 +43,13 @@ interface AnalysisResult {
         totalCalories?: number;
     };
     cachedResult?: boolean;
+}
+
+interface DiagramArtifact {
+    uid: string;
+    fileName: string;
+    contentType: string;
+    sizeBytes: number;
 }
 
 const SUGGESTED_QUERIES = [
@@ -69,6 +76,9 @@ export default function AiInsights() {
     const [analysisJob, setAnalysisJob] = useState<AnalysisJob | null>(null);
     const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
     const [submittingAnalysis, setSubmittingAnalysis] = useState(false);
+    const [diagramArtifact, setDiagramArtifact] = useState<DiagramArtifact | null>(null);
+    const [generatingDiagram, setGeneratingDiagram] = useState(false);
+    const [diagramError, setDiagramError] = useState<string | null>(null);
     const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const resultRef = useRef<HTMLDivElement>(null);
 
@@ -158,6 +168,8 @@ export default function AiInsights() {
         setSubmittingAnalysis(true);
         setAnalysisJob(null);
         setAnalysisResult(null);
+        setDiagramArtifact(null);
+        setDiagramError(null);
         stopPolling();
         try {
             const runsRes = await axios.get('/api/garminRuns?size=20&sort=activityDate,desc');
@@ -177,6 +189,27 @@ export default function AiInsights() {
                 return;
             }
             handleServerError(error, navigate);
+        }
+    };
+
+    const handleGenerateDiagram = async () => {
+        if (!analysisResult?.documentId) return;
+        setGeneratingDiagram(true);
+        setDiagramError(null);
+        try {
+            const response = await axios.post(
+                `/api/rag/analysis/${analysisResult.documentId}/diagram`,
+                {diagramType: 'SUMMARY', format: 'PNG'}
+            );
+            setDiagramArtifact(response.data);
+        } catch (error: any) {
+            if (error?.response?.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            setDiagramError(error?.response?.data?.error ?? 'Diagram generation failed. Please try again.');
+        } finally {
+            setGeneratingDiagram(false);
         }
     };
 
@@ -456,6 +489,43 @@ export default function AiInsights() {
 
                         {analysisResult.confidenceScore != null && (
                             <p className="text-xs text-gray-400 mt-4 text-right">Confidence: {analysisResult.confidenceScore}%</p>
+                        )}
+
+                        {analysisResult.documentId && (
+                            <div className="mt-6 pt-4 border-t border-green-200">
+                                <button
+                                    type="button"
+                                    onClick={handleGenerateDiagram}
+                                    disabled={generatingDiagram}
+                                    className="inline-flex items-center gap-2 text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-4 focus:ring-indigo-300 rounded px-5 py-2 text-sm font-medium transition-colors"
+                                >
+                                    {generatingDiagram ? 'Generating diagram…' : diagramArtifact ? 'Regenerate Diagram' : 'Generate Diagram'}
+                                </button>
+                                {diagramError && (
+                                    <p className="mt-3 text-sm text-red-600">{diagramError}</p>
+                                )}
+                                {diagramArtifact && (
+                                    <div className="mt-4 rounded-lg border border-green-200 bg-white p-3">
+                                        <img
+                                            src={`/api/rag/diagrams/${encodeURIComponent(diagramArtifact.fileName)}`}
+                                            alt="AI-generated run analysis diagram"
+                                            className="w-full h-auto rounded"
+                                        />
+                                        <div className="mt-3 flex items-center justify-between gap-3">
+                                            <span className="text-xs text-gray-500">
+                                                {diagramArtifact.fileName} · {Math.ceil(diagramArtifact.sizeBytes / 1024)} KB
+                                            </span>
+                                            <a
+                                                href={`/api/rag/diagrams/${encodeURIComponent(diagramArtifact.fileName)}`}
+                                                download={diagramArtifact.fileName}
+                                                className="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+                                            >
+                                                Download
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         )}
                     </div>
                 )}
