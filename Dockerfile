@@ -30,7 +30,7 @@ RUN --mount=type=cache,target=/root/.m2 \
     mvn package -DskipTests -B
 
 # Runtime stage
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:24-jre-alpine
 WORKDIR /app
 
 # Patch OS-level packages (OpenSSL etc.) — this is the stage that actually ships,
