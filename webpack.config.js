@@ -7,6 +7,26 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const WarningsToErrorsPlugin = require('warnings-to-errors-webpack-plugin');
+const fs = require('fs');
+
+/**
+ * Backend URL for the local dev server proxy (npm run devserver only).
+ * Single source of truth: SERVER_PORT in .env.local, the same value Spring Boot uses locally.
+ * BACKEND_URL overrides it. Production builds never use this: on the VM, Spring Boot serves
+ * the bundle itself, so the browser calls /api on the same origin.
+ */
+function resolveBackendUrl() {
+  if (process.env.BACKEND_URL) {
+    return process.env.BACKEND_URL;
+  }
+  let port = process.env.SERVER_PORT;
+  const localEnv = path.resolve(__dirname, '.env.local');
+  if (!port && fs.existsSync(localEnv)) {
+    const match = fs.readFileSync(localEnv, 'utf8').match(/^\s*SERVER_PORT\s*=\s*(\d+)\s*$/m);
+    port = match && match[1];
+  }
+  return `http://localhost:${port || 8080}`;
+}
 
 
 module.exports = (env, argv) => ({
@@ -93,6 +113,16 @@ module.exports = (env, argv) => ({
     },
     hot: true,
     static: false,
+    // Keep the browser same-origin, exactly like the VM: proxy backend paths to Spring Boot.
+    // Leave API_PATH empty in .env.development so axios uses relative URLs.
+    proxy: [
+      {
+        context: ['/api', '/login', '/logout', '/actuator', '/swagger-ui', '/v3/api-docs'],
+        target: resolveBackendUrl(),
+        // GET /login is the React login page; only the form POST goes to Spring Security.
+        bypass: (req) => (req.method === 'GET' && req.path === '/login' ? '/index.html' : undefined),
+      },
+    ],
     watchFiles: [
       'src/main/webapp/**',
     ]

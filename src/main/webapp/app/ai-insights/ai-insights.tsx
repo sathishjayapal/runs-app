@@ -164,7 +164,8 @@ export default function AiInsights() {
         }, POLL_INTERVAL_MS);
     };
 
-    const handleAnalyzeRuns = async () => {
+    // forceRefresh=true skips the analyzer's cache and always calls the LLM.
+    const handleAnalyzeRuns = async (forceRefresh = false) => {
         setSubmittingAnalysis(true);
         setAnalysisJob(null);
         setAnalysisResult(null);
@@ -178,7 +179,7 @@ export default function AiInsights() {
                 setSubmittingAnalysis(false);
                 return;
             }
-            const jobRes = await axios.post('/api/rag/analyze', {runs, forceRefresh: false});
+            const jobRes = await axios.post('/api/rag/analyze', {runs, forceRefresh});
             const job: AnalysisJob = jobRes.data;
             setAnalysisJob(job);
             pollJobStatus(job.jobId);
@@ -355,7 +356,7 @@ export default function AiInsights() {
                     <h2 className="text-xl font-semibold">Analyze My Runs</h2>
                     <button
                         type="button"
-                        onClick={handleAnalyzeRuns}
+                        onClick={() => handleAnalyzeRuns()}
                         disabled={submittingAnalysis}
                         className="inline-flex items-center gap-2 text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-4 focus:ring-green-300 rounded px-5 py-2 text-sm font-medium transition-colors"
                     >
@@ -416,8 +417,19 @@ export default function AiInsights() {
                                 AI Analysis Complete
                             </h3>
                             {analysisResult.cachedResult && (
-                                <span
-                                    className="text-xs bg-yellow-100 text-yellow-700 border border-yellow-200 rounded-full px-2 py-0.5">Cached</span>
+                                <div className="flex items-center gap-2">
+                                    <span
+                                        className="text-xs bg-yellow-100 text-yellow-700 border border-yellow-200 rounded-full px-2 py-0.5">Cached</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleAnalyzeRuns(true)}
+                                        disabled={submittingAnalysis}
+                                        title="Ignore the cached result and ask the AI again"
+                                        className="text-xs font-medium text-green-700 hover:text-green-900 underline disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Regenerate
+                                    </button>
+                                </div>
                             )}
                         </div>
 

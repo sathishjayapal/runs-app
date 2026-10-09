@@ -392,7 +392,9 @@ APP_INITIALIZATION_SYSTEM_PASSWORD=dev-system-password
 
 # Production flag
 PRODUCTION=false
-API_PATH=http://localhost:$APP_PORT
+# Empty on purpose: webpack devServer proxies /api to Spring Boot (port from .env.local SERVER_PORT),
+# so local dev is same-origin like the VM. Do not put a host:port here.
+API_PATH=
 EOF
 
 print_status ".env and .env.development files created"
