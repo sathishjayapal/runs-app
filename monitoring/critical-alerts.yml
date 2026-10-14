@@ -1,0 +1,175 @@
+# Critical-only alerts, phase 1: runs-app stack on runs-server (192.168.4.101).
+# Goals: runs-app always up, no RabbitMQ data loss, Postgres healthy.
+# Host rules adapted from https://samber.github.io/awesome-prometheus-alerts/rules/basic-resource-monitoring/host-and-hardware/
+# Self-monitoring adapted from .../prometheus-self-monitoring/.
+# Deployed to /etc/prometheus/rules/ by vm-setup-alerting.sh. Mac 13 (immich, nextcloud) is phase 2.
+groups:
+  - name: runs-app-containers
+    rules:
+      # One alert per missing/stopped container, labelled with its name. Uses cadvisor's container_last_seen.
+      - alert: RequiredContainerDown
+        expr: |
+          (
+            label_replace(vector(1), "name", "runs-app", "", "")
+            or label_replace(vector(1), "name", "rabbitmq", "", "")
+            or label_replace(vector(1), "name", "eventstracker", "", "")
+            or label_replace(vector(1), "name", "runs-ai-analyzer", "", "")
+            or label_replace(vector(1), "name", "runs-ai-analyzer-db", "", "")
+            or label_replace(vector(1), "name", "config-server", "", "")
+            or label_replace(vector(1), "name", "sathishlogger", "", "")
+          ) unless on (name) (container_last_seen{job="cadvisor"} > time() - 90)
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "Container down: {{ $labels.name }}"
+          description: "{{ $labels.name }} is stopped or missing on runs-server."
+
+      - alert: RequiredContainerRestartLoop
+        expr: changes(container_start_time_seconds{job="cadvisor", name=~"runs-app|rabbitmq|eventstracker|runs-ai-analyzer|runs-ai-analyzer-db|config-server|sathishlogger"}[15m]) > 3
+        labels: {severity: critical}
+        annotations:
+          summary: "Container restart loop: {{ $labels.name }}"
+          description: "Restarted more than 3 times in 15 minutes (crash or OOM)."
+
+  - name: rabbitmq-no-data-loss
+    rules:
+      - alert: RabbitMQDown
+        expr: up{job="rabbitmq"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "RabbitMQ metrics endpoint down"
+          description: "Publishers cannot deliver events; check the rabbitmq container."
+
+      - alert: RabbitMQResourceAlarm
+        expr: '{__name__=~"rabbitmq_alarms_.*"} == 1'
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: "RabbitMQ resource alarm: {{ $labels.__name__ }}"
+          description: "Memory, disk or file-descriptor alarm: RabbitMQ is blocking publishers."
+
+      # A message in a dead-letter queue means a consumer rejected it; fix and replay before it expires.
+      - alert: RabbitMQDeadLetterMessages
+        expr: sum by (queue) (rabbitmq_detailed_queue_messages_ready{queue=~"dlq\\..*"}) > 0
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: "Messages in dead-letter queue {{ $labels.queue }}: {{ $value }}"
+          description: "A consumer rejected these messages (e.g. deserialisation failure). Inspect and replay."
+
+      - alert: RabbitMQQueueNoConsumers
+        # Only queues with a real @RabbitListener; q.sathishprojects.events and q.sathishprojects.github.ops.events
+        # are declared but have no consumer in the code, so zero consumers there is normal.
+        expr: rabbitmq_detailed_queue_consumers{queue=~"q\\.sathishprojects\\.(garmin\\.api|garmin\\.ops|github\\.api)\\.events"} == 0
+        for: 10m
+        labels: {severity: critical}
+        annotations:
+          summary: "No consumers on queue {{ $labels.queue }}"
+          description: "Messages will accumulate. Check eventstracker / runs-ai-analyzer."
+
+      - alert: RabbitMQQueueBacklog
+        expr: rabbitmq_detailed_queue_messages_ready{queue=~"q\\..*"} > 100
+        for: 10m
+        labels: {severity: critical}
+        annotations:
+          summary: "Backlog on {{ $labels.queue }}: {{ $value }} messages"
+
+  - name: postgres
+    rules:
+      - alert: PostgresDown
+        expr: pg_up == 0
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: "Postgres down: {{ $labels.instance }}"
+          description: "Either the database or its exporter is down (native runsapp-db or runs-ai-analyzer-db container)."
+
+      # Metric comes from the dedicated sequence exporters (vm-setup-sequence-monitor.sh): last_value / max_value.
+      - alert: PostgresSequenceNearExhaustion
+        expr: pg_sequence_usage_ratio > 0.8
+        for: 10m
+        labels: {severity: critical}
+        annotations:
+          summary: "Sequence {{ $labels.sequencename }} is {{ $value | humanizePercentage }} used ({{ $labels.datname }})"
+          description: "Inserts will start failing when it hits its maximum. Migrate the column/sequence to bigint."
+
+      - alert: PostgresConnectionsExhausted
+        expr: sum by (instance) (pg_stat_activity_count) / max by (instance) (pg_settings_max_connections) > 0.9
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: "Postgres connections >90% of max on {{ $labels.instance }}"
+
+  - name: runs-server-host
+    rules:
+      - alert: HostDown
+        expr: up{job="runs-server"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "runs-server node_exporter unreachable"
+
+      - alert: HostOutOfDiskSpace
+        expr: |
+          node_filesystem_avail_bytes{job="runs-server", fstype!~"^(fuse.*|tmpfs|cifs|nfs|overlay|squashfs|vfat)"}
+            / node_filesystem_size_bytes < 0.10
+          and on (instance, device, mountpoint) node_filesystem_readonly == 0
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: "Disk <10% free on runs-server {{ $labels.mountpoint }}"
+          description: "Postgres, RabbitMQ and Docker stall when this fills."
+
+      - alert: HostOutOfMemory
+        expr: node_memory_MemAvailable_bytes{job="runs-server"} / node_memory_MemTotal_bytes{job="runs-server"} < 0.05
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: "runs-server available memory <5%"
+
+      - alert: HostOomKillDetected
+        expr: increase(node_vmstat_oom_kill{job="runs-server"}[30m]) > 0
+        labels: {severity: critical}
+        annotations:
+          summary: "Kernel OOM-killed a process on runs-server"
+          description: "A container such as Postgres or RabbitMQ was likely killed. Check dmesg."
+
+  - name: monitoring-self
+    rules:
+      - alert: MonitoringComponentDown
+        expr: up{job=~"prometheus|alertmanager|cadvisor|rabbitmq|postgres-.*"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "Monitoring component down: {{ $labels.job }}"
+          description: "Alerts that depend on this job are blind while it is down."
+
+      - alert: PrometheusRuleEvaluationFailures
+        expr: increase(prometheus_rule_evaluation_failures_total[3m]) > 0
+        labels: {severity: critical}
+        annotations:
+          summary: "Prometheus rule evaluation failing; alerts may be ignored"
+
+      - alert: PrometheusNotIngestingSamples
+        expr: |
+          sum without(type) (rate(prometheus_tsdb_head_samples_appended_total[5m])) <= 0
+          and (sum without(scrape_job) (prometheus_target_metadata_cache_entries) > 0
+               or sum without(rule_group) (prometheus_rule_group_rules) > 0)
+        for: 10m
+        labels: {severity: critical}
+        annotations:
+          summary: "Prometheus is not ingesting samples"
+
+      - alert: PrometheusTsdbWalCorruptions
+        expr: increase(prometheus_tsdb_wal_corruptions_total[1m]) > 0
+        labels: {severity: critical}
+        annotations:
+          summary: "Prometheus WAL corruption detected"
+
+      # Always firing; Alertmanager sends it to ntfy once a day. If the daily ping stops, the pipeline is broken.
+      - alert: Watchdog
+        expr: vector(1)
+        labels: {severity: heartbeat}
+        annotations:
+          summary: "Alerting pipeline alive (daily heartbeat)"
