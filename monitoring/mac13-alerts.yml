@@ -1,0 +1,69 @@
+# Critical-only alerts for the second server "mac13-server" (192.168.4.236): Nextcloud (notes) and Immich (photos).
+# Needs cAdvisor on that host scraped as job=cadvisor-mac13 (see mac13-cadvisor-compose.yml, vm-setup-mac13.sh).
+# Dashboard-only containers (heimdall, portainer agent) and Immich machine-learning/Nextcloud cron are left out on
+# purpose: their failure degrades a feature, it does not lose or hide data.
+groups:
+  - name: mac13-containers
+    rules:
+      - alert: Mac13RequiredContainerDown
+        expr: |
+          (
+            label_replace(vector(1), "name", "nextcloud-app-1", "", "")
+            or label_replace(vector(1), "name", "nextcloud-db-1", "", "")
+            or label_replace(vector(1), "name", "nextcloud-redis-1", "", "")
+            or label_replace(vector(1), "name", "immich_server", "", "")
+            or label_replace(vector(1), "name", "immich_postgres", "", "")
+            or label_replace(vector(1), "name", "immich_redis", "", "")
+          ) unless on (name) (container_last_seen{job="cadvisor-mac13"} > time() - 90)
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "mac13 container down: {{ $labels.name }}"
+          description: "{{ $labels.name }} is stopped or missing on mac13-server (Nextcloud or Immich is impaired)."
+
+      - alert: Mac13ContainerRestartLoop
+        expr: changes(container_start_time_seconds{job="cadvisor-mac13", name=~"nextcloud-app-1|nextcloud-db-1|nextcloud-redis-1|immich_server|immich_postgres|immich_redis"}[15m]) > 3
+        labels: {severity: critical}
+        annotations:
+          summary: "mac13 container restart loop: {{ $labels.name }}"
+
+      - alert: Mac13CadvisorDown
+        expr: up{job="cadvisor-mac13"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "cAdvisor on mac13 is down"
+          description: "Container alerts for Nextcloud and Immich are blind while this is down."
+
+  - name: mac13-host
+    rules:
+      - alert: Mac13HostDown
+        expr: up{job="mac13-server"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "mac13-server node_exporter unreachable (host or network down)"
+
+      - alert: Mac13OutOfDiskSpace
+        expr: |
+          node_filesystem_avail_bytes{job="mac13-server", fstype!~"^(fuse.*|tmpfs|cifs|nfs|overlay|squashfs|vfat)"}
+            / node_filesystem_size_bytes < 0.10
+          and on (instance, device, mountpoint) node_filesystem_readonly == 0
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: "Disk <10% free on mac13 {{ $labels.mountpoint }}"
+          description: "Photos and notes live here; Immich and Nextcloud stall when this fills."
+
+      - alert: Mac13OutOfMemory
+        expr: node_memory_MemAvailable_bytes{job="mac13-server"} / node_memory_MemTotal_bytes{job="mac13-server"} < 0.05
+        for: 5m
+        labels: {severity: critical}
+        annotations:
+          summary: "mac13 available memory <5%"
+
+      - alert: Mac13OomKillDetected
+        expr: increase(node_vmstat_oom_kill{job="mac13-server"}[30m]) > 0
+        labels: {severity: critical}
+        annotations:
+          summary: "Kernel OOM-killed a process on mac13"

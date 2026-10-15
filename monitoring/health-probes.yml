@@ -1,0 +1,21 @@
+# Critical "does it actually answer" alerts, from blackbox_exporter probes (job=blackbox-health).
+# Container-up (critical-alerts.yml) is not the same as app-answering: a JVM can be running and wedged.
+# config-server is intentionally not probed: its health endpoint needs basic auth; container-down covers it.
+groups:
+  - name: app-health-probes
+    rules:
+      - alert: AppHealthProbeFailed
+        expr: probe_success{job="blackbox-health"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $labels.app }} is not answering its health check"
+          description: "Probe of {{ $labels.instance }} failed for 2 minutes (wrong status, body not UP, timeout or connection refused)."
+
+      - alert: AppHealthProbeSlow
+        expr: probe_duration_seconds{job="blackbox-health"} > 4
+        for: 10m
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $labels.app }} health check taking over 4s for 10 minutes"
+          description: "The app is up but nearly timing out: GC thrash, exhausted pool or overloaded host."

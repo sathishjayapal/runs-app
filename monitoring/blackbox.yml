@@ -1,0 +1,26 @@
+# blackbox_exporter modules: "does the app really answer", not just "is the container running".
+modules:
+  spring_health:            # Spring Boot actuator health: HTTP 200 and status UP in the body
+    prober: http
+    timeout: 5s
+    http:
+      valid_status_codes: [200]
+      method: GET
+      fail_if_body_not_matches_regexp:
+        - '"status":"UP"'
+  nextcloud_status:         # status.php: installed and not in maintenance mode
+    prober: http
+    timeout: 8s
+    http:
+      valid_status_codes: [200]
+      fail_if_body_not_matches_regexp:
+        - '"installed":true'
+      fail_if_body_matches_regexp:
+        - '"maintenance":true'
+  immich_ping:              # /api/server/ping answers pong
+    prober: http
+    timeout: 8s
+    http:
+      valid_status_codes: [200]
+      fail_if_body_not_matches_regexp:
+        - '"res":"pong"'
