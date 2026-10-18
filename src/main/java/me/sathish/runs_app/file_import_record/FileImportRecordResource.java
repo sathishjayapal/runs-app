@@ -7,6 +7,9 @@ import me.sathish.runs_app.common.PagedResponse;
 import me.sathish.runs_app.util.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,7 +46,8 @@ public class FileImportRecordResource {
     public PagedResponse<FileImportRecordDTO> listImports(
         @RequestParam(required = false) ProcessingStatus status,
         @RequestParam(required = false) ReconciliationStatus reconciliationStatus,
-        Pageable pageable) {
+        @PageableDefault(size = 20)
+        @SortDefault(sort = "processedAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Page<FileImportRecord> page;
 
