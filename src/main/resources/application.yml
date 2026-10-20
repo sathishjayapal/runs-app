@@ -42,7 +42,18 @@ spring:
     template:
       mandatory: true
 logging:
+  # Replaces the old custom logback-spring.xml (and its copied SathishLoggerAppender). Boot's importable
+  # console-appender.xml ignores logging.structured.format.console, so keeping that file would have made
+  # JSON logs impossible. Locally this prints the normal console pattern with the correlation ID; on the
+  # VM set LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs to emit one JSON object per line (MDC entries such as
+  # correlationId become top-level fields) and this pattern is unused.
+  pattern:
+    correlation: "[%X{correlationId:-}] "
   level:
+    root: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+    me.sathish.runs_app: INFO
     org.springframework.amqp: DEBUG
     org.springframework.amqp.rabbit: DEBUG
     me.sathish.runs_app.config.RabbitMQConfiguration: DEBUG

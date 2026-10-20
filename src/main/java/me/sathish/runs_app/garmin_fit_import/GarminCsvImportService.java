@@ -25,10 +25,14 @@ import java.util.stream.Collectors;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessagePostProcessor;
+import org.slf4j.MDC;
 
 @Service
 @Slf4j
 public class GarminCsvImportService {
+
+    /** MDC key for the per-file correlation ID; same name eventstracker uses. */
+    static final String CORRELATION_ID_MDC_KEY = "correlationId";
 
     private final GarminCsvParser csvParser;
     private final GarminRunService garminRunService;
@@ -108,10 +112,19 @@ public class GarminCsvImportService {
      * Phase 3: RECONCILE & ROUTE - Verify all rows accounted for, route file appropriately
      */
     private void processFileWithReconciliation(CsvFileHandle handle, ImportResult result) {
-        String fileName = handle.getFileName();
         // One correlation ID per file so its full journey (publish -> eventstracker consume ->
-        // persist) can be traced as a single thread in sathishlogger.
+        // persist) can be traced as a single thread. It is also placed in the logging MDC for the
+        // duration of the import, so every log line written meanwhile carries it as a JSON field
+        // (or in the console pattern) without being repeated in each message. The key matches
+        // eventstracker's, so one Loki filter works across both services.
         String correlationId = UUID.randomUUID().toString();
+        try (MDC.MDCCloseable ignored = MDC.putCloseable(CORRELATION_ID_MDC_KEY, correlationId)) {
+            processFileWithReconciliation(handle, result, correlationId);
+        }
+    }
+
+    private void processFileWithReconciliation(CsvFileHandle handle, ImportResult result, String correlationId) {
+        String fileName = handle.getFileName();
         log.info("Starting import for file={} correlationId={}", fileName, correlationId);
 
         // PHASE 1: INITIALIZE - Parse CSV and create tracking record
