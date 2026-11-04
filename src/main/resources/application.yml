@@ -54,16 +54,20 @@ logging:
     org.springframework: WARN
     org.hibernate: WARN
     me.sathish.runs_app: INFO
-    org.springframework.amqp: DEBUG
-    org.springframework.amqp.rabbit: DEBUG
+    # amqp at DEBUG logged a RabbitHealthIndicator line every ~15s, which drowned real output in Loki.
+    # Raise it temporarily via POST /actuator/loggers/org.springframework.amqp when debugging publishes.
+    org.springframework.amqp: INFO
     me.sathish.runs_app.config.RabbitMQConfiguration: DEBUG
     me.sathish.runs_app.garmin_fit_import: DEBUG
 error:
   handling:
     http-status-in-json-response: true
-    exception-logging: NO_LOGGING
+    # NO_LOGGING made every handled exception (validation failures, bad requests) vanish from the logs;
+    # a rejected save left no trace. MESSAGE_ONLY logs one line per error; stack traces stay 5xx-only.
+    exception-logging: MESSAGE_ONLY
     full-stacktrace-http-statuses: 5xx
     log-levels:
+      4xx: WARN
       5xx: ERROR
     http-statuses:
       org.springframework.security.authorization.AuthorizationDeniedException: unauthorized

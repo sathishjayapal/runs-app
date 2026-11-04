@@ -49,7 +49,14 @@ axios.get('/api/current-user').catch(() => {
   // Even if this fails, the response will set the CSRF token cookie
 });
 
-axios.interceptors.request.use((config) => {
+axios.interceptors.request.use(async (config) => {
+  if (riflClient.appliesTo(config.url ?? '', config.method ?? '')) {
+    try {
+      await riflClient.ensureOpen();
+    } catch (e) {
+      console.error('RIFL lease could not be opened; the request will be rejected with 400', e);
+    }
+  }
   const result = riflClient.headersFor(config.url ?? '', config.method ?? '');
   if (result) {
     Object.assign(config.headers, result.headers);
@@ -86,6 +93,15 @@ axios.interceptors.response.use(
   (error) => {
     if (error.config?.riflSeq != null) {
       riflClient.ack(error.config.riflSeq);
+    }
+    if (error.response?.status === 410) {
+      // Lease expired or unknown (e.g. the server restarted); open a new one for the next save.
+      riflClient.reset();
+    }
+    if (error.response?.status >= 400) {
+      // The /error page only shows a status code; keep the server's reason in the browser console.
+      console.error(`${error.config?.method?.toUpperCase()} ${error.config?.url} -> ${error.response.status}`,
+          error.response.data, 'correlationId=' + error.response.headers?.['x-correlation-id']);
     }
     if (error.response?.status === 401 && window.location.pathname !== '/login') {
       window.location.href = '/login';

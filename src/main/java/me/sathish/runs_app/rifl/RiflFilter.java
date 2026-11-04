@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -15,6 +16,7 @@ import java.io.IOException;
  * cached response and short-circuit the chain. On a miss, wrap the response so
  * we can capture the controller's body, then cache it for future retries.
  */
+@Slf4j
 @Component
 public class RiflFilter extends OncePerRequestFilter {
 
@@ -72,11 +74,17 @@ public class RiflFilter extends OncePerRequestFilter {
         Long seq = parseLong(request, HDR_SEQ);
         Long firstIncomplete = parseLong(request, HDR_FIRST_INCOMPLETE);
         if (clientId == null || seq == null || firstIncomplete == null) {
+            // sendError bypasses the exception-handling library, so nothing else logs this rejection.
+            log.warn("RIFL rejected {} {}: missing/invalid headers {}={} {}={} {}={}",
+                    request.getMethod(), request.getRequestURI(),
+                    HDR_CLIENT_ID, clientId, HDR_SEQ, seq, HDR_FIRST_INCOMPLETE, firstIncomplete);
             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
                     "Missing required RIFL headers: " + HDR_CLIENT_ID + ", " + HDR_SEQ + ", " + HDR_FIRST_INCOMPLETE);
             return;
         }
         if (!leaseManager.isAlive(clientId)) {
+            log.warn("RIFL rejected {} {}: lease expired or unknown for clientId={}",
+                    request.getMethod(), request.getRequestURI(), clientId);
             throw new StaleRpcException(clientId);
         }
         resultTracker.advanceFirstIncomplete(clientId, firstIncomplete);

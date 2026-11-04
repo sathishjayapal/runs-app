@@ -10,6 +10,35 @@ class RiflClient {
   private pendingSeqs = new Set<number>();
   private timer: ReturnType<typeof setInterval> | null = null;
 
+  private opening: Promise<void> | null = null;
+
+  /** True for the requests the server's RIFL filter guards (mutating calls under /api/garminRuns). */
+  appliesTo(url: string, method: string): boolean {
+    const path = (url ?? '').split('?')[0] ?? '';
+    return path.startsWith(GARMIN_RUNS_PREFIX) && MUTATING_METHODS.has((method ?? '').toLowerCase());
+  }
+
+  /**
+   * Opens a lease if none is held. The first open at page load can fail (it races the call that sets the
+   * XSRF cookie), and a failed open used to leave the client without headers for the rest of the session,
+   * so every save returned 400. Callers await this before a guarded request; concurrent callers share one open.
+   */
+  async ensureOpen(): Promise<void> {
+    if (this.clientId != null) return;
+    if (!this.opening) {
+      this.opening = this.open().finally(() => { this.opening = null; });
+    }
+    await this.opening;
+  }
+
+  /** Drops the lease so the next guarded request opens a fresh one (server answered 410: lease expired/unknown). */
+  reset(): void {
+    this.clientId = null;
+    this.pendingSeqs.clear();
+    if (this.timer) clearInterval(this.timer);
+    this.timer = null;
+  }
+
   async open(): Promise<void> {
     const res = await axios.post<number>('/api/rifl/lease/open');
     this.clientId = res.data;

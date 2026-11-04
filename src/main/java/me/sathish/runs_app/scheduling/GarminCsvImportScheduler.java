@@ -33,7 +33,7 @@ public class GarminCsvImportScheduler implements CommandLineRunner {
 
     @Scheduled(fixedDelay = 50000)
     public void heartbeat() {
-        log.warn("SCHEDULER_HEARTBEAT tick");
+        log.debug("SCHEDULER_HEARTBEAT tick");
     }
 
     @Scheduled(cron = "${app.garmin.csv-import-schedule}")
