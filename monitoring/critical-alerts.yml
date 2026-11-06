@@ -7,6 +7,8 @@ groups:
   - name: runs-app-containers
     rules:
       # One alert per missing/stopped container, labelled with its name. Uses cadvisor's container_last_seen.
+      # Matches on the compose *service* name, not the container name: Portainer's stack prefixes containers
+      # ("sathish-stack-runs-app"), which made every bare-name match fail and fired all alerts (Oct 26 2026).
       - alert: RequiredContainerDown
         expr: |
           (
@@ -17,7 +19,9 @@ groups:
             or label_replace(vector(1), "name", "runs-ai-analyzer-db", "", "")
             or label_replace(vector(1), "name", "config-server", "", "")
             or label_replace(vector(1), "name", "sathishlogger", "", "")
-          ) unless on (name) (container_last_seen{job="cadvisor"} > time() - 90)
+          ) unless on (name) label_replace(
+            container_last_seen{job="cadvisor", container_label_com_docker_compose_service!=""} > time() - 90,
+            "name", "$1", "container_label_com_docker_compose_service", "(.+)")
         for: 2m
         labels: {severity: critical}
         annotations:
@@ -25,7 +29,7 @@ groups:
           description: "{{ $labels.name }} is stopped or missing on runs-server."
 
       - alert: RequiredContainerRestartLoop
-        expr: changes(container_start_time_seconds{job="cadvisor", name=~"runs-app|rabbitmq|eventstracker|runs-ai-analyzer|runs-ai-analyzer-db|config-server|sathishlogger"}[15m]) > 3
+        expr: changes(container_start_time_seconds{job="cadvisor", container_label_com_docker_compose_service=~"runs-app|rabbitmq|eventstracker|runs-ai-analyzer|runs-ai-analyzer-db|config-server|sathishlogger"}[15m]) > 3
         labels: {severity: critical}
         annotations:
           summary: "Container restart loop: {{ $labels.name }}"
