@@ -265,7 +265,9 @@ export default function AiInsights() {
                         }}
                     />
                     <div className="flex items-center justify-between mt-3">
-                        <span className="text-xs text-gray-400">{t('aiInsights.queryHint')}</span>
+                        <span className="text-xs text-gray-400">
+                            {searching ? t('aiInsights.searchingHint') : t('aiInsights.queryHint')}
+                        </span>
                         <button
                             type="submit"
                             disabled={searching || !query.trim()}
