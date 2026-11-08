@@ -110,7 +110,9 @@ export default function AiInsights() {
         setSearching(true);
         setAnswer(null);
         try {
-            const response = await axios.post('/api/rag/search', {query: trimmed});
+            // /ask retrieves your analyses and journal entries and has the LLM answer with next steps;
+            // /search only returned the raw vector-search hits, which this card then dumped as JSON.
+            const response = await axios.post('/api/rag/ask', {query: trimmed});
             setAnswer(response.data);
             setTimeout(() => answerRef.current?.scrollIntoView({behavior: 'smooth', block: 'start'}), 100);
         } catch (error: any) {
@@ -214,13 +216,18 @@ export default function AiInsights() {
         }
     };
 
+    // The answer is LLM output built from stored text, and it is injected as HTML below, so escape it first.
+    const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
     const renderAnswer = (text: string) => {
-        // Render newlines as paragraphs and bold **text**
+        // Render newlines as paragraphs, "- " lines as bullets and bold **text**
         return text
             .split('\n\n')
             .filter(Boolean)
             .map((paragraph, i) => {
-                const withBold = paragraph.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                const withBold = escapeHtml(paragraph)
+                    .replace(/^- /gm, '• ')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                 const withNewlines = withBold.replace(/\n/g, '<br/>');
                 return (
                     <p key={i} className="mb-3 leading-relaxed"
