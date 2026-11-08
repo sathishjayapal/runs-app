@@ -54,8 +54,11 @@ groups:
           description: "Memory, disk or file-descriptor alarm: RabbitMQ is blocking publishers."
 
       # A message in a dead-letter queue means a consumer rejected it; fix and replay before it expires.
+      # dlq.sathishprojects.events is excluded on purpose: it is the DLQ of the catch-all fanout queue
+      # q.sathishprojects.events, which has no consumer and a 10s TTL, so every fanout publish expires into it
+      # (x-death reason=expired). Those are not rejections (diagnosed Nov 7 2026). Revisit if that queue gets a consumer.
       - alert: RabbitMQDeadLetterMessages
-        expr: sum by (queue) (rabbitmq_detailed_queue_messages_ready{queue=~"dlq\\..*"}) > 0
+        expr: sum by (queue) (rabbitmq_detailed_queue_messages_ready{queue=~"dlq\\..*", queue!="dlq.sathishprojects.events"}) > 0
         for: 5m
         labels: {severity: critical}
         annotations:
