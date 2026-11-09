@@ -43,8 +43,6 @@ grep -q 'job_name: blackbox-health' "$PROM/prometheus.yml" || cat >> "$PROM/prom
         labels: {app: runs-ai-analyzer, __param_module: spring_health}
       - targets: ['http://localhost:9081/actuator/health']
         labels: {app: eventstracker, __param_module: spring_health}
-      - targets: ['http://localhost:8090/actuator/health']
-        labels: {app: sathishlogger, __param_module: spring_health}
       - targets: ['http://192.168.4.236:2281/status.php']
         labels: {app: nextcloud, __param_module: nextcloud_status}
       - targets: ['http://192.168.4.236:2283/api/server/ping']

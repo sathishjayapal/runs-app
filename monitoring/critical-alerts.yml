@@ -18,7 +18,6 @@ groups:
             or label_replace(vector(1), "name", "runs-ai-analyzer", "", "")
             or label_replace(vector(1), "name", "runs-ai-analyzer-db", "", "")
             or label_replace(vector(1), "name", "config-server", "", "")
-            or label_replace(vector(1), "name", "sathishlogger", "", "")
           ) unless on (name) label_replace(
             container_last_seen{job="cadvisor", container_label_com_docker_compose_service!=""} > time() - 90,
             "name", "$1", "container_label_com_docker_compose_service", "(.+)")
@@ -29,7 +28,7 @@ groups:
           description: "{{ $labels.name }} is stopped or missing on runs-server."
 
       - alert: RequiredContainerRestartLoop
-        expr: changes(container_start_time_seconds{job="cadvisor", container_label_com_docker_compose_service=~"runs-app|rabbitmq|eventstracker|runs-ai-analyzer|runs-ai-analyzer-db|config-server|sathishlogger"}[15m]) > 3
+        expr: changes(container_start_time_seconds{job="cadvisor", container_label_com_docker_compose_service=~"runs-app|rabbitmq|eventstracker|runs-ai-analyzer|runs-ai-analyzer-db|config-server"}[15m]) > 3
         labels: {severity: critical}
         annotations:
           summary: "Container restart loop: {{ $labels.name }}"
