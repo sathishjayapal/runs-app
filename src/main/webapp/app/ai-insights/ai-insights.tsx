@@ -9,6 +9,10 @@ interface RagAnswer {
     answer?: string;
     query?: string;
     sources?: string[];
+    /** Which model wrote the answer, e.g. "OpenRouter" or "local Qwen on the VM". */
+    provider?: string;
+    /** Why a faster model was skipped, when it was; shown so a slow local answer is not a mystery. */
+    notice?: string;
     error?: string;
 }
 
@@ -337,6 +341,14 @@ export default function AiInsights() {
                                     <pre className="whitespace-pre-wrap text-xs font-mono bg-white/60 rounded p-3">
                                         {JSON.stringify(answer, null, 2)}
                                     </pre>
+                                )}
+                            </div>
+                        )}
+                        {(answer.provider || answer.notice) && (
+                            <div className="mt-3 text-xs">
+                                {answer.notice && <p className="text-amber-700 mb-1">{answer.notice}</p>}
+                                {answer.provider && (
+                                    <p className="text-gray-500">{t('aiInsights.answeredBy')}: {answer.provider}</p>
                                 )}
                             </div>
                         )}
